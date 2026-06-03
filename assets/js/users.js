@@ -15,6 +15,7 @@
  * ========================================================================== */
 
 window.USERS = {
+  "tim":  "tim2",
   "gabriel":  "gabriel978",
   "aluno":  "medicina",
   "turma":  "setimo7"
