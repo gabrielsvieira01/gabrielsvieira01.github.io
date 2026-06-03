@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Questões · Preparação para a integradora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,0..100&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="crest">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Banco de questões · 7º período
+      </div>
+      <h1>Preparação para a <em>integradora</em></h1>
+      <p class="subtitle" id="subtitle">Resolva as questões selecionadas. Boa sorte!</p>
+
+      <!-- Progresso (mostrado durante o quiz) -->
+      <div class="progress" id="progressContainer" style="display:none">
+        <div class="progress-meta">
+          <span><span id="progressIdx">0</span> / <span id="progressTotal">0</span></span>
+          <span class="score">Acertos: <span id="scoreCount">0</span></span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+      </div>
+
+      <!-- Filtros ativos (mostrado durante o quiz) -->
+      <div class="active-filters" id="activeFilters" style="display:none"></div>
+    </header>
+
+    <main id="main"></main>
+
+    <p class="footnote" id="footnote">
+      Carregando questões…
+    </p>
+  </div>
+
+  <script src="assets/data/questions.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/quiz.js"></script>
+</body>
+</html>
