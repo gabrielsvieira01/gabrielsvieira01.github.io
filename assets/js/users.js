@@ -15,7 +15,7 @@
  * ========================================================================== */
 
 window.USERS = {
-  "admin":  "integradora2025",
+  "gabriel":  "gabriel978",
   "aluno":  "medicina",
   "turma":  "setimo7"
 };
