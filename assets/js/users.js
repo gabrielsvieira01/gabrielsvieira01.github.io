@@ -15,8 +15,6 @@
  * ========================================================================== */
 
 window.USERS = {
-      "pedro": "senha",
-  "gabriel": "gabriel978",
   "admin":  "integradora2025",
   "aluno":  "medicina",
   "turma":  "setimo7"
