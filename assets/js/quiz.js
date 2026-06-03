@@ -8,6 +8,17 @@
   // Bloqueia o acesso sem login.
   if (!window.Auth.requireAuth("index.html")) return;
 
+  // Token de uso único: o quiz só pode ser aberto vindo do botão "Começar
+  // treino" da página de filtros. Isso evita que, ao reabrir/atualizar a aba
+  // (ou ao restaurar a sessão do navegador), o site caia direto no quiz sem
+  // passar pelos filtros. Reabrir o quiz volta para a página de filtros.
+  var started = sessionStorage.getItem("integradora_start");
+  sessionStorage.removeItem("integradora_start");
+  if (!started) {
+    window.location.replace("filtros.html");
+    return;
+  }
+
   var FILTERS_KEY = "integradora_filters";
   var QUESTIONS = window.QUESTIONS || [];
   var ALL_YEARS = ["2023.2", "2024.1", "2024.2", "2025.1", "2025.2"];

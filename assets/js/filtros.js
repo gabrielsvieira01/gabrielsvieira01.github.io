@@ -155,6 +155,8 @@
       topics: Array.from(state.selectedTopics)
     };
     sessionStorage.setItem(FILTERS_KEY, JSON.stringify(payload));
+    // Token de uso único: garante que o quiz só seja aberto vindo daqui.
+    sessionStorage.setItem("integradora_start", "1");
     window.location.href = "quiz.html";
   }
 
