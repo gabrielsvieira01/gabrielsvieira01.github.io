@@ -77,5 +77,6 @@ window.USERS = {
   "kaik":         "kaik423",        // Kaik
   "gilberto":     "gilberto842",    // Gilberto
   "paloma":       "paloma276",      // Paloma
+  "pedro":       "pedro157",      // Pedro Montalvão
   "flavia":       "flavia598"       // Flavia
 };
