@@ -292,6 +292,22 @@
     border-color: #6ef0d8;
     box-shadow: 0 0 24px var(--accent-glow);
   }
+  a.btn { text-decoration: none; }
+  .header-actions {
+    margin-top: 22px;
+    display: flex;
+    justify-content: center;
+  }
+  .btn-ghost {
+    background: transparent;
+    border-color: var(--border-strong);
+    color: var(--accent);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(94, 234, 212, 0.15);
+  }
 
   /* PROGRESS (during quiz) */
   .progress {

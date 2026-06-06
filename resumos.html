@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resumos · Preparação para a integradora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,0..100&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="assets/css/resumos.css">
+</head>
+<body>
+
+  <!-- ===================== NAVEGAÇÃO ===================== -->
+  <nav class="topnav">
+    <div class="topnav-inner">
+      <span class="brand">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Resumos
+      </span>
+      <div class="nav-links">
+        <a href="#visao-geral">Visão geral</a>
+        <a href="#obstetricia">Obstetrícia</a>
+        <a href="#gastro">Gastro / Abdome agudo</a>
+        <a href="#infecto">Infectologia</a>
+        <a href="#pediatria">Pediatria</a>
+        <a href="#saude-mental">Saúde Mental</a>
+        <a href="#nefrologia">Nefrologia</a>
+        <a href="#hematologia">Hematologia</a>
+        <a href="#cirurgia">Cirurgia</a>
+        <a href="#ginecologia">Ginecologia</a>
+        <a href="#urologia">Urologia / Dor lombar</a>
+      </div>
+      <a class="nav-back" href="filtros.html">← Treinar questões</a>
+    </div>
+  </nav>
+
+  <div class="resumos-app">
+
+    <!-- ===================== HERO ===================== -->
+    <header class="r-hero">
+      <div class="crest">Material de estudo · 7º período</div>
+      <h1>Resumos da <em>integradora</em></h1>
+      <p>O essencial de cada assunto cobrado — fisiopatologia, diagnóstico e tratamento — organizado por especialidade e baseado nos temas que realmente aparecem nas provas.</p>
+      <div class="disclaimer">
+        <strong>Aviso:</strong> material de revisão rápida, escrito para complementar (não substituir) seus estudos e as diretrizes oficiais (MS, FEBRASGO, SBP, KDIGO, etc.). Conteúdo construído a partir dos temas das questões e complementado com conhecimento médico geral — <strong>sempre confirme condutas nas fontes oficiais</strong>.
+      </div>
+    </header>
+
+    <!-- ===================== ESTATÍSTICAS ===================== -->
+    <section class="stats-section" id="visao-geral">
+      <p class="section-eyebrow">Como os assuntos são cobrados</p>
+      <h2>O que mais cai nas provas</h2>
+      <p class="lead">Análise das <b>248 questões</b> reais das 5 últimas integradoras (2023.2 a 2025.2). As provas são fortemente <b>clínicas</b>: quase tudo vem em forma de caso (vinheta) pedindo diagnóstico ou conduta. <b>Escolha uma prova</b> abaixo para ver o que caiu em cada uma — os resumos se reorganizam e escondem o que não foi cobrado.</p>
+
+      <div class="exam-filter" id="examFilter">
+        <span class="ef-label">Filtrar por prova:</span>
+        <button class="exam-chip active" type="button" data-exam="overview">Visão geral</button>
+        <button class="exam-chip" type="button" data-exam="2023.2">2023.2</button>
+        <button class="exam-chip" type="button" data-exam="2024.1">2024.1</button>
+        <button class="exam-chip" type="button" data-exam="2024.2">2024.2</button>
+        <button class="exam-chip" type="button" data-exam="2025.1">2025.1</button>
+        <button class="exam-chip" type="button" data-exam="2025.2">2025.2</button>
+      </div>
+
+      <div class="stat-cards">
+        <div class="stat-card"><div class="v" id="sc-count">248</div><div class="k">questões no recorte</div></div>
+        <div class="stat-card"><div class="v" id="sc-scope" style="font-size:1.25rem">Visão geral</div><div class="k">recorte atual</div></div>
+        <div class="stat-card"><div class="v" id="sc-top">Obstetrícia</div><div class="k" id="sc-top-k">assunto nº 1 (21%)</div></div>
+        <div class="stat-card"><div class="v" id="sc-spec">13</div><div class="k">especialidades</div></div>
+      </div>
+
+      <div class="bars" id="bars">
+        <div class="bar-row"><span class="bl">Obstetrícia</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bn">53</span></div>
+        <div class="bar-row"><span class="bl">Gastro / Abdome</span><div class="bar-track"><div class="bar-fill" style="width:62%"></div></div><span class="bn">33</span></div>
+        <div class="bar-row"><span class="bl">Infectologia</span><div class="bar-track"><div class="bar-fill" style="width:60%"></div></div><span class="bn">32</span></div>
+        <div class="bar-row"><span class="bl">Pediatria</span><div class="bar-track"><div class="bar-fill" style="width:55%"></div></div><span class="bn">29</span></div>
+        <div class="bar-row"><span class="bl">Saúde Mental</span><div class="bar-track"><div class="bar-fill" style="width:53%"></div></div><span class="bn">28</span></div>
+        <div class="bar-row"><span class="bl">Nefrologia</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="bn">21</span></div>
+        <div class="bar-row"><span class="bl">Hematologia</span><div class="bar-track"><div class="bar-fill" style="width:32%"></div></div><span class="bn">17</span></div>
+        <div class="bar-row"><span class="bl">Cirurgia</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="bn">13</span></div>
+        <div class="bar-row"><span class="bl">Ginecologia</span><div class="bar-track"><div class="bar-fill" style="width:17%"></div></div><span class="bn">9</span></div>
+        <div class="bar-row muted"><span class="bl">Pneumologia</span><div class="bar-track"><div class="bar-fill" style="width:8%"></div></div><span class="bn">4</span></div>
+        <div class="bar-row muted"><span class="bl">Urologia</span><div class="bar-track"><div class="bar-fill" style="width:6%"></div></div><span class="bn">3</span></div>
+        <div class="bar-row muted"><span class="bl">Neurologia</span><div class="bar-track"><div class="bar-fill" style="width:6%"></div></div><span class="bn">3</span></div>
+        <div class="bar-row muted"><span class="bl">Atenção Primária</span><div class="bar-track"><div class="bar-fill" style="width:6%"></div></div><span class="bn">3</span></div>
+      </div>
+
+      <div class="insights" id="insights">
+        <div class="insight"><span class="ic">▸</span><span><strong>Obstetrícia domina</strong> e vem crescendo: saltou de 4 questões em 2023.2 para 12–15 a partir de 2024. Pré-natal, emergências hemorrágicas, hipertensão na gestação, parto e reanimação neonatal são o coração da prova.</span></div>
+        <div class="insight"><span class="ic">▸</span><span><strong>Gastro = abdome agudo.</strong> O 2º assunto mais cobrado quase não tem clínica ambulatorial: é apendicite, colecistite/colangite, pancreatite, diverticulite, obstrução, isquemia mesentérica, hemorragia digestiva e doença anorretal. <em>Não estava na sua lista de estudo — vale atenção.</em></span></div>
+        <div class="insight"><span class="ic">▸</span><span><strong>Tríade de ouro:</strong> Obstetrícia + Gastro/Cirurgia + Infectologia somam quase metade das questões. Saúde Mental e Pediatria vêm logo atrás.</span></div>
+        <div class="insight"><span class="ic">▸</span><span><strong>Foco em conduta.</strong> Muitas questões dão o diagnóstico pronto e pedem o <em>próximo passo</em> (primeira droga, exame inicial, manobra). Decorar tratamento de primeira linha rende muito.</span></div>
+      </div>
+    </section>
+
+    <!-- ===================== BUSCA ===================== -->
+    <div class="search-wrap">
+      <svg class="search-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="searchInput" class="search-input" type="search" placeholder="Buscar assunto… (ex.: pré-eclâmpsia, anemia, choque, sepse)" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button id="searchClear" class="search-clear" type="button" aria-label="Limpar busca" hidden>×</button>
+    </div>
+    <p class="filter-status" id="filterStatus"></p>
+
+    <div id="specialties">
+    <!-- ===================== OBSTETRÍCIA ===================== -->
+    <section class="specialty" id="obstetricia">
+      <div class="specialty-head">
+        <h2>Obstetrícia</h2>
+        <span class="count-chip">53 questões · nº 1</span>
+      </div>
+      <p class="spec-intro">A maior fatia da prova. Domine o pré-natal, as três grandes hemorragias (1ª metade, 2ª metade e pós-parto), as síndromes hipertensivas, o trabalho de parto e a reanimação do recém-nascido.</p>
+
+      <article class="subject">
+        <h3>Pré-natal e infecções congênitas (TORCHS)</h3>
+        <div class="tags"><span class="tag hot">muito cobrado</span><span class="tag">rastreio</span><span class="tag">sífilis</span></div>
+        <div class="block fisio"><div class="block-label"><span class="d"></span>Fisiopatologia</div><div class="block-body">
+          <p>TORCHS = infecções de transmissão <b>vertical</b> (transplacentária ou perinatal): <em>To</em>xoplasmose, <em>O</em>utras (sífilis, HIV, hepatites, zika, parvovírus B19, varicela), <em>R</em>ubéola, <em>C</em>itomegalovírus, <em>H</em>erpes, <em>S</em>ífilis. A gravidade depende do agente e da idade gestacional na infecção.</p>
+        </div></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Diagnóstico / rastreio</div><div class="block-body">
+          <p>Roteiro do MS: iniciar o pré-natal precocemente, mínimo de <b>6 consultas</b>. Exames-chave do 1º trimestre: tipagem ABO/Rh + Coombs indireto (se Rh−), hemograma, glicemia de jejum, EAS + urocultura, e <b>sorologias</b>: VDRL (sífilis), anti-HIV, HBsAg, IgG/IgM para toxoplasmose e rubéola. Repetir sorologias por trimestre.</p>
+          <ul>
+            <li><b>Sífilis:</b> VDRL reagente → confirmar com teste treponêmico.</li>
+            <li><b>Toxoplasmose:</b> IgM+ → infecção aguda; teste de avidez de IgG ajuda a datar.</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento / prevenção</div><div class="block-body">
+          <ul>
+            <li><b>Ácido fólico</b> pré-concepção (previne defeito de tubo neural) e <b>sulfato ferroso</b> profilático.</li>
+            <li>Vacinas: <b>dTpa</b> (a partir de 20s, a cada gestação), hepatite B e influenza.</li>
+            <li><b>Sífilis → penicilina benzatina</b> (única que trata o feto).</li>
+            <li>Toxoplasmose aguda → espiramicina; infecção fetal confirmada → sulfadiazina + pirimetamina + ácido folínico.</li>
+            <li>HIV → TARV + medidas de redução da transmissão vertical.</li>
+          </ul>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> sífilis só é considerada adequadamente tratada com <b>penicilina benzatina iniciada ≥30 dias antes do parto</b> e queda do VDRL — outros antibióticos não tratam o feto.</div>
+        <div class="exam-note"><b>Como cai:</b> ~13 questões de Obstetrícia tocam pré-natal/TORCH; campeãs são sífilis e interpretação de sorologias.</div>
+      </article>
+
+      <article class="subject">
+        <h3>Síndromes hipertensivas da gestação</h3>
+        <div class="tags"><span class="tag hot">alto rendimento</span><span class="tag">pré-eclâmpsia</span><span class="tag">HELLP</span></div>
+        <div class="block fisio"><div class="block-label"><span class="d"></span>Fisiopatologia</div><div class="block-body">
+          <p>Placentação anormal (invasão deficiente das artérias espiraladas) → isquemia placentária → liberação de fatores antiangiogênicos → <b>disfunção endotelial sistêmica</b> com hipertensão, proteinúria e lesão de órgãos-alvo. Surge <b>após 20 semanas</b>.</p>
+        </div></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Diagnóstico</div><div class="block-body">
+          <p><b>Pré-eclâmpsia (PE):</b> PA ≥140×90 (2 medidas) após 20s + proteinúria (≥300 mg/24h ou relação prot/creat ≥0,3) <em>ou</em> lesão de órgão-alvo (plaquetopenia, creatinina↑, transaminases↑, sintomas neurológicos/visuais, edema pulmonar).</p>
+          <p><b>Sinais de gravidade:</b> PA ≥160×110, plaquetas &lt;100 mil, Cr &gt;1,1, EAP, cefaleia/escotomas, dor epigástrica. <b>Eclâmpsia</b> = convulsão. <b>HELLP</b> = Hemólise + ↑enzimas hepáticas + plaquetopenia (Low platelets).</p>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <ul>
+            <li><b>Anti-hipertensivo</b> se PA ≥160×110: hidralazina, nifedipino ou labetalol.</li>
+            <li><b>Sulfato de magnésio</b> (esquema de Zuspan): previne e trata a convulsão — <em>não é anti-hipertensivo</em>.</li>
+            <li><b>Cura definitiva = parto</b> (resolução da gestação). PE grave ≥34s, eclâmpsia ou HELLP → resolver.</li>
+            <li>Prevenção em alto risco: <b>AAS</b> em dose baixa (12–16s) ± cálcio.</li>
+          </ul>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> intoxicação por sulfato de magnésio (↓reflexos, ↓FR, ↓diurese) → antídoto é <b>gluconato de cálcio</b>.</div>
+        <div class="exam-note"><b>Como cai:</b> ~7 questões; pedem o reconhecimento de gravidade e a droga certa (MgSO₄ × anti-hipertensivo).</div>
+      </article>
+
+      <article class="subject">
+        <h3>Hemorragias do 1º trimestre (abortamento, ectópica, mola)</h3>
+        <div class="tags"><span class="tag hot">muito cobrado</span><span class="tag">β-hCG</span></div>
+        <div class="block fisio"><div class="block-label"><span class="d"></span>Fisiopatologia / quadros</div><div class="block-body">
+          <ul>
+            <li><b>Abortamento</b> (&lt;20–22s): ameaça (colo fechado, BCF+), inevitável/incompleto (colo aberto), completo, retido (óbito + colo fechado), infectado.</li>
+            <li><b>Gravidez ectópica</b> (90% tubária): implantação fora da cavidade; risco de rotura → abdome agudo hemorrágico.</li>
+            <li><b>Doença trofoblástica (mola):</b> proliferação trofoblástica anômala.</li>
+          </ul>
+        </div></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Diagnóstico</div><div class="block-body">
+          <ul>
+            <li><b>Ectópica:</b> atraso menstrual + dor pélvica + sangramento; β-hCG+ <b>sem</b> saco gestacional intrauterino à USG (com β-hCG acima da zona discriminatória ~1500–2000).</li>
+            <li><b>Mola:</b> útero maior que a IG, β-hCG muito elevado, hiperêmese, USG em "tempestade de neve / cachos de uva", ausência de feto (completa).</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <ul>
+            <li><b>Abortamento:</b> expectante / misoprostol / esvaziamento (AMIU ou curetagem). Infectado → ATB + esvaziamento.</li>
+            <li><b>Ectópica:</b> metotrexato (íntegra, estável, β-hCG baixo, massa pequena) × cirurgia (salpingectomia) se rota/instável.</li>
+            <li><b>Mola:</b> esvaziamento uterino + <b>seguimento com β-hCG seriado</b> (risco de neoplasia trofoblástica).</li>
+          </ul>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> mulher em idade fértil + dor abdominal/sangramento → <b>sempre pedir β-hCG</b> para excluir ectópica.</div>
+        <div class="exam-note"><b>Como cai:</b> ~10–13 questões; o ponto-chave costuma ser diferenciar os tipos pela situação do colo/β-hCG e escolher a conduta.</div>
+      </article>
+
+      <article class="subject">
+        <h3>Hemorragias da 2ª metade (DPP × placenta prévia)</h3>
+        <div class="tags"><span class="tag">emergência</span><span class="tag">DPP</span><span class="tag">prévia</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Diagnóstico diferencial</div><div class="block-body">
+          <ul>
+            <li><b>DPP (descolamento prematuro):</b> sangramento + <b>dor + hipertonia uterina</b> + sofrimento fetal; associada a HAS/PE, trauma, cocaína. Sangue pode ser oculto (hematoma retroplacentário).</li>
+            <li><b>Placenta prévia:</b> sangramento <b>indolor</b>, vermelho-vivo, recorrente, sem sofrimento fetal inicial. <b>Não fazer toque vaginal</b>; diagnóstico por USG.</li>
+            <li><b>Acretismo:</b> invasão anormal (associado a prévia + cesárea anterior).</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <p><b>DPP</b> → emergência: estabilizar e resolver (cesárea se sofrimento/instável; vaginal se parto iminente/feto morto e mãe estável). Risco de <b>CIVD</b> e útero de Couvelaire. <b>Prévia</b> → conduta conforme sangramento e IG; cesárea (eletiva a termo se persistir). <b>Acretismo</b> → cesárea-histerectomia programada.</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> <b>DPP = dor + hipertonia</b>; <b>prévia = indolor</b>. Na suspeita de prévia, <em>nunca</em> faça toque vaginal.</div>
+      </article>
+
+      <article class="subject">
+        <h3>Trabalho de parto prematuro (TPP) e RPM</h3>
+        <div class="tags"><span class="tag hot">muito cobrado</span><span class="tag">corticoide</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Diagnóstico</div><div class="block-body">
+          <ul>
+            <li><b>TPP:</b> contrações regulares + modificação cervical entre 20 e 37 semanas.</li>
+            <li><b>RPM:</b> perda de líquido antes do início do TP; se &lt;37s = RPM pré-termo. Exame especular (líquido em fundo de saco), teste de cristalização ("samambaia") / pH, USG (oligoâmnio). Risco de <b>corioamnionite</b>.</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <ul>
+            <li><b>Corticoide antenatal</b> (betametasona/dexametasona) entre 24–34s → maturação pulmonar.</li>
+            <li><b>Tocólise</b> (nifedipino, indometacina &lt;32s) para ganhar tempo (cerca de 48h).</li>
+            <li><b>Sulfato de magnésio</b> para neuroproteção fetal (&lt;32s).</li>
+            <li>Profilaxia para <b>estreptococo do grupo B</b> (penicilina intraparto).</li>
+          </ul>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> a grande sacada do TPP é <b>corticoide antenatal</b> (reduz SDR, hemorragia intraventricular e enterocolite). Tocólise serve só para dar tempo ao corticoide.</div>
+        <div class="exam-note"><b>Como cai:</b> ~14 questões; cobram a janela do corticoide e o objetivo da tocólise.</div>
+      </article>
+
+      <article class="subject">
+        <h3>Trabalho de parto normal, partograma e distocia de ombro</h3>
+        <div class="tags"><span class="tag">partograma</span><span class="tag">McRoberts</span></div>
+        <div class="block fisio"><div class="block-label"><span class="d"></span>Fisiologia</div><div class="block-body">
+          <p>Períodos clínicos: <b>1º</b> dilatação (fase latente → ativa), <b>2º</b> expulsivo, <b>3º</b> dequitação (saída da placenta), <b>4º</b> 1ª hora pós-parto. Mecanismo do parto: insinuação → descida → flexão → rotação interna → desprendimento → rotação externa.</p>
+        </div></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Monitorização</div><div class="block-body">
+          <p>O <b>partograma</b> registra a dilatação × tempo (linhas de alerta e de ação) e ajuda a identificar distocias (parada de dilatação/descida) e a vitalidade fetal.</p>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Distocia de ombro (emergência)</div><div class="block-body">
+          <p>Ombro anterior impactado após sair o polo cefálico ("sinal da tartaruga"). Sequência de manobras: <b>McRoberts</b> (1ª) → <b>pressão suprapúbica</b> → Rubin/Woods → retirada do braço posterior → Gaskin. <b>Nunca</b> fazer pressão de fundo uterino (Kristeller).</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> McRoberts + pressão suprapúbica resolvem a maioria das distocias de ombro.</div>
+      </article>
+
+      <article class="subject">
+        <h3>Hemorragia pós-parto (HPP)</h3>
+        <div class="tags"><span class="tag">4 Ts</span><span class="tag">atonia</span></div>
+        <div class="block fisio"><div class="block-label"><span class="d"></span>Causas — os 4 Ts</div><div class="block-body">
+          <p><b>T</b>ônus (atonia uterina — <em>causa mais comum</em>) · <b>T</b>rauma (lacerações) · <b>T</b>ecido (restos placentários) · <b>T</b>rombina (coagulopatia).</p>
+        </div></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Diagnóstico</div><div class="block-body">
+          <p>Perda ≥500 mL (vaginal) ou ≥1000 mL (cesárea), ou com repercussão hemodinâmica. Na atonia o útero está amolecido e mal contraído.</p>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <p>ABC + massagem uterina bimanual + <b>ocitocina</b> (1ª linha). Outros uterotônicos (misoprostol, metilergometrina — evitar se HAS) e <b>ácido tranexâmico</b> precoce. Refratário → balão de tamponamento, suturas (B-Lynch), ligadura/embolização e, em último caso, histerectomia.</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> prevenção da HPP = <b>manejo ativo do 3º período</b> (ocitocina profilática logo após o desprendimento).</div>
+      </article>
+
+      <article class="subject">
+        <h3>Puerpério normal e patológico</h3>
+        <div class="tags"><span class="tag">lóquios</span><span class="tag">mastite</span></div>
+        <div class="block fisio"><div class="block-label"><span class="d"></span>Puerpério normal</div><div class="block-body">
+          <p>Involução uterina, <b>lóquios</b> em evolução (rubros → serosos → albos) e apojadura (descida do leite por volta do 3º dia).</p>
+        </div></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Patológico</div><div class="block-body">
+          <ul>
+            <li><b>Endometrite / infecção puerperal:</b> febre ≥38° pós-parto, útero doloroso, lóquios fétidos.</li>
+            <li><b>Mastite:</b> dor, eritema e calor focal + febre; geralmente por <em>S. aureus</em>.</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <p>Endometrite → ATB de amplo espectro (clindamicina + gentamicina). Mastite → manter a amamentação, esvaziamento da mama, analgesia e ATB (cefalexina); abscesso → drenagem.</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> mastite <b>não</b> é contraindicação à amamentação. Febre puerperal → pensar em endometrite.</div>
+      </article>
+
+      <article class="subject">
+        <h3>Reanimação neonatal e Apgar</h3>
+        <div class="tags"><span class="tag hot">muito cobrado</span><span class="tag">VPP</span><span class="tag">Minuto de Ouro</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Avaliação inicial</div><div class="block-body">
+          <p>Ao nascer, 3 perguntas: <b>gestação a termo? respira ou chora? bom tônus?</b> O <b>Apgar</b> (1º e 5º min) avalia FC, respiração, tônus, irritabilidade e cor, mas <em>não guia</em> a reanimação — a conduta é guiada pela <b>FC e respiração</b>.</p>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Fluxo (PRN/SBP)</div><div class="block-body">
+          <ul>
+            <li>Passos iniciais: aquecer, posicionar, aspirar se necessário, secar.</li>
+            <li>Apneia/gasping ou <b>FC &lt;100</b> → <b>VPP</b> (ventilação com pressão positiva — a medida mais importante).</li>
+            <li><b>FC &lt;60</b> apesar de VPP efetiva → massagem cardíaca <b>3:1</b> + considerar intubação.</li>
+            <li>FC &lt;60 persistente → <b>adrenalina</b>.</li>
+          </ul>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> a <b>VPP efetiva no "Minuto de Ouro"</b> é a intervenção que mais muda o desfecho; a FC é o melhor indicador de resposta.</div>
+        <div class="exam-note"><b>Como cai:</b> ~13 questões tocam reanimação/Apgar (sob Obstetrícia) — cobram o próximo passo do fluxograma.</div>
+      </article>
+    </section>
+
+    <!-- ===================== GASTRO / ABDOME AGUDO ===================== -->
+    <section class="specialty" id="gastro">
+      <div class="specialty-head">
+        <h2>Gastroenterologia / Abdome agudo</h2>
+        <span class="count-chip">33 questões · nº 2</span>
+      </div>
+      <p class="spec-intro"><b>Não estava na sua lista</b>, mas é o 2º assunto mais cobrado — quase tudo em forma de abdome agudo e emergências do aparelho digestivo. Pense sempre em classificar a dor abdominal em síndromes.</p>
+
+      <article class="subject">
+        <h3>Abdome agudo — as grandes síndromes</h3>
+        <div class="tags"><span class="tag hot">campeão</span><span class="tag">dor abdominal</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Reconhecimento por quadro</div><div class="block-body">
+          <ul>
+            <li><b>Apendicite:</b> dor periumbilical que <b>migra para a FID</b> (McBurney), anorexia, febre, Blumberg+. Dx clínico ± USG/TC.</li>
+            <li><b>Colecistite/colangite:</b> dor em QSD pós-gordura; <b>Murphy+</b> (colecistite); <b>tríade de Charcot</b> = febre + icterícia + dor QSD (colangite); pêntade de Reynolds (+ hipotensão e confusão).</li>
+            <li><b>Pancreatite aguda:</b> dor epigástrica <b>em faixa</b> irradiando ao dorso (biliar/álcool); diagnóstico = 2 de 3 (clínica + lipase/amilase ≥3× + imagem).</li>
+            <li><b>Diverticulite:</b> "apendicite do lado esquerdo" — dor em FIE + febre; TC.</li>
+            <li><b>Obstrução intestinal:</b> dor em cólica, distensão, parada de eliminação de gases/fezes, vômitos; bridas (pós-op) e hérnias são as causas clássicas; níveis hidroaéreos.</li>
+            <li><b>Isquemia mesentérica:</b> idoso com FA/aterosclerose, dor súbita e intensa <b>desproporcional ao exame</b>, lactato↑.</li>
+            <li><b>Perfurativo:</b> pneumoperitônio (ar subdiafragmático no RX) + peritonite difusa.</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Condutas-chave</div><div class="block-body">
+          <ul>
+            <li>Apendicite/diverticulite complicada → ATB + cirurgia/drenagem.</li>
+            <li>Colecistite → ATB + colecistectomia; <b>colangite → ATB + drenagem da via biliar (CPRE)</b>.</li>
+            <li>Pancreatite → suporte (hidratação vigorosa, analgesia, dieta precoce) + tratar a causa.</li>
+            <li>Obstrução → "sonda, soro e cirurgia se complicar" (SNG, hidratação; operar se estrangulamento).</li>
+            <li>Isquemia mesentérica e perfuração → emergência cirúrgica.</li>
+          </ul>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> classifique o abdome agudo em 5 síndromes — <b>inflamatório, obstrutivo, perfurativo, vascular e hemorrágico</b> — e a conduta praticamente se desenha sozinha.</div>
+      </article>
+
+      <article class="subject">
+        <h3>Hemorragia digestiva (alta × baixa)</h3>
+        <div class="tags"><span class="tag">melena</span><span class="tag">varizes</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Diagnóstico</div><div class="block-body">
+          <ul>
+            <li><b>HDA</b> (acima do ângulo de Treitz): hematêmese/melena. Causas: úlcera péptica e varizes esofágicas (hepatopata).</li>
+            <li><b>HDB:</b> hematoquezia/enterorragia — doença diverticular, angiodisplasia, neoplasia, doença orificial.</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <p>Estabilização + <b>IBP EV</b>; <b>EDA</b> diagnóstica e terapêutica. Varizes → <b>terlipressina/octreotide + ligadura elástica + ATB profilático</b>.</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> melena = HDA até prova em contrário; hematoquezia volumosa pode ser uma HDA maciça.</div>
+      </article>
+
+      <article class="subject">
+        <h3>Doença anorretal</h3>
+        <div class="tags"><span class="tag">hemorroidas</span><span class="tag">abscesso</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Quadros</div><div class="block-body">
+          <ul>
+            <li><b>Hemorroidas:</b> sangramento vermelho-vivo indolor ao evacuar.</li>
+            <li><b>Fissura anal:</b> dor anal intensa à evacuação + sangramento.</li>
+            <li><b>Abscesso/fístula perianal:</b> dor, abaulamento e secreção; <b>diabetes</b> é fator de risco importante.</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <p>Medidas locais e dieta rica em fibras na maioria. <b>Abscesso anorretal → drenagem cirúrgica</b> (não resolve só com ATB).</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> dor anal intensa + febre + diabético → pense em <b>abscesso anorretal</b> e drene.</div>
+      </article>
+    </section>
+
+    <!-- ===================== INFECTOLOGIA ===================== -->
+    <section class="specialty" id="infecto">
+      <div class="specialty-head">
+        <h2>Infectologia</h2>
+        <span class="count-chip">32 questões · nº 3</span>
+      </div>
+      <p class="spec-intro">Sepse e HIV/AIDS são o núcleo. Saiba reconhecer a sepse cedo e relacionar cada infecção oportunista ao nível de CD4.</p>
+
+      <article class="subject">
+        <h3>Sepse e choque séptico</h3>
+        <div class="tags"><span class="tag hot">alto rendimento</span><span class="tag">1ª hora</span></div>
+        <div class="block fisio"><div class="block-label"><span class="d"></span>Fisiopatologia</div><div class="block-body">
+          <p>Disfunção orgânica ameaçadora à vida causada por uma <b>resposta desregulada do hospedeiro à infecção</b>.</p>
+        </div></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Diagnóstico</div><div class="block-body">
+          <p><b>Sepse</b> = infecção + aumento do SOFA ≥2. <b>Choque séptico</b> = sepse + necessidade de vasopressor para PAM ≥65 + lactato &gt;2 apesar de volume. Triagem rápida <b>qSOFA</b>: FR ≥22, PAS ≤100, alteração do estado mental.</p>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Pacote da 1ª hora</div><div class="block-body">
+          <ul>
+            <li>Coletar <b>hemoculturas antes</b> do antibiótico e dosar <b>lactato</b>.</li>
+            <li><b>Antibiótico de amplo espectro precoce</b> (cada hora conta).</li>
+            <li><b>Cristaloide 30 mL/kg</b> se hipotensão ou lactato elevado.</li>
+            <li><b>Noradrenalina</b> (vasopressor de 1ª escolha) se hipotensão refratária ao volume.</li>
+            <li>Controle do foco infeccioso.</li>
+          </ul>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> antibiótico e ressuscitação volêmica <b>na 1ª hora</b> mudam a mortalidade; noradrenalina é o vasopressor de escolha.</div>
+      </article>
+
+      <article class="subject">
+        <h3>HIV / AIDS e infecções oportunistas</h3>
+        <div class="tags"><span class="tag hot">muito cobrado</span><span class="tag">CD4</span><span class="tag">TARV</span></div>
+        <div class="block fisio"><div class="block-label"><span class="d"></span>Fisiopatologia</div><div class="block-body">
+          <p>O HIV infecta linfócitos <b>CD4</b> → imunodepressão progressiva. <b>AIDS</b> = CD4 &lt;200 ou presença de doença definidora.</p>
+        </div></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Diagnóstico e oportunistas por CD4</div><div class="block-body">
+          <p>Testagem (teste rápido / ELISA 4ª geração + confirmatório); CD4 e carga viral para estadiar e acompanhar.</p>
+          <ul>
+            <li><b>CD4 &lt;200:</b> pneumocistose (PCP — dispneia + RX intersticial + LDH↑), neurotoxoplasmose (lesões anelares com efeito de massa).</li>
+            <li><b>CD4 &lt;100:</b> criptococose (meningite — tinta da China/antígeno).</li>
+            <li><b>CD4 &lt;50:</b> CMV (retinite, colite) e micobactéria atípica (MAC).</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <ul>
+            <li><b>TARV para todos</b> — esquema atual de 1ª linha: <b>tenofovir + lamivudina + dolutegravir</b> (TDF/3TC/DTG).</li>
+            <li>Profilaxia com <b>SMX-TMP</b> se CD4 &lt;200 (previne PCP/toxo).</li>
+            <li>PCP → SMX-TMP (+ corticoide se hipoxemia); neurotoxoplasmose → sulfadiazina + pirimetamina + ácido folínico.</li>
+          </ul>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> a questão dá o CD4 — relacione ao oportunista esperado e o diagnóstico cai no colo.</div>
+      </article>
+    </section>
+
+    <!-- ===================== PEDIATRIA ===================== -->
+    <section class="specialty" id="pediatria">
+      <div class="specialty-head">
+        <h2>Pediatria</h2>
+        <span class="count-chip">29 questões · nº 4</span>
+      </div>
+      <p class="spec-intro">Neurodesenvolvimento, maus-tratos e as emergências respiratórias/PALS são os campeões. Lembre: na criança a parada costuma ser respiratória.</p>
+
+      <article class="subject">
+        <h3>Transtornos do neurodesenvolvimento (TEA, TDAH, DI)</h3>
+        <div class="tags"><span class="tag hot">muito cobrado</span><span class="tag">marcos</span></div>
+        <div class="block fisio"><div class="block-label"><span class="d"></span>Fisiopatologia</div><div class="block-body">
+          <p>Alterações do desenvolvimento do SNC com <b>início precoce</b> e origem multifatorial (genética + ambiente).</p>
+        </div></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Diagnóstico (clínico, DSM-5)</div><div class="block-body">
+          <ul>
+            <li><b>TEA:</b> déficit persistente em comunicação/interação social + comportamentos restritos e repetitivos, início precoce. Rastreio <b>M-CHAT</b> (18–24 meses). Sinais de alerta: não aponta, não responde ao nome, pouco contato visual, regressão de marcos.</li>
+            <li><b>TDAH:</b> desatenção e/ou hiperatividade-impulsividade (≥6 sintomas), antes dos 12 anos, em ≥2 ambientes, com prejuízo.</li>
+            <li><b>Deficiência intelectual:</b> déficit intelectual + adaptativo iniciado no período do desenvolvimento.</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <p><b>Intervenção precoce e multidisciplinar</b>. TEA → terapia comportamental (ABA), fono, TO. TDAH → medidas comportamentais + <b>metilfenidato</b> quando indicado.</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> vigilância dos <b>marcos do desenvolvimento</b> em toda puericultura; M-CHAT é o rastreio do autismo.</div>
+        <div class="exam-note"><b>Como cai:</b> ~12 questões de Pediatria envolvem neurodesenvolvimento — atenção aos sinais de alerta do TEA.</div>
+      </article>
+
+      <article class="subject">
+        <h3>Maus-tratos e violência infantil</h3>
+        <div class="tags"><span class="tag">notificação</span><span class="tag">ECA</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Quando suspeitar</div><div class="block-body">
+          <p>Incompatibilidade entre a história e a lesão, atraso na procura, lesões em <b>estágios diferentes</b> de cicatrização e lesões sugestivas: queimadura "em luva/bota", marcas de objeto, <b>fraturas metafisárias/costais</b> em lactente, hematoma subdural + hemorragia retiniana (<em>shaken baby</em>). Tipos: física, sexual, psicológica e negligência.</p>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Conduta</div><div class="block-body">
+          <p>Garantir a <b>segurança da criança</b>, tratar as lesões, documentar detalhadamente e fazer a <b>notificação compulsória</b> ao Conselho Tutelar — <em>independe de confirmação</em>.</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> a notificação é obrigatória já na <b>suspeita</b>; o sigilo médico não se sobrepõe à proteção da criança (ECA).</div>
+      </article>
+
+      <article class="subject">
+        <h3>Emergências respiratórias e PALS</h3>
+        <div class="tags"><span class="tag">bronquiolite</span><span class="tag">asma</span><span class="tag">PALS</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Quadros e abordagem</div><div class="block-body">
+          <ul>
+            <li><b>Bronquiolite</b> (lactente &lt;2 anos, VSR): pródromo de IVAS → taquipneia, sibilos/estertores, tiragem.</li>
+            <li><b>Crise de asma:</b> sibilância, tiragem, queda da SatO₂.</li>
+            <li><b>PALS — abordagem sistemática:</b> impressão inicial pelo <b>Triângulo de Avaliação Pediátrica</b> (aparência, respiração, circulação) → avaliação primária ABCDE → classificar (desconforto × insuficiência respiratória; choque compensado × descompensado).</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <ul>
+            <li><b>Bronquiolite:</b> SUPORTE (oxigênio, hidratação, aspiração); <em>não</em> usar broncodilatador/corticoide/ATB de rotina.</li>
+            <li><b>Asma:</b> O₂ + <b>β2-agonista inalatório (salbutamol) + corticoide sistêmico</b>; ipratrópio e sulfato de magnésio nas crises graves.</li>
+            <li>Acesso de emergência na criança grave: <b>via intraóssea</b> (rápida e segura quando não se obtém acesso venoso); cateterismo umbilical no recém-nascido.</li>
+          </ul>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> na criança, a PCR costuma ser <b>secundária à insuficiência respiratória</b> — reconhecer e tratar cedo evita a parada.</div>
+      </article>
+    </section>
+
+    <!-- ===================== SAÚDE MENTAL ===================== -->
+    <section class="specialty" id="saude-mental">
+      <div class="specialty-head">
+        <h2>Saúde Mental</h2>
+        <span class="count-chip">28 questões · nº 5</span>
+      </div>
+      <p class="spec-intro">Depressão/suicídio puxam a fila, seguidos de transtornos psiquiátricos maiores e transtornos alimentares. Saber a 1ª linha de tratamento rende muito.</p>
+
+      <article class="subject">
+        <h3>Depressão e risco de suicídio</h3>
+        <div class="tags"><span class="tag hot">muito cobrado</span><span class="tag">ISRS</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Diagnóstico (DSM-5)</div><div class="block-body">
+          <p>≥5 sintomas por ≥2 semanas, incluindo <b>humor deprimido e/ou anedonia</b>, mais: alterações de sono, apetite/peso, energia, culpa, concentração, atividade psicomotora e <b>ideação de morte</b>. <b>Sempre avaliar risco de suicídio</b> (ideação, plano, meios, tentativas prévias, desesperança, isolamento).</p>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <p>Psicoterapia + <b>antidepressivos ISRS</b> de 1ª linha (sertralina, fluoxetina, escitalopram). Latência de 2–4 semanas. Avaliar segurança/internação se alto risco.</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> perguntar sobre suicídio <b>não</b> induz ao ato. Atenção ao risco no <em>início</em> do tratamento (melhora a energia antes do humor) e à viragem maníaca.</div>
+        <div class="exam-note"><b>Como cai:</b> ~16 questões de Saúde Mental envolvem depressão/suicídio — frequentemente pedem a conduta inicial.</div>
+      </article>
+
+      <article class="subject">
+        <h3>Transtornos psiquiátricos maiores</h3>
+        <div class="tags"><span class="tag">esquizofrenia</span><span class="tag">bipolar</span><span class="tag">ansiedade</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Reconhecimento</div><div class="block-body">
+          <ul>
+            <li><b>Esquizofrenia:</b> sintomas positivos (delírios, alucinações), negativos (embotamento, avolição) e desorganização, por ≥6 meses.</li>
+            <li><b>Transtorno bipolar:</b> episódios de <b>mania</b> (humor elevado/irritável + ↑energia, grandiosidade, ↓sono, ≥1 semana) ± depressão.</li>
+            <li><b>Ansiedade</b> (TAG, pânico, fobias): preocupação/medo excessivos com prejuízo.</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <ul>
+            <li>Esquizofrenia → <b>antipsicóticos</b> (risperidona; clozapina se refratária).</li>
+            <li>Bipolar → <b>estabilizadores de humor</b> (lítio, valproato) ± antipsicótico.</li>
+            <li>Ansiedade → <b>ISRS + TCC</b>; benzodiazepínico só por curto prazo.</li>
+          </ul>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> diferencie depressão <b>unipolar × bipolar</b> antes de prescrever antidepressivo — em bipolar isolado há risco de <b>virada maníaca</b>.</div>
+      </article>
+
+      <article class="subject">
+        <h3>Transtornos alimentares</h3>
+        <div class="tags"><span class="tag">anorexia</span><span class="tag">bulimia</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Diagnóstico</div><div class="block-body">
+          <ul>
+            <li><b>Anorexia nervosa:</b> restrição → baixo peso, <b>medo intenso de engordar</b> e distorção da imagem corporal. Complicações: bradicardia, amenorreia, distúrbios hidroeletrolíticos, osteoporose.</li>
+            <li><b>Bulimia nervosa:</b> compulsão + purgação (vômitos, laxantes); peso geralmente normal. Sinais: erosão dentária, <b>sinal de Russell</b>, hipocalemia/alcalose.</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <p>Abordagem <b>multidisciplinar</b> (nutrição + psicoterapia — TCC/familiar) e correção das complicações clínicas. Renutrição cuidadosa para evitar a <b>síndrome de realimentação</b> (hipofosfatemia).</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> a <b>anorexia</b> tem a maior mortalidade entre os transtornos psiquiátricos; cuidado com a síndrome de realimentação ao renutrir.</div>
+      </article>
+    </section>
+
+    <!-- ===================== NEFROLOGIA ===================== -->
+    <section class="specialty" id="nefrologia">
+      <div class="specialty-head">
+        <h2>Nefrologia</h2>
+        <span class="count-chip">21 questões · nº 6</span>
+      </div>
+      <p class="spec-intro">Glomerulopatias, injúria renal/DRC e distúrbios ácido-base e hidroeletrolíticos. Saber separar nefrítica de nefrótica e ler uma gasometria resolve a maioria.</p>
+
+      <article class="subject">
+        <h3>Glomerulopatias (nefrítica × nefrótica)</h3>
+        <div class="tags"><span class="tag hot">alto rendimento</span><span class="tag">GNPE</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>As duas síndromes</div><div class="block-body">
+          <ul>
+            <li><b>Síndrome nefrítica:</b> hematúria (dismórfica/cilindros hemáticos) + HAS + edema + oligúria + proteinúria subnefrótica. Protótipo: <b>GN pós-estreptocócica</b> (criança, 1–3 semanas após faringite/piodermite, <b>C3 baixo</b>, ASLO↑); também nefropatia por IgA (hematúria "sinfaríngea").</li>
+            <li><b>Síndrome nefrótica:</b> proteinúria maciça (≥3,5 g/24h) + hipoalbuminemia + edema + dislipidemia. Lesões mínimas (criança), GESF, membranosa (adulto). Risco de trombose e infecção.</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <p><b>Nefrítica/GNPE</b> → suporte (restrição de sal/água, diurético, controle da PA) e tratar a infecção. <b>Nefrótica</b> → corticoide (lesões mínimas), <b>IECA/BRA</b> (antiproteinúrico), estatina e profilaxia de complicações.</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> <b>nefrítica = hematúria + HAS</b>; <b>nefrótica = proteinúria maciça + edema</b>. GNPE: criança com C3 baixo que <em>normaliza em ~8 semanas</em>.</div>
+        <div class="exam-note"><b>Como cai:</b> 14 das 19 questões com tema glomerular estão em Nefrologia — geralmente um caso pedindo para classificar a síndrome.</div>
+      </article>
+
+      <article class="subject">
+        <h3>Injúria renal aguda (IRA) e doença renal crônica (DRC)</h3>
+        <div class="tags"><span class="tag">KDIGO</span><span class="tag">AEIOU</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Diagnóstico</div><div class="block-body">
+          <ul>
+            <li><b>IRA:</b> queda abrupta da TFG (↑creatinina e/ou ↓diurese). Classificar: <b>pré-renal</b> (hipovolemia — responde a volume, FENa &lt;1%), <b>renal/intrínseca</b> (NTA isquêmica/nefrotóxica, glomerular) e <b>pós-renal</b> (obstrução).</li>
+            <li><b>DRC:</b> TFG &lt;60 por ≥3 meses e/ou lesão renal. Principais causas: DM e HAS. Complicações: anemia (↓EPO), distúrbio mineral-ósseo (↑P, ↓Ca, ↑PTH), acidose, hipercalemia.</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <p><b>IRA</b> → tratar a causa, otimizar volemia/perfusão, suspender nefrotóxicos; <b>diálise</b> se refratário (indicações <b>AEIOU</b>: Acidose, Eletrólitos/hipercalemia, Intoxicação, Overload/hipervolemia, Uremia). <b>DRC</b> → controlar PA (IECA/BRA) e glicemia, restrição de sal/proteína, tratar anemia (ferro/EPO) e o distúrbio mineral.</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> decore as indicações dialíticas de urgência (<b>AEIOU</b>). Pré-renal responde a volume e tem <b>FENa &lt;1%</b>.</div>
+      </article>
+
+      <article class="subject">
+        <h3>Distúrbios ácido-base e hidroeletrolíticos</h3>
+        <div class="tags"><span class="tag">gasometria</span><span class="tag">potássio</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Leitura</div><div class="block-body">
+          <p><b>Ácido-base</b> (pH, pCO₂, HCO₃): acidose metabólica (↓HCO₃) com <em>ânion-gap alto</em> (cetoacidose, lactato, uremia, intoxicações) ou normal (diarreia, ATR); respiratória (↑pCO₂). Alcalose metabólica (vômitos) ou respiratória (hiperventilação). Sempre avaliar a compensação.</p>
+          <ul>
+            <li><b>Hipercalemia:</b> IRA, acidose, drogas → onda T apiculada → alargamento do QRS (arritmia).</li>
+            <li><b>Hiponatremia:</b> avaliar volemia/osmolaridade; corrigir <b>lentamente</b> (risco de mielinólise pontina).</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento da hipercalemia</div><div class="block-body">
+          <p><b>1º gluconato de cálcio</b> (estabiliza a membrana, protege o coração) → depois <b>shift</b> (insulina + glicose, β2-agonista) → <b>remoção</b> (diurético, resina de troca, diálise).</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> hipercalemia com alteração no ECG é emergência — <b>cálcio primeiro</b>, depois jogar o potássio para dentro da célula e removê-lo.</div>
+      </article>
+    </section>
+
+    <!-- ===================== HEMATOLOGIA ===================== -->
+    <section class="specialty" id="hematologia">
+      <div class="specialty-head">
+        <h2>Hematologia</h2>
+        <span class="count-chip">17 questões · nº 7</span>
+      </div>
+      <p class="spec-intro">Anemias (pelo VCM) e distúrbios da coagulação. Reconheça o padrão plaquetário × de fatores no sangramento.</p>
+
+      <article class="subject">
+        <h3>Anemias</h3>
+        <div class="tags"><span class="tag hot">muito cobrado</span><span class="tag">VCM</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Classificação pelo VCM</div><div class="block-body">
+          <ul>
+            <li><b>Microcítica:</b> <b>ferropriva</b> (mais comum; ferritina baixa, perda crônica/dieta), talassemia (RDW normal, eletroforese alterada), doença crônica (ferritina normal/alta).</li>
+            <li><b>Macrocítica:</b> deficiência de <b>B12/folato</b> (megaloblástica; B12 dá alterações neurológicas), hipotireoidismo, álcool.</li>
+            <li><b>Normocítica:</b> doença crônica, <b>hemolítica</b> (LDH↑, BI↑, haptoglobina↓, reticulócitos↑ — falciforme, esferocitose, autoimune/Coombs), aplásica, sangramento agudo.</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <p>Ferropriva → <b>sulfato ferroso VO</b> + tratar a causa. Megaloblástica → repor B12/folato. Falciforme → hidratação, analgesia, hidroxiureia. Hemolítica autoimune → corticoide.</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> anemia ferropriva em <b>homem ou idoso</b> → investigar perda digestiva (neoplasia). Repor folato sem corrigir B12 pode <b>piorar</b> o quadro neurológico.</div>
+      </article>
+
+      <article class="subject">
+        <h3>Distúrbios da coagulação</h3>
+        <div class="tags"><span class="tag">hemofilia</span><span class="tag">PTI</span><span class="tag">CIVD</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Padrões de sangramento</div><div class="block-body">
+          <ul>
+            <li><b>Hemostasia primária (plaqueta/vaso):</b> petéquias e sangramento mucocutâneo → PTI (plaquetopenia autoimune isolada), doença de von Willebrand.</li>
+            <li><b>Hemostasia secundária (fatores):</b> hematomas e <b>hemartrose</b> → <b>hemofilia A</b> (fator VIII) / B (IX) — TTPa alargado, ligada ao X.</li>
+            <li><b>CIVD:</b> consumo (↓plaquetas, ↑TP/TTPa, ↓fibrinogênio, ↑D-dímero) em sepse/causas obstétricas.</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <p>PTI → corticoide/imunoglobulina. Hemofilia → reposição do fator. von Willebrand → desmopressina/fator. CIVD → tratar a causa de base + suporte transfusional.</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> <b>petéquias = problema plaquetário</b>; <b>hemartrose = problema de fator</b>. Menino com TTPa alargado e hemartrose → hemofilia.</div>
+      </article>
+    </section>
+
+    <!-- ===================== CIRURGIA ===================== -->
+    <section class="specialty" id="cirurgia">
+      <div class="specialty-head">
+        <h2>Cirurgia</h2>
+        <span class="count-chip">13 questões · nº 8</span>
+      </div>
+      <p class="spec-intro">Coloproctologia, hérnias, complicações pós-operatórias e o reconhecimento/tratamento do choque (HAM). Muito se sobrepõe ao abdome agudo.</p>
+
+      <article class="subject">
+        <h3>Parede abdominal e pós-operatório</h3>
+        <div class="tags"><span class="tag">hérnia</span><span class="tag">pós-op</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Quadros</div><div class="block-body">
+          <ul>
+            <li><b>Hérnias:</b> a inguinal é a mais comum; abaulamento que <b>piora ao esforço</b>. Sinais de alarme: dor + irredutível + sinais obstrutivos = <b>encarceramento/estrangulamento</b>.</li>
+            <li><b>Complicações pós-op:</b> íleo paralítico × obstrução por bridas; deiscência/fístula; abdome agudo pós-operatório. Febre pós-op → os "5 Ws".</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <p>Hérnia não complicada → correção eletiva. <b>Hérnia encarcerada/estrangulada = emergência cirúrgica.</b> Pós-op: distinguir íleo (suporte) de obstrução mecânica (pode precisar de reoperação).</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> hérnia dolorosa, irredutível e com vômitos/distensão → não empurre: é emergência cirúrgica.</div>
+      </article>
+
+      <article class="subject">
+        <h3>Choque — identificação e tratamento</h3>
+        <div class="tags"><span class="tag hot">HAM</span><span class="tag">trauma</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Tipos e reconhecimento</div><div class="block-body">
+          <p>Tipos: <b>hipovolêmico</b> (hemorragia/trauma), <b>distributivo</b> (séptico, anafilático, neurogênico), <b>cardiogênico</b> e <b>obstrutivo</b> (tamponamento, TEP, pneumotórax hipertensivo). Sinais de hipoperfusão: taquicardia, oligúria, alteração do estado mental, enchimento capilar lento, lactato↑ — <b>a hipotensão é tardia</b>.</p>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <p>ABCDE. <b>Hemorrágico</b> → controle do sangramento + cristaloide/hemocomponentes. <b>Séptico</b> → volume + noradrenalina + ATB. Sempre <b>identificar e tratar a causa</b>.</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> no trauma, choque é <b>hemorrágico até prova em contrário</b>; a criança compensa muito antes de hipotensão aparecer (descompensa de forma abrupta).</div>
+      </article>
+    </section>
+
+    <!-- ===================== GINECOLOGIA ===================== -->
+    <section class="specialty" id="ginecologia">
+      <div class="specialty-head">
+        <h2>Ginecologia</h2>
+        <span class="count-chip">9 questões · nº 9</span>
+      </div>
+      <p class="spec-intro">O grande tema é o sangramento vaginal — com uma regra de ouro para a mulher na pós-menopausa.</p>
+
+      <article class="subject">
+        <h3>Sangramento vaginal na mulher adulta e idosa</h3>
+        <div class="tags"><span class="tag">PALM-COEIN</span><span class="tag">pós-menopausa</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Diagnóstico por faixa</div><div class="block-body">
+          <ul>
+            <li><b>Idade reprodutiva (SUA):</b> causas <b>PALM-COEIN</b> (Pólipo, Adenomiose, Leiomioma, Malignidade; Coagulopatia, disfunção Ovulatória, Endometrial, Iatrogênica, Não classificada). <b>Sempre excluir gravidez.</b></li>
+            <li><b>Pós-menopausa:</b> todo sangramento é sinal de alarme → investigar <b>câncer de endométrio</b>. USG transvaginal: espessamento endometrial &gt;4–5 mm → biópsia/histeroscopia. Atrofia é a causa mais comum, mas é diagnóstico de exclusão.</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <p>Conforme a causa: hormonal (ACO, progesterona), AINE e antifibrinolítico na SUA; mioma (clínico ou cirúrgico); câncer → estadiamento e cirurgia.</p>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> <b>sangramento na pós-menopausa = câncer de endométrio até prova em contrário</b> (USG transvaginal + biópsia).</div>
+      </article>
+    </section>
+
+    <!-- ===================== UROLOGIA / DOR LOMBAR ===================== -->
+    <section class="specialty" id="urologia">
+      <div class="specialty-head">
+        <h2>Urologia / Dor lombar</h2>
+        <span class="count-chip">3 questões + sobreposições</span>
+      </div>
+      <p class="spec-intro">Tema pequeno em número, mas com um diagnóstico diferencial clássico: a dor lombar entre ITU, pielonefrite e nefrolitíase.</p>
+
+      <article class="subject">
+        <h3>Diagnóstico diferencial da dor lombar (ITU · pielonefrite · nefrolitíase)</h3>
+        <div class="tags"><span class="tag">Giordano</span><span class="tag">cólica</span></div>
+        <div class="block dx"><div class="block-label"><span class="d"></span>Diferenciação</div><div class="block-body">
+          <ul>
+            <li><b>ITU/cistite:</b> disúria, polaciúria, urgência; EAS (leucocitúria, nitrito) + urocultura.</li>
+            <li><b>Pielonefrite:</b> febre alta + dor lombar (<b>Giordano +</b>) + sintomas urinários ± náuseas; pode evoluir para urosepse.</li>
+            <li><b>Nefrolitíase:</b> dor lombar <b>em cólica</b> intensa, irradiando para flanco/genitália, hematúria e paciente <b>agitado</b>. TC sem contraste é o padrão-ouro.</li>
+          </ul>
+        </div></div>
+        <div class="block tx"><div class="block-label"><span class="d"></span>Tratamento</div><div class="block-body">
+          <ul>
+            <li><b>Cistite:</b> ATB (nitrofurantoína, fosfomicina, SMX-TMP conforme o perfil).</li>
+            <li><b>Pielonefrite:</b> ATB (ceftriaxona/ciprofloxacino); internar se grave ou gestante.</li>
+            <li><b>Cálculo:</b> analgesia (AINE) + hidratação; cálculos pequenos eliminam. Intervenção (litotripsia/ureteroscopia) se grande, obstrutivo ou infectado.</li>
+          </ul>
+        </div></div>
+        <div class="pearl"><b>Pega:</b> dor lombar + febre + <b>Giordano+</b> = pielonefrite; cólica + hematúria + agitação = cálculo. <b>Obstrução + infecção</b> é urgência (drenar a via urinária).</div>
+      </article>
+    </section>
+    </div><!-- /#specialties -->
+
+    <p class="no-results" id="noResults" hidden>Nenhum assunto encontrado. Tente outro termo ou volte para a <b>“Visão geral”</b>.</p>
+
+    <footer class="r-footer">
+      Resumos gerados a partir da análise das 248 questões + conhecimento médico geral · revise sempre com as diretrizes oficiais.
+    </footer>
+
+  </div>
+
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/resumos.js"></script>
+</body>
+</html>

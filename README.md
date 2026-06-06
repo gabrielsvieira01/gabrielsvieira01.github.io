@@ -15,9 +15,15 @@ index.html  →  filtros.html  →  quiz.html
 1. **`index.html`** — tela de login. Verifica usuário/senha e, se estiver certo,
    leva para os filtros.
 2. **`filtros.html`** — escolhe os anos e assuntos. Ao clicar em **Começar
-   treino**, salva a seleção e **redireciona para outra página**.
+   treino**, salva a seleção e **redireciona para outra página**. Tem também um
+   botão **"Ver resumos dos assuntos"** que leva ao `resumos.html`.
 3. **`quiz.html`** — lê os filtros escolhidos e roda o treino (questões,
    gabarito comentado e resultado final).
+4. **`resumos.html`** — site de estudo: resumos (fisiopatologia, diagnóstico e
+   tratamento) por assunto + seção de como/quais assuntos mais caem, com barra
+   de navegação entre as especialidades. Permite **filtrar "o que mais cai" por
+   prova** (os resumos se reorganizam e ocultam o que não caiu naquela prova) e
+   tem uma **barra de busca** para localizar assuntos.
 
 A "sessão" de login dura enquanto a aba do navegador estiver aberta
 (`sessionStorage`). Ao fechar a aba, é preciso logar de novo.
@@ -27,14 +33,16 @@ A "sessão" de login dura enquanto a aba do navegador estiver aberta
 ```
 .
 ├── index.html              # Login
-├── filtros.html            # Seleção de filtros
+├── filtros.html            # Seleção de filtros (+ botão para os resumos)
 ├── quiz.html               # Resolução das questões
+├── resumos.html            # Site de resumos por assunto
 ├── 404.html                # Redireciona para o login
 ├── .nojekyll               # Faz o GitHub Pages servir a pasta assets/ sem processar
 └── assets/
     ├── css/
     │   ├── styles.css       # Estilos principais (extraídos do site original)
-    │   └── login.css        # Estilos só da tela de login
+    │   ├── login.css        # Estilos só da tela de login
+    │   └── resumos.css      # Estilos do site de resumos
     ├── data/
     │   └── questions.js     # Banco de questões (os dados)
     └── js/
@@ -42,8 +50,13 @@ A "sessão" de login dura enquanto a aba do navegador estiver aberta
         ├── auth.js          # Controle de sessão/login
         ├── login.js         # Lógica da tela de login
         ├── filtros.js       # Lógica da tela de filtros
-        └── quiz.js          # Lógica da resolução das questões
+        ├── quiz.js          # Lógica da resolução das questões
+        └── resumos.js       # Navegação/scrollspy dos resumos
 ```
+
+> Os textos dos resumos ficam direto no **`resumos.html`** (cada assunto é um
+> bloco `<article class="subject">`). Para editar/complementar um resumo, basta
+> alterar o texto desse arquivo.
 
 ## ➕ Como adicionar / mudar logins
 
