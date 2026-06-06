@@ -78,5 +78,6 @@ window.USERS = {
   "gilberto":     "gilberto842",    // Gilberto
   "paloma":       "paloma276",      // Paloma
   "pedro":       "pedro157",      // Pedro Montalvão
+  "leonidas":       "leo678",      // Leônidas
   "flavia":       "flavia598"       // Flavia
 };
