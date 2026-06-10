@@ -81,5 +81,6 @@ window.USERS = {
   "leonidas":       "leo678",      // Leônidas
   "analuiza2":       "ana789",      // Ana Luiza leily
   "arissia":       "arissia978",      // Arissia
+  "lorena":       "lore345",      // Arissia
   "flavia":       "flavia598"       // Flavia
 };
