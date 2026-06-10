@@ -35,7 +35,10 @@
 
   // Assuntos NA MESMA ORDEM dos cards em resumos.html, com a contagem por prova
   // (derivada da análise das questões). count > 0 = caiu naquela prova.
+  // ORDEM EXATA dos cards (.subject) como aparecem em resumos.html.
+  // c = nº de questões por prova (0 = não caiu naquela prova → card oculto no filtro).
   var SUBJECTS = [
+    // --- Obstetrícia ---
     { id: "pre-natal-torch",        c: { "2023.2": 0, "2024.1": 4, "2024.2": 3, "2025.1": 3, "2025.2": 4 } },
     { id: "hipertensiva",           c: { "2023.2": 0, "2024.1": 1, "2024.2": 4, "2025.1": 2, "2025.2": 3 } },
     { id: "abortamento",            c: { "2023.2": 0, "2024.1": 2, "2024.2": 4, "2025.1": 4, "2025.2": 2 } },
@@ -45,26 +48,47 @@
     { id: "hpp",                    c: { "2023.2": 0, "2024.1": 0, "2024.2": 0, "2025.1": 0, "2025.2": 0 } },
     { id: "puerperio",              c: { "2023.2": 0, "2024.1": 2, "2024.2": 1, "2025.1": 0, "2025.2": 1 } },
     { id: "reanimacao-neonatal",    c: { "2023.2": 3, "2024.1": 3, "2024.2": 4, "2025.1": 3, "2025.2": 3 } },
-    { id: "abdome-agudo",           c: { "2023.2": 7, "2024.1": 5, "2024.2": 4, "2025.1": 4, "2025.2": 4 } },
+    // --- Gastro / Abdome agudo ---
+    { id: "abdome-inflamatorio",    c: { "2023.2": 7, "2024.1": 5, "2024.2": 4, "2025.1": 4, "2025.2": 4 } },
+    { id: "obstrucao-isquemia",     c: { "2023.2": 3, "2024.1": 1, "2024.2": 1, "2025.1": 1, "2025.2": 0 } },
     { id: "hemorragia-digestiva",   c: { "2023.2": 1, "2024.1": 4, "2024.2": 3, "2025.1": 3, "2025.2": 1 } },
     { id: "anorretal",              c: { "2023.2": 3, "2024.1": 3, "2024.2": 2, "2025.1": 2, "2025.2": 1 } },
+    // --- Infectologia ---
     { id: "sepse",                  c: { "2023.2": 3, "2024.1": 3, "2024.2": 3, "2025.1": 9, "2025.2": 11 } },
     { id: "hiv-aids",               c: { "2023.2": 1, "2024.1": 5, "2024.2": 3, "2025.1": 3, "2025.2": 4 } },
+    { id: "arboviroses",            c: { "2023.2": 1, "2024.1": 0, "2024.2": 1, "2025.1": 2, "2025.2": 3 } },
+    { id: "sifilis-ist",            c: { "2023.2": 4, "2024.1": 1, "2024.2": 2, "2025.1": 1, "2025.2": 0 } },
+    { id: "hepatites",              c: { "2023.2": 1, "2024.1": 0, "2024.2": 0, "2025.1": 0, "2025.2": 0 } },
+    { id: "endemias",               c: { "2023.2": 0, "2024.1": 1, "2024.2": 2, "2025.1": 1, "2025.2": 2 } },
+    // --- Pediatria ---
     { id: "neurodesenvolvimento",   c: { "2023.2": 4, "2024.1": 2, "2024.2": 2, "2025.1": 2, "2025.2": 2 } },
     { id: "maus-tratos",            c: { "2023.2": 5, "2024.1": 2, "2024.2": 1, "2025.1": 3, "2025.2": 1 } },
     { id: "emergencia-resp-ped",    c: { "2023.2": 2, "2024.1": 2, "2024.2": 0, "2025.1": 5, "2025.2": 4 } },
+    { id: "choque-pediatrico",      c: { "2023.2": 0, "2024.1": 2, "2024.2": 1, "2025.1": 3, "2025.2": 3 } },
+    { id: "anafilaxia",             c: { "2023.2": 1, "2024.1": 0, "2024.2": 0, "2025.1": 0, "2025.2": 0 } },
+    // --- Saúde Mental ---
     { id: "depressao-suicidio",     c: { "2023.2": 4, "2024.1": 5, "2024.2": 3, "2025.1": 3, "2025.2": 4 } },
-    { id: "transtornos-psiq",       c: { "2023.2": 6, "2024.1": 1, "2024.2": 3, "2025.1": 4, "2025.2": 2 } },
-    { id: "transtornos-alimentares",c: { "2023.2": 2, "2024.1": 3, "2024.2": 2, "2025.1": 0, "2025.2": 0 } },
+    { id: "psicoses-bipolar",       c: { "2023.2": 6, "2024.1": 1, "2024.2": 1, "2025.1": 0, "2025.2": 0 } },
+    { id: "transtornos-alimentares",c: { "2023.2": 2, "2024.1": 3, "2024.2": 2, "2025.1": 0, "2025.2": 1 } },
+    { id: "somatoformes",           c: { "2023.2": 0, "2024.1": 2, "2024.2": 1, "2025.1": 0, "2025.2": 1 } },
+    { id: "abstinencia-wernicke",   c: { "2023.2": 1, "2024.1": 1, "2024.2": 0, "2025.1": 1, "2025.2": 0 } },
+    // --- Nefrologia ---
     { id: "glomerulopatias",        c: { "2023.2": 2, "2024.1": 3, "2024.2": 2, "2025.1": 4, "2025.2": 3 } },
     { id: "ira-drc",                c: { "2023.2": 5, "2024.1": 3, "2024.2": 3, "2025.1": 2, "2025.2": 4 } },
     { id: "acido-base",             c: { "2023.2": 3, "2024.1": 5, "2024.2": 4, "2025.1": 1, "2025.2": 10 } },
+    // --- Hematologia ---
     { id: "anemias",                c: { "2023.2": 2, "2024.1": 6, "2024.2": 2, "2025.1": 5, "2025.2": 2 } },
     { id: "coagulacao",             c: { "2023.2": 5, "2024.1": 5, "2024.2": 4, "2025.1": 5, "2025.2": 2 } },
+    // --- Cirurgia ---
     { id: "parede-posop",           c: { "2023.2": 1, "2024.1": 0, "2024.2": 1, "2025.1": 1, "2025.2": 3 } },
     { id: "choque",                 c: { "2023.2": 1, "2024.1": 4, "2024.2": 8, "2025.1": 9, "2025.2": 12 } },
+    // --- Ginecologia ---
     { id: "sangramento-vaginal",    c: { "2023.2": 3, "2024.1": 2, "2024.2": 2, "2025.1": 2, "2025.2": 0 } },
-    { id: "dor-lombar",             c: { "2023.2": 0, "2024.1": 2, "2024.2": 2, "2025.1": 1, "2025.2": 2 } }
+    // --- Urologia / Dor lombar ---
+    { id: "dor-lombar",             c: { "2023.2": 0, "2024.1": 2, "2024.2": 2, "2025.1": 1, "2025.2": 2 } },
+    // --- Urgências & APS (temas transversais: visíveis em todas as provas) ---
+    { id: "acessos-emergencia",     c: { "2023.2": 1, "2024.1": 1, "2024.2": 1, "2025.1": 1, "2025.2": 1 } },
+    { id: "conduta-aps",            c: { "2023.2": 1, "2024.1": 1, "2024.2": 1, "2025.1": 1, "2025.2": 1 } }
   ];
 
   function norm(s) { return (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
@@ -220,6 +244,25 @@
 
     applyFilter();
     setupScrollSpy(navMap);
+    setupChrome();
+  }
+
+  // Barra de progresso de leitura + botão "voltar ao topo".
+  function setupChrome() {
+    var prog = document.getElementById("scrollProgress");
+    var back = document.getElementById("backTop");
+    function onScroll() {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      var y = h.scrollTop || document.body.scrollTop;
+      if (prog) prog.style.width = (max > 0 ? (y / max * 100) : 0) + "%";
+      if (back) back.classList.toggle("show", y > 600);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    if (back) back.addEventListener("click", function () {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    onScroll();
   }
 
   function setupScrollSpy(navMap) {
