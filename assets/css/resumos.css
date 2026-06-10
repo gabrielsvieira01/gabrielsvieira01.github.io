@@ -237,10 +237,62 @@
 .specialty { display: flex; flex-direction: column; }
 .no-results { text-align: center; color: var(--text-secondary); padding: 56px 20px; font-size: 15px; }
 
+/* ---------- Cor por especialidade ---------- */
+.specialty { --sc: var(--accent); scroll-margin-top: 68px; }
+.spec-obs { --sc: #f472b6; }
+.spec-gas { --sc: #fb923c; }
+.spec-inf { --sc: #f87171; }
+.spec-ped { --sc: #5eead4; }
+.spec-sm  { --sc: #c084fc; }
+.spec-nef { --sc: #38bdf8; }
+.spec-hem { --sc: #fb7185; }
+.spec-cir { --sc: #a3e635; }
+.spec-gin { --sc: #f0abfc; }
+.spec-uro { --sc: #fbbf24; }
+.spec-urg { --sc: #34d399; }
+
+.specialty-head h2 { display: inline-flex; align-items: center; }
+.spec-dot {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--sc); margin-right: 12px; flex: 0 0 auto;
+  box-shadow: 0 0 14px var(--sc);
+}
+.specialty-head { border-bottom-color: color-mix(in srgb, var(--sc) 22%, var(--border)); }
+.spec-intro { border-left: 2px solid var(--sc); padding-left: 14px; }
+.subject { transition: border-color .18s ease, transform .18s ease; }
+.subject:hover { border-color: color-mix(in srgb, var(--sc) 35%, var(--border-strong)); }
+.tag.hot { color: var(--sc); border-color: color-mix(in srgb, var(--sc) 40%, transparent); background: color-mix(in srgb, var(--sc) 12%, transparent); }
+.count-chip { border-color: color-mix(in srgb, var(--sc) 30%, var(--border-strong)); color: color-mix(in srgb, var(--sc) 60%, var(--text-secondary)); }
+
+/* ---------- Barra de progresso de leitura ---------- */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; height: 3px; width: 0;
+  background: linear-gradient(90deg, var(--accent), #34d399);
+  z-index: 100; transition: width .1s linear;
+}
+
+/* ---------- Botão voltar ao topo ---------- */
+.back-top {
+  position: fixed; bottom: 24px; right: 24px; z-index: 60;
+  width: 46px; height: 46px; border-radius: 50%;
+  border: 1px solid var(--border-strong); background: var(--bg-elev-2);
+  color: var(--text-primary); font-size: 20px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transform: translateY(12px) scale(.9); pointer-events: none;
+  transition: all .22s cubic-bezier(.16,1,.3,1);
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,.6);
+}
+.back-top.show { opacity: 1; transform: none; pointer-events: auto; }
+.back-top:hover { border-color: var(--accent); color: var(--accent); }
+
+/* realce do termo buscado / âncoras */
+.subject mark { background: var(--accent-soft); color: var(--accent); border-radius: 3px; padding: 0 2px; }
+
 @media (max-width: 620px) {
   .bar-row { grid-template-columns: 110px 1fr 34px; gap: 8px; }
   .bar-row .bl { font-size: 12px; }
   .topnav .brand { display: none; }
   .subject { padding: 20px 18px; }
   .stats-section { padding: 22px 18px 26px; }
+  .back-top { bottom: 16px; right: 16px; width: 42px; height: 42px; }
 }
