@@ -127,8 +127,12 @@
   .ico.folder { background: linear-gradient(135deg, rgba(169,120,255,0.22), rgba(91,140,255,0.22)); }
   .ico.file   { background: linear-gradient(135deg, rgba(70,224,200,0.18), rgba(91,140,255,0.18)); }
   .meta { min-width: 0; flex: 1; }
-  .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .desc { font-size: 0.78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+  .name { font-weight: 600; overflow-wrap: anywhere; word-break: break-word; }
+  .desc { font-size: 0.78rem; color: var(--muted); overflow-wrap: anywhere; word-break: break-word; margin-top: 2px; }
+  .card.back { border-color: rgba(120,160,255,0.3); }
+  .card.back .ico { background: linear-gradient(135deg, rgba(91,140,255,0.3), rgba(169,120,255,0.3)); }
+  .card.back .arrow { transform: rotate(180deg); }
+  .card.back:hover .arrow { transform: rotate(180deg) translateX(3px); }
   .badge { flex: none; font-size: 0.72rem; color: var(--muted); background: rgba(255,255,255,0.06); padding: 3px 9px; border-radius: 999px; }
   .arrow { flex: none; color: var(--muted); transition: transform 0.18s, color 0.18s; }
   .card:hover .arrow { transform: translateX(3px); color: var(--text); }
@@ -257,9 +261,28 @@
     listEl.innerHTML = '';
     const grid = document.createElement('div'); grid.className = 'grid';
     let i = 0;
+    if (prefix) grid.appendChild(backCard(prefix));
     for (const [name, qtd] of folders) grid.appendChild(folderCard(prefix + name + '/', name, qtd, i++));
     for (const path of files) grid.appendChild(fileCard(path, path.split('/').pop().replace(/\.html?$/i,''), i++));
     listEl.appendChild(grid);
+  }
+
+  function parentOf(prefix) {
+    const p = prefix.split('/').filter(Boolean); p.pop();
+    return p.length ? p.join('/') + '/' : '';
+  }
+  function navTo(prefix) { listEl.style.opacity = 0; setTimeout(() => { renderFolder(prefix); listEl.style.opacity = 1; }, 80); }
+
+  function backCard(prefix) {
+    const parent = parentOf(prefix);
+    const label = parent ? parent.replace(/\/$/,'').split('/').pop() : 'Início';
+    const el = document.createElement('div');
+    el.className = 'card back'; el.style.animationDelay = '0ms';
+    el.innerHTML = `<div class="ico folder">⬅</div>
+      <div class="meta"><div class="name">Voltar</div><div class="desc">para ${esc(label)}</div></div>
+      <span class="arrow">›</span>`;
+    el.onclick = () => navTo(parent);
+    return el;
   }
 
   function renderSearch(query) {
@@ -280,7 +303,7 @@
     el.innerHTML = `<div class="ico folder">📁</div>
       <div class="meta"><div class="name">${esc(name)}</div><div class="desc">${qtd} página${qtd===1?'':'s'}</div></div>
       <span class="arrow">›</span>`;
-    el.onclick = () => { listEl.style.opacity=0; setTimeout(()=>{ renderFolder(fullPrefix); listEl.style.opacity=1; }, 80); };
+    el.onclick = () => navTo(fullPrefix);
     return el;
   }
 
