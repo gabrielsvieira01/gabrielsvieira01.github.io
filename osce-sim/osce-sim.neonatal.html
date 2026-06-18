@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador OSCE — Conduta sob pressão</title>
+<style>
+  :root{
+    --bg:#0f1419; --bg2:#161d26; --card:#1c2530; --card2:#222d3a;
+    --ink:#e7eef6; --ink-dim:#9fb0c3; --line:#2c3a4a;
+    --accent:#3aa0ff; --accent-2:#1d7fe0;
+    --ok:#27c08a; --warn:#f5b53d; --bad:#ff5d73; --crit:#ff3860;
+    /* cores de monitor por parâmetro */
+    --m-hr:#39e08b; --m-spo2:#36d6ff; --m-bp:#ff6b81; --m-rr:#ffd166;
+    --m-temp:#ff9f43; --m-default:#dfe9f3;
+    --radius:14px; --mono:'SF Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased}
+  button{font-family:inherit;cursor:pointer}
+  h1,h2,h3,h4{line-height:1.2;margin:.2em 0 .5em}
+  a{color:var(--accent)}
+  .wrap{max-width:1180px;margin:0 auto;padding:18px}
+  .hidden{display:none !important}
+
+  /* ---------- TELA DE ENTRADA ---------- */
+  .home{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+  .home h1{font-size:clamp(28px,5vw,46px);margin-bottom:6px;letter-spacing:-.5px}
+  .home .sub{color:var(--ink-dim);max-width:560px;margin-bottom:34px}
+  .home .menu{display:grid;gap:16px;width:100%;max-width:760px;grid-template-columns:repeat(3,1fr)}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px 18px;text-align:left;transition:.15s;color:var(--ink)}
+  .tile:hover{border-color:var(--accent);transform:translateY(-3px);background:var(--card2)}
+  .tile .ic{font-size:30px;display:block;margin-bottom:10px}
+  .tile b{display:block;font-size:18px;margin-bottom:4px}
+  .tile span{color:var(--ink-dim);font-size:13.5px}
+  .home .foot{margin-top:30px;color:var(--ink-dim);font-size:13px;display:flex;gap:18px;flex-wrap:wrap;justify-content:center;align-items:center}
+  .pill{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12.5px}
+  .dot{width:8px;height:8px;border-radius:50%}
+
+  /* ---------- TOPBAR ---------- */
+  .topbar{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--bg2);position:sticky;top:0;z-index:30}
+  .topbar .back{background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:8px 12px;font-size:14px}
+  .topbar .ttl{font-weight:600}
+  .topbar .spacer{flex:1}
+  /* botão global do narrador */
+  .narr-btn{background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:600;white-space:nowrap}
+  .narr-btn:hover{border-color:var(--accent)}
+  .narr-btn.off{color:var(--ink-dim);opacity:.85}
+  .home .foot .narr-btn{font-weight:500}
+  .clock{font-family:var(--mono);font-size:20px;font-weight:700;padding:6px 12px;border-radius:10px;background:#101820;border:1px solid var(--line)}
+  .clock.warn{color:var(--warn);border-color:var(--warn)}
+  .clock.bad{color:var(--bad);border-color:var(--bad);animation:pulse 1s infinite}
+  .clock .lbl{font-size:10px;color:var(--ink-dim);font-weight:600;letter-spacing:.5px;display:block;text-align:center;font-family:var(--sans)}
+  @keyframes pulse{50%{opacity:.55}}
+
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:14.5px;font-weight:600}
+  .btn:hover{background:var(--accent-2)}
+  .btn.ghost{background:var(--card);border:1px solid var(--line);color:var(--ink)}
+  .btn.ghost:hover{border-color:var(--accent)}
+  .btn.sm{padding:7px 12px;font-size:13px}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  /* ---------- SETUP ---------- */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+  .panel h2{margin-top:0}
+  .field{margin:14px 0}
+  .field label{display:block;font-size:13px;color:var(--ink-dim);margin-bottom:6px;font-weight:600}
+  select,input[type=number],input[type=text],textarea{width:100%;background:#101820;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:11px 12px;font-size:15px;font-family:inherit}
+  textarea{resize:vertical;min-height:54px}
+  .radio-row{display:flex;gap:10px;flex-wrap:wrap}
+  .radio-row label{display:flex;align-items:center;gap:8px;background:#101820;border:1px solid var(--line);padding:10px 14px;border-radius:10px;cursor:pointer;font-size:14px;color:var(--ink)}
+  .radio-row label.on{border-color:var(--accent);background:#13202e}
+  .case-list{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+  .case-card{background:#101820;border:1px solid var(--line);border-radius:12px;padding:14px;text-align:left;color:var(--ink)}
+  .case-card:hover{border-color:var(--accent)}
+  .case-card .tag{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-dim)}
+  .case-card b{display:block;margin:4px 0;font-size:15px}
+  .areabar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .chip{background:var(--card);border:1px solid var(--line);color:var(--ink-dim);border-radius:999px;padding:6px 13px;font-size:13px}
+  .chip.on{background:#13202e;border-color:var(--accent);color:var(--ink)}
+
+  /* ---------- LAYOUT DO CASO ---------- */
+  .case-grid{display:grid;gap:14px;grid-template-columns:340px 1fr 300px;align-items:start;padding:14px 18px}
+  .col{display:flex;flex-direction:column;gap:14px;min-width:0}
+  .section-h{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-dim);font-weight:700;margin:0 0 4px}
+
+  /* monitor */
+  .monitor{background:#05080b;border:1px solid #1d2a36;border-radius:14px;padding:12px;box-shadow:inset 0 0 40px rgba(0,40,80,.15)}
+  .monitor .vit-grid{display:grid;gap:8px;grid-template-columns:1fr 1fr}
+  .vit{background:#0a0f14;border:1px solid #16222e;border-radius:10px;padding:9px 11px;position:relative;overflow:hidden}
+  .vit .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:#7d93a8;font-weight:700}
+  .vit .v{font-family:var(--mono);font-size:27px;font-weight:700;line-height:1.05;color:var(--m-default);margin-top:2px;word-break:break-word}
+  .vit .u{font-size:11px;color:#7d93a8}
+  .vit .note{font-size:10.5px;color:#8aa0b4;margin-top:2px;line-height:1.25}
+  .vit.full{grid-column:1/-1}
+  .vit.abn{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad) inset, 0 0 14px rgba(255,93,115,.25)}
+  .vit.abn .v{color:var(--bad)}
+  .vit.abn::after{content:"";position:absolute;top:0;left:0;width:4px;height:100%;background:var(--bad)}
+  .vit .k::after{content:attr(data-flash)}
+  .vit.t-hr .v{color:var(--m-hr)} .vit.t-spo2 .v{color:var(--m-spo2)}
+  .vit.t-bp .v{color:var(--m-bp)} .vit.t-rr .v{color:var(--m-rr)} .vit.t-temp .v{color:var(--m-temp)}
+  .vit.t-hr.abn .v,.vit.t-spo2.abn .v,.vit.t-bp.abn .v,.vit.t-rr.abn .v,.vit.t-temp.abn .v{color:var(--bad)}
+  .ecg{height:36px;margin-top:8px}
+  .ecg path{stroke:var(--m-hr);stroke-width:2;fill:none}
+
+  /* exames */
+  .exam{background:#0a0f14;border:1px solid #16222e;border-radius:10px;padding:10px 12px}
+  .exam .en{font-weight:700;font-size:13.5px;color:var(--ink);text-transform:capitalize}
+  .exam .er{font-size:13px;color:var(--ink-dim);margin-top:4px;white-space:pre-wrap}
+  .exam.na{border-style:dashed;color:var(--ink-dim)}
+  .exam-sub{margin:3px 0 0;padding-left:12px;font-size:12.5px;color:var(--ink-dim)}
+  .exam-empty{color:var(--ink-dim);font-size:13px;font-style:italic}
+
+  /* feed central */
+  .feed{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;min-height:240px;display:flex;flex-direction:column;gap:12px}
+  .msg{padding:11px 13px;border-radius:12px;font-size:14.5px}
+  .msg.scenario{background:#13202e;border:1px solid #1d3346}
+  .msg.you{background:#15212c;border:1px solid var(--line);align-self:flex-end;max-width:88%}
+  .msg.you .who{color:var(--accent)}
+  .msg.exam-r{background:#101a14;border:1px solid #1c3326}
+  .msg.consequence{background:#1a1410;border:1px solid #3a2a1c}
+  .msg.probe{background:#191527;border:1px solid #2e2747;color:#cfc6ee}
+  .msg.sys{background:transparent;color:var(--ink-dim);font-size:13px;text-align:center}
+  .msg .who{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-dim);font-weight:700;margin-bottom:3px;display:block}
+  .msg.consequence .who{color:var(--warn)}
+  .turnbadge{font-size:11px;color:var(--ink-dim);font-family:var(--mono)}
+
+  /* input */
+  .inputbar{display:flex;gap:8px;align-items:flex-end;padding:12px 18px;border-top:1px solid var(--line);background:var(--bg2);position:sticky;bottom:0}
+  .inputbar textarea{flex:1}
+  .iconbtn{width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .iconbtn:hover{border-color:var(--accent)}
+  .iconbtn.rec{background:var(--bad);border-color:var(--bad);color:#fff;animation:pulse 1s infinite}
+  .inputbar .send{height:46px}
+  .hint{font-size:12px;color:var(--ink-dim);padding:0 18px 10px}
+  .thinking{display:inline-flex;gap:4px}
+  .thinking i{width:7px;height:7px;border-radius:50%;background:var(--ink-dim);animation:bounce 1.2s infinite}
+  .thinking i:nth-child(2){animation-delay:.2s} .thinking i:nth-child(3){animation-delay:.4s}
+  @keyframes bounce{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+
+  /* modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+  .modal{background:var(--card);border:1px solid var(--line);border-radius:16px;max-width:680px;width:100%;max-height:86vh;overflow:auto;padding:22px}
+  .modal h3{margin-top:0}
+  .modal .x{float:right;background:none;border:none;color:var(--ink-dim);font-size:22px}
+
+  /* debrief */
+  .debrief{padding:18px}
+  .score-hero{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px}
+  .score-ring{--p:0;width:108px;height:108px;border-radius:50%;flex-shrink:0;
+    background:conic-gradient(var(--ringc) calc(var(--p)*1%), #223 0);display:flex;align-items:center;justify-content:center}
+  .score-ring .inner{width:86px;height:86px;border-radius:50%;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .score-ring .pct{font-size:26px;font-weight:800;font-family:var(--mono)}
+  .score-ring .pl{font-size:10px;color:var(--ink-dim)}
+  .grid2{display:grid;gap:14px;grid-template-columns:1fr 1fr}
+  .timeline{position:relative;padding-left:6px}
+  .tl-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+  .tl-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;margin-top:3px;border:2px solid}
+  .tl-dot.ok{background:var(--ok);border-color:var(--ok)} .tl-dot.early{background:var(--warn);border-color:var(--warn)}
+  .tl-dot.late{background:var(--warn);border-color:var(--warn)} .tl-dot.bad{background:var(--bad);border-color:var(--bad)}
+  .tl-dot.neutral{background:var(--ink-dim);border-color:var(--ink-dim)}
+  .tl-body .what{font-size:14px;font-weight:600}
+  .tl-body .why{font-size:12.5px;color:var(--ink-dim)}
+  .tl-mark{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 8px;border-radius:999px;align-self:flex-start;margin-top:2px}
+  .mk-ok{color:var(--ok);background:rgba(39,192,138,.12)} .mk-early{color:var(--warn);background:rgba(245,181,61,.12)}
+  .mk-late{color:var(--warn);background:rgba(245,181,61,.12)} .mk-bad{color:var(--bad);background:rgba(255,93,115,.12)}
+  .mk-neutral{color:var(--ink-dim);background:rgba(159,176,195,.12)}
+  /* fluxo-gabarito */
+  .flow{display:flex;flex-direction:column;gap:0}
+  .flow-step{display:flex;gap:12px;align-items:stretch}
+  .flow-rail{display:flex;flex-direction:column;align-items:center;width:26px;flex-shrink:0}
+  .flow-node{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink-dim)}
+  .flow-line{flex:1;width:2px;background:var(--line);min-height:14px}
+  .flow-step.hit .flow-node{border-color:var(--ok);background:var(--ok);color:#04140d}
+  .flow-step.miss .flow-node{border-color:var(--bad);color:var(--bad)}
+  .flow-step.hit .flow-line{background:var(--ok)}
+  .flow-card{flex:1;background:#101820;border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:8px;cursor:pointer}
+  .flow-step.hit .flow-card{border-color:rgba(39,192,138,.45)}
+  .flow-step.miss .flow-card{border-color:rgba(255,93,115,.4)}
+  .flow-card .fc-t{font-size:13.5px;font-weight:600}
+  .flow-card .fc-s{font-size:11.5px;color:var(--ink-dim);margin-top:2px}
+  .flow-card .fc-detail{display:none;margin-top:8px;font-size:12.5px;color:var(--ink-dim);border-top:1px dashed var(--line);padding-top:8px;white-space:pre-wrap}
+  .flow-card.open .fc-detail{display:block}
+  .legend{display:flex;gap:14px;font-size:12px;color:var(--ink-dim);margin:6px 0 12px;flex-wrap:wrap}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  . point-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--line)}
+  .point-row .pv.pos{color:var(--ok)} .point-row .pv.neg{color:var(--bad)}
+
+  /* resumos */
+  .md{max-width:820px;margin:0 auto;padding:8px 18px 60px}
+  .md h1{font-size:30px;border-bottom:1px solid var(--line);padding-bottom:10px}
+  .md h2{font-size:22px;margin-top:30px}
+  .md h3{font-size:18px;margin-top:22px}
+  .md table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  .md th,.md td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+  .md th{background:var(--card2)}
+  .md blockquote{border-left:3px solid var(--accent);margin:14px 0;padding:6px 14px;background:var(--card);color:var(--ink-dim);border-radius:0 8px 8px 0}
+  .md code{background:#101820;padding:2px 6px;border-radius:6px;font-family:var(--mono);font-size:13px}
+  .md pre{background:#101820;padding:12px;border-radius:10px;overflow:auto}
+  .md ul,.md ol{padding-left:22px}
+  .md li{margin:4px 0}
+  .md hr{border:none;border-top:1px solid var(--line);margin:24px 0}
+  .mermaid{background:#0c1218;border:1px solid var(--line);border-radius:12px;padding:14px;margin:16px 0;text-align:center;overflow:auto}
+  .topiclist{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+
+  /* tracking */
+  .track-row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px}
+  .track-bar{flex:1;height:10px;background:#101820;border-radius:6px;overflow:hidden}
+  .track-bar i{display:block;height:100%;border-radius:6px}
+  .track-row .tn{width:200px;font-size:13.5px}
+  .track-row .tp{font-family:var(--mono);font-size:13px;width:70px;text-align:right}
+
+  @media(max-width:920px){
+    .case-grid{grid-template-columns:1fr}
+    .home .menu{grid-template-columns:1fr}
+    .grid2{grid-template-columns:1fr}
+    .monitor .vit-grid{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<!-- ============================================================= -->
+<!-- ===================  DADOS (NÃO É O MOTOR)  ================== -->
+<!-- Casos = blocos application/json (texto cru colado dos *.json). -->
+<!-- Resumos = blocos text/markdown (texto cru colado dos *.md).    -->
+<!-- Adicionar/corrigir caso = mexer só aqui. O motor não muda.     -->
+<!-- ============================================================= -->
+
+<!--DATA_START (gerado por build.ps1 — não edite à mão entre os marcadores)-->
+<script id="dados-gz" type="text/plain">
+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
+</script>
+<!--DATA_END-->
+<!-- ============================================================= -->
+<!-- =========================  MOTOR  =========================== -->
+<!-- Genérico. Nenhum conteúdo clínico hardcoded: tudo vem dos     -->
+<!-- blocos de DADOS acima. Trocar USE_MOCK_AI p/ false no artifact-->
+<!-- ============================================================= -->
+<script>
+"use strict";
+const App = (() => {
+
+  // ---- FLAG DE MOCK: única coisa a trocar pra ativar a IA real no artifact ----
+  const USE_MOCK_AI = false;   // <— no artifact da claude.ai, mude para false
+  const MODELO_IA = "claude-sonnet-4-6";
+
+  // ----------------------------- DADOS -----------------------------
+  function carregarCasos(){
+    const out = [];
+    document.querySelectorAll("script.dados-caso").forEach(s=>{
+      try{ const arr = JSON.parse(s.textContent); (Array.isArray(arr)?arr:[arr]).forEach(c=>out.push(c)); }
+      catch(e){ console.error("Caso inválido:", e); }
+    });
+    return out;
+  }
+  function carregarResumos(){
+    const out = [];
+    document.querySelectorAll("script.dados-resumo").forEach(s=>{
+      out.push({ topico:s.dataset.topico, area:s.dataset.area||"", titulo:s.dataset.titulo||s.dataset.topico, md:s.textContent });
+    });
+    return out;
+  }
+  // Preenchidos em carregarDados() (no boot). Mutados por push() para que a
+  // referência exportada em _casos continue válida.
+  const CASOS = [];
+  const RESUMOS = [];
+  const AREA_LABEL = { neonatal:"Neonatal", obstetricia:"Obstetrícia", pals:"PALS / Pediatria" };
+
+  // Artifact: dados vêm comprimidos (gzip+base64) num <script id="dados-gz">.
+  // Dev/local: dados vêm dos blocos <script class="dados-*">. Auto-detecta.
+  async function decompB64Gz(b64){
+    const clean = b64.replace(/\s+/g,"");
+    const bin = atob(clean); const bytes = new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+    if(typeof DecompressionStream==="undefined") throw new Error("Este navegador não suporta DecompressionStream — use o Chrome/Edge atual.");
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+    const buf = await new Response(stream).arrayBuffer();
+    return JSON.parse(new TextDecoder("utf-8").decode(buf));
+  }
+  async function carregarDados(){
+    const gz = document.getElementById("dados-gz");
+    if(gz && gz.textContent.trim()){
+      const bundle = await decompB64Gz(gz.textContent);
+      (bundle.casos||[]).forEach(c=>CASOS.push(c));
+      (bundle.resumos||[]).forEach(r=>RESUMOS.push(r));
+    } else {
+      carregarCasos().forEach(c=>CASOS.push(c));
+      carregarResumos().forEach(r=>RESUMOS.push(r));
+    }
+  }
+
+  // --------------------------- PERSISTÊNCIA -------------------------
+  // window.storage só existe no artifact. Local: shim em localStorage.
+  const PER_USER = false; // 3º parâmetro do window.storage = "por usuário"
+  const store = (typeof window!=="undefined" && window.storage) ? window.storage : {
+    async set(k,v){ try{ localStorage.setItem("osce:"+k, JSON.stringify(v)); }catch(e){} },
+    async get(k){ try{ const r=localStorage.getItem("osce:"+k); return r?JSON.parse(r):null; }catch(e){ return null; } },
+    async list(pfx){ const r=[]; try{ for(let i=0;i<localStorage.length;i++){ const key=localStorage.key(i); if(key.startsWith("osce:"+pfx)) r.push(key.slice(5)); } }catch(e){} return r; }
+  };
+  const TRACK_PFX = "track_";
+  async function carregarTracking(){
+    const map = {};
+    try{
+      const keys = await store.list(TRACK_PFX, PER_USER);
+      for(const k of keys){ const v = await store.get(k, PER_USER); if(v) map[v.topico||k] = v; }
+    }catch(e){ console.warn("tracking:", e); }
+    return map;
+  }
+  async function salvarTracking(topico, area, ganho, max){
+    const key = TRACK_PFX+topico;
+    let cur = await store.get(key, PER_USER) || { topico, area, soma:0, max:0, tentativas:0 };
+    cur.soma += ganho; cur.max += max; cur.tentativas += 1; cur.area = area; cur.atualizado = Date.now();
+    await store.set(key, cur, PER_USER);
+  }
+
+  // ------------------------------ ESTADO ----------------------------
+  const app = { root:document.getElementById("app"), screen:"home", sessao:null, modal:null, narracaoOn:true };
+  const NARR_KEY = "pref_narracao";
+
+  // --------------------------- HELPERS UI ---------------------------
+  const esc = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const humanize = k => k.replace(/_/g," ").replace(/\b\w/g,m=>m.toUpperCase()).replace(/\bFc\b/,"FC").replace(/\bFr\b/,"FR").replace(/\bPa\b/,"PA").replace(/\bPam\b/,"PAM").replace(/\bSato2\b/i,"SatO₂").replace(/\bTec\b/,"TEC").replace(/\bIg\b/,"IG").replace(/\bBcf\b/,"BCF");
+  const el = (html)=>{ const t=document.createElement("template"); t.innerHTML=html.trim(); return t.content.firstElementChild; };
+
+  // heurística: parâmetro fora da faixa normal?
+  const ABN_RE = /(taqui|bradi|hipo|hiper|cianose|cian[oó]tic|apneia|apn[eé]ia|choque|grave|insufici|acidose|\brisco\b|hipov|sonol|palidez|edema|desconforto|reten|febre|sibil|crepit|sangr|hemorrag|dist[oó]c|sofrimento|colapso|m[aá] perfus|n[aã]o mensur|diminu[ií]|prolongad|ausent|instáv|< ?\d|gemente|tiragem)/i;
+  function isAbnormal(valStr){ return ABN_RE.test(String(valStr||"")); }
+  function numOf(v){ const m=String(v).replace(/\.(?=\d{3}\b)/g,"").match(/\d{1,3}([.,]\d+)?/); return m?parseFloat(m[0].replace(",",".")):null; }
+  // anormal = palavra-chave OU piso numérico universal (independente de idade) p/ os perigos óbvios
+  function abnormalVital(k,v){
+    if(isAbnormal(v)) return true;
+    const tp=tipoParam(k), n=numOf(v); if(n==null) return false;
+    if(tp==="hr"  && (n<60 || n>205)) return true;
+    if(tp==="spo2"&& n<92) return true;
+    if(tp==="rr"  && (n>60 || n<8)) return true;
+    if(tp==="temp"&& (n>=38 || n<35.5)) return true;
+    return false;
+  }
+  // cor do parâmetro no monitor por nome de chave
+  function tipoParam(k){
+    const x=k.toLowerCase();
+    if(/^fc|freq.*card|bcf/.test(x)) return "hr";
+    if(/sato2|spo2|sat/.test(x)) return "spo2";
+    if(/^pa\b|press|pam/.test(x)) return "bp";
+    if(/^fr|resp|irpm/.test(x)) return "rr";
+    if(/temp/.test(x)) return "temp";
+    return "";
+  }
+  // extrai número grande + resto pra exibição
+  function splitValor(v){
+    const s=String(v);
+    const m=s.match(/^([0-9]+[.,]?[0-9]*\s*[–\-/]?\s*[0-9]*\s*[%a-zA-Z°ºµ/]*)\s*(.*)$/);
+    if(m && /[0-9]/.test(m[1])) return { big:m[1].trim(), note:(m[2]||"").trim() };
+    return { big:s.length>16? s.slice(0,16)+"…": s, note: s.length>16? s : "" };
+  }
+
+  // ============================ ROTEADOR ============================
+  function go(screen, data){ cancelarFala(); app.screen=screen; render(screen, data); wireNarr(); window.scrollTo(0,0); }
+  function render(screen, data){
+    closeModal();
+    if(screen==="home") return renderHome();
+    if(screen==="resumos") return renderResumosLista();
+    if(screen==="resumo") return renderResumo(data);
+    if(screen==="estudo-setup") return renderEstudoSetup();
+    if(screen==="osce-setup") return renderOsceSetup();
+    if(screen==="caso") return renderCaso();
+    if(screen==="debrief") return renderDebrief(data);
+    if(screen==="tracking") return renderTracking();
+  }
+
+  // ============================== HOME =============================
+  function renderHome(){
+    app.root.innerHTML = `
+    <div class="home">
+      <h1>Simulador OSCE</h1>
+      <div class="sub">Casos clínicos de reanimação neonatal, PALS e obstetrícia. O examinador te entrega o caso e fica calado — você conduz.</div>
+      <div class="menu">
+        <button class="tile" data-go="resumos"><span class="ic">📚</span><b>Resumos</b><span>Estude cada assunto com fluxogramas interativos.</span></button>
+        <button class="tile" data-go="estudo-setup"><span class="ic">🎯</span><b>Modo Estudo</b><span>Escolha um caso. Tempo livre ou cronometrado. Debrief no fim.</span></button>
+        <button class="tile" data-go="osce-setup"><span class="ic">⏱️</span><b>Simulação OSCE</b><span>4 casos sorteados, misturados. 1min leitura + 3min conduta cada.</span></button>
+      </div>
+      <div class="foot">
+        <span class="pill"><span class="dot" style="background:${USE_MOCK_AI?'var(--warn)':'var(--ok)'}"></span>${USE_MOCK_AI?'IA mockada (teste local)':'IA ativa'}</span>
+        <span class="pill">${CASOS.length} casos carregados</span>
+        <button class="pill" data-go="tracking" style="cursor:pointer">📊 Meu balanço por tópico</button>
+        <button class="pill narr-btn" data-narr style="cursor:pointer"></button>
+      </div>
+    </div>`;
+    app.root.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+    wireNarr();
+  }
+
+  // ============================ TOPBAR ============================
+  function topbar(title, backScreen){
+    return `<div class="topbar">
+      <button class="back" data-back>← Voltar</button>
+      <span class="ttl">${esc(title)}</span><span class="spacer"></span>
+      <button class="narr-btn" data-narr></button>
+      <span id="clock-slot"></span>
+    </div>`;
+  }
+  function wireTopbar(backScreen){
+    const b=app.root.querySelector("[data-back]");
+    if(b) b.onclick=()=>{
+      const sair=()=>{ closeModal(); stopTimers(); go(backScreen||"home"); };
+      if(app.sessao && app.screen==="caso" && !app.sessao.atual.encerrado){
+        // confirmação via modal próprio (confirm() nativo é bloqueado em artifact/iframe)
+        openModal(`<h3>Sair do caso?</h3><p>O progresso atual será perdido.</p>
+          <div style="display:flex;gap:10px;margin-top:14px"><button class="btn" data-x>Continuar no caso</button>
+          <button class="btn ghost" id="confirmsair">Sair mesmo assim</button></div>`);
+        app.modal.querySelector("#confirmsair").onclick=sair;
+        return;
+      }
+      sair();
+    };
+  }
+
+  // =========================== RESUMOS ===========================
+  function renderResumosLista(){
+    const byArea={};
+    RESUMOS.forEach(r=>{ (byArea[r.area||"outros"]=byArea[r.area||"outros"]||[]).push(r); });
+    let html = topbar("Resumos","home")+`<div class="wrap">`;
+    Object.keys(byArea).forEach(area=>{
+      html+=`<h2>${esc(AREA_LABEL[area]||area)}</h2><div class="topiclist">`;
+      byArea[area].forEach(r=>{ html+=`<button class="case-card" data-topico="${esc(r.topico)}"><span class="tag">${esc(AREA_LABEL[r.area]||r.area||"")}</span><b>${esc(r.titulo)}</b></button>`; });
+      html+=`</div>`;
+    });
+    html+=`</div>`;
+    app.root.innerHTML=html;
+    wireTopbar("home");
+    app.root.querySelectorAll("[data-topico]").forEach(b=>b.onclick=()=>go("resumo",b.dataset.topico));
+  }
+  function renderResumo(topico){
+    const r = RESUMOS.find(x=>x.topico===topico);
+    if(!r){ go("resumos"); return; }
+    app.root.innerHTML = topbar(r.titulo,"resumos")+`<div class="md" id="md"></div>`;
+    wireTopbar("resumos");
+    document.getElementById("md").innerHTML = mdToHtml(r.md);
+    runMermaid();
+  }
+
+  // ======================= MODO ESTUDO SETUP ======================
+  let estudoSel = { area:"todas", casoId:null, tempo:"ilimitado", limiteMin:5 };
+  function renderEstudoSetup(){
+    const areas = ["todas", ...Object.keys(AREA_LABEL).filter(a=>CASOS.some(c=>c.area===a))];
+    let html = topbar("Modo Estudo","home")+`<div class="wrap">
+      <div class="panel">
+        <h2>1. Escolha o caso</h2>
+        <div class="areabar">${areas.map(a=>`<button class="chip ${a===estudoSel.area?'on':''}" data-area="${a}">${a==='todas'?'Todas':esc(AREA_LABEL[a]||a)}</button>`).join("")}</div>
+        <div class="case-list" id="caselist"></div>
+      </div>
+      <div class="panel">
+        <h2>2. Tempo</h2>
+        <div class="radio-row" id="temporow">
+          <label data-tempo="ilimitado" class="${estudoSel.tempo==='ilimitado'?'on':''}"><input type="radio" name="tempo" ${estudoSel.tempo==='ilimitado'?'checked':''}> Ilimitado (padrão)</label>
+          <label data-tempo="limite" class="${estudoSel.tempo==='limite'?'on':''}"><input type="radio" name="tempo" ${estudoSel.tempo==='limite'?'checked':''}> Limite definido por mim</label>
+        </div>
+        <div class="field ${estudoSel.tempo==='limite'?'':'hidden'}" id="limitefield" style="max-width:220px">
+          <label>Minutos</label><input type="number" id="limitemin" min="1" max="60" value="${estudoSel.limiteMin}">
+        </div>
+      </div>
+      <button class="btn" id="iniciar" ${estudoSel.casoId?'':'disabled'}>Iniciar caso →</button>
+    </div>`;
+    app.root.innerHTML=html;
+    wireTopbar("home");
+    const drawList=()=>{
+      const list=app.root.querySelector("#caselist");
+      const cs=CASOS.filter(c=>estudoSel.area==="todas"||c.area===estudoSel.area);
+      list.innerHTML=cs.map(c=>`<button class="case-card ${c.id===estudoSel.casoId?'on':''}" data-cid="${esc(c.id)}" style="${c.id===estudoSel.casoId?'border-color:var(--accent)':''}">
+        <span class="tag">${esc(AREA_LABEL[c.area]||c.area)} · ${esc(c.topico)}</span>
+        <b>${esc(tituloCaso(c))}</b></button>`).join("");
+      list.querySelectorAll("[data-cid]").forEach(b=>b.onclick=()=>{ estudoSel.casoId=b.dataset.cid; renderEstudoSetup(); });
+    };
+    drawList();
+    app.root.querySelectorAll("[data-area]").forEach(b=>b.onclick=()=>{ estudoSel.area=b.dataset.area; renderEstudoSetup(); });
+    app.root.querySelectorAll("#temporow [data-tempo]").forEach(b=>b.onclick=()=>{ estudoSel.tempo=b.dataset.tempo; renderEstudoSetup(); });
+    const lm=app.root.querySelector("#limitemin"); if(lm) lm.oninput=()=>estudoSel.limiteMin=Math.max(1,+lm.value||5);
+    app.root.querySelector("#iniciar").onclick=()=>{
+      const caso=CASOS.find(c=>c.id===estudoSel.casoId); if(!caso) return;
+      const limite = estudoSel.tempo==="limite" ? estudoSel.limiteMin*60 : null;
+      iniciarSessao({ modo:"estudo", casos:[caso], limiteCondutaSeg:limite, leituraSeg:null });
+    };
+  }
+  function tituloCaso(c){
+    // título legível derivado do comando (1ª frase curta) — sem hardcode clínico
+    const f = (c.comando||"").split(/[.—]/)[0].trim();
+    return f.length>60? f.slice(0,60)+"…" : (f||c.topico);
+  }
+
+  // ======================== MODO OSCE SETUP =======================
+  function renderOsceSetup(){
+    const n=Math.min(4,CASOS.length);
+    app.root.innerHTML = topbar("Simulação OSCE","home")+`<div class="wrap">
+      <div class="panel">
+        <h2>Estação OSCE</h2>
+        <p>Serão sorteados <b>${n} casos</b> de assuntos misturados. Para cada um: <b>1 minuto</b> para ler o caso e <b>3 minutos</b> para conduzir. O debrief aparece só ao final dos ${n}.</p>
+        <ul>
+          <li>O cronômetro da conduta zera → o caso encerra e vai pro próximo.</li>
+          <li>Você pode encerrar antes declarando ("encaminho pra UTI", "terminei").</li>
+          <li>Encerrar com paciente instável conta como erro no debrief.</li>
+        </ul>
+        <button class="btn" id="startosce">Sortear e começar →</button>
+      </div>
+    </div>`;
+    wireTopbar("home");
+    app.root.querySelector("#startosce").onclick=()=>{
+      const pool=[...CASOS]; const sel=[];
+      while(sel.length<n && pool.length){ sel.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]); }
+      iniciarSessao({ modo:"osce", casos:sel, limiteCondutaSeg:180, leituraSeg:60 });
+    };
+  }
+
+  // ============================ SESSÃO ============================
+  function iniciarSessao(cfg){
+    stopTimers(); // evita cronômetro órfão de uma sessão anterior encerrar esta
+    app.sessao = {
+      modo:cfg.modo, casos:cfg.casos, idx:0,
+      limiteCondutaSeg:cfg.limiteCondutaSeg, leituraSeg:cfg.leituraSeg,
+      resultados:[]           // 1 por caso (pra debrief final no OSCE)
+    };
+    iniciarCasoAtual();
+  }
+  function iniciarCasoAtual(){
+    const s=app.sessao, caso=s.casos[s.idx];
+    s.atual = {
+      caso,
+      estado: JSON.parse(JSON.stringify(caso.estado_inicial||{})),
+      historico: [],          // {texto, res}
+      examesRevelados: [],     // {nome, valor}
+      turno:0,
+      fase: (s.leituraSeg? "leitura":"conduta"),
+      encerrado:false,
+      pontos:[], penalidades:[]
+    };
+    go("caso");
+    // narra o cenário (narrar() respeita a preferência global)
+    narrar(caso.comando);
+    // cronômetros
+    if(s.atual.fase==="leitura"){ startClock(s.leituraSeg, ()=>{ s.atual.fase="conduta"; startClock(s.limiteCondutaSeg, ()=>encerrarCaso("tempo")); updateFaseUI(); }); }
+    else if(s.limiteCondutaSeg){ startClock(s.limiteCondutaSeg, ()=>encerrarCaso("tempo")); }
+  }
+
+  // ============================ RENDER CASO ============================
+  function renderCaso(){
+    const s=app.sessao, st=s.atual, caso=st.caso;
+    const passo = s.modo==="osce" ? ` · Caso ${s.idx+1}/${s.casos.length}` : "";
+    app.root.innerHTML = topbar((AREA_LABEL[caso.area]||caso.area)+passo, s.modo==="osce"?"osce-setup":"estudo-setup")+`
+      <div class="case-grid">
+        <div class="col">
+          <div><div class="section-h">Monitor — sinais vitais</div><div class="monitor" id="monitor"></div></div>
+          <button class="btn ghost sm" id="recaso">📋 Reabrir caso clínico</button>
+          <button class="btn ghost sm" id="narrar">🔊 Repetir narração</button>
+        </div>
+        <div class="col">
+          <div class="section-h" id="faseh"></div>
+          <div class="feed" id="feed"></div>
+        </div>
+        <div class="col">
+          <div class="section-h">Exames solicitados</div>
+          <div class="col" id="exames" style="gap:8px"></div>
+        </div>
+      </div>
+      <div class="hint" id="hint"></div>
+      <div class="inputbar">
+        <textarea id="conduta" rows="1" placeholder="Digite sua conduta… (ex.: 'faço VPP com máscara', 'peço gasometria', 'encaminho pra UTIN')"></textarea>
+        <button class="iconbtn" id="mic" title="Falar (pt-BR)">🎤</button>
+        <button class="btn send" id="enviar">Enviar</button>
+      </div>`;
+    wireTopbar(s.modo==="osce"?"osce-setup":"estudo-setup");
+    drawMonitor(); drawExames(); updateFaseUI();
+    // feed inicial
+    pushMsg("scenario","Cenário",caso.comando);
+    // input handlers
+    const ta=app.root.querySelector("#conduta"), enviar=app.root.querySelector("#enviar");
+    const autosize=()=>{ ta.style.height="auto"; ta.style.height=Math.min(120,ta.scrollHeight)+"px"; };
+    ta.oninput=autosize;
+    ta.onkeydown=(e)=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); submitConduta(); } };
+    enviar.onclick=submitConduta;
+    app.root.querySelector("#recaso").onclick=()=>openCasoModal(caso);
+    app.root.querySelector("#narrar").onclick=()=>narrar(caso.comando);
+    setupMic();
+    placeClock();
+    ta.focus();
+  }
+
+  function updateFaseUI(){
+    const st=app.sessao.atual; const h=app.root.querySelector("#faseh"); const hint=app.root.querySelector("#hint");
+    if(!h) return;
+    if(st.fase==="leitura"){ h.textContent="Fase de leitura — leia o caso. As condutas liberam quando o tempo de leitura acabar."; }
+    else h.textContent="Conduza o caso — uma conduta por vez";
+    const ta=app.root.querySelector("#conduta"), enviar=app.root.querySelector("#enviar");
+    const bloq = st.fase==="leitura";
+    if(ta) ta.disabled=bloq; if(enviar) enviar.disabled=bloq;
+    if(hint) hint.textContent = st.encerrado? "Caso encerrado." : "Pré-requisitos e ordem importam. Doses ficam escondidas — você precisa produzir o valor. Exame fora da lista → 'não disponível'.";
+  }
+
+  function drawMonitor(){
+    const st=app.sessao.atual; const m=app.root.querySelector("#monitor"); if(!m) return;
+    const st0=st.estado; const keys=Object.keys(st0);
+    let html=`<div class="vit-grid">`;
+    keys.forEach(k=>{
+      const v=st0[k]; if(v==null||v==="") return;
+      const tp=tipoParam(k), abn=abnormalVital(k,v);
+      const sv=splitValor(v);
+      const wide = sv.big.length>9 || /respira|cor|tonus|conscien|ausculta|edema|extremidad|gatilho|alergia/i.test(k);
+      html+=`<div class="vit ${tp?'t-'+tp:''} ${abn?'abn':''} ${wide?'full':''}">
+        <div class="k">${esc(humanize(k))}</div>
+        <div class="v">${esc(sv.big)}</div>
+        ${sv.note?`<div class="note">${esc(sv.note)}</div>`:""}
+      </div>`;
+    });
+    html+=`</div>`+ecgSvg();
+    m.innerHTML=html;
+  }
+  function ecgSvg(){
+    return `<svg class="ecg" viewBox="0 0 300 36" preserveAspectRatio="none"><path d="M0,18 L40,18 L48,18 L52,6 L56,30 L60,18 L120,18 L128,18 L132,6 L136,30 L140,18 L200,18 L208,18 L212,6 L216,30 L220,18 L300,18"/></svg>`;
+  }
+  function drawExames(){
+    const st=app.sessao.atual; const c=app.root.querySelector("#exames"); if(!c) return;
+    if(!st.examesRevelados.length){ c.innerHTML=`<div class="exam-empty">Nenhum exame solicitado ainda.</div>`; return; }
+    c.innerHTML=st.examesRevelados.map(e=>renderExame(e)).join("");
+  }
+  function renderExame(e){
+    if(e.na) return `<div class="exam na"><div class="en">${esc(e.nome)}</div><div class="er">Não disponível neste caso.</div></div>`;
+    let body;
+    if(e.valor && typeof e.valor==="object"){
+      body = Object.entries(e.valor).map(([k,v])=>`<div class="exam-sub"><b>${esc(humanize(k))}:</b> ${esc(v)}</div>`).join("");
+    } else body=`<div class="er">${esc(e.valor)}</div>`;
+    return `<div class="exam"><div class="en">${esc(humanize(e.nome))}</div>${body}</div>`;
+  }
+
+  // --------------------------- FEED ---------------------------
+  function pushMsg(kind, who, text, extra){
+    const feed=app.root.querySelector("#feed"); if(!feed) return null;
+    const turno = (kind==="you") ? `<span class="turnbadge">turno ${app.sessao.atual.turno}</span> ` : "";
+    const node=el(`<div class="msg ${kind}">${who?`<span class="who">${turno}${esc(who)}</span>`:""}<div>${esc(text)}</div>${extra||""}</div>`);
+    feed.appendChild(node); feed.scrollTop=feed.scrollHeight; return node;
+  }
+
+  // -------------------- SUBMETER CONDUTA --------------------
+  let avaliando=false;
+  async function submitConduta(){
+    const st=app.sessao.atual; if(st.encerrado||avaliando||st.fase==="leitura") return;
+    const ta=app.root.querySelector("#conduta"); const texto=(ta.value||"").trim();
+    if(!texto) return;
+    ta.value=""; ta.style.height="auto";
+    st.turno++;
+    pushMsg("you","Você",texto);
+    avaliando=true;
+    const thinking=pushMsg("sys","",""); if(thinking) thinking.innerHTML=`<div class="thinking"><i></i><i></i><i></i></div>`;
+    let res;
+    try{ res = await avaliarConduta(st, texto); }
+    catch(e){ console.error(e); res={ classe:"erro_ia", consequencia_narrativa:"Falha ao avaliar (IA indisponível no teste local)." }; }
+    if(thinking) thinking.remove();
+    avaliando=false;
+    aplicarResultado(st, texto, res);
+  }
+
+  // -------------------- APLICAR RESULTADO --------------------
+  function aplicarResultado(st, texto, res){
+    st.historico.push({ texto, res, turno:st.turno });
+    // acumula pontos/penalidades
+    (res.pontos_ganhos||[]).forEach(p=>st.pontos.push(p));
+    (res.penalidades_aplicadas||[]).forEach(p=>st.penalidades.push(p));
+
+    if(res.classe==="exame"){
+      revelarExame(st, res);
+    } else if(res.classe==="encerramento"){
+      // examinador não corrige; encerra
+      pushMsg("sys","", res.consequencia_narrativa||"Você declara o encerramento do caso.");
+      return encerrarCaso("declaracao");
+    } else if(res.classe==="nao_reconhecida"){
+      pushMsg("probe","Examinador", res.sondagem||"Não entendi a conduta. Pode reformular?");
+      return;
+    }
+
+    // consequência clínica (intervenção)
+    if(res.novo_estado && typeof res.novo_estado==="object"){
+      Object.entries(res.novo_estado).forEach(([k,v])=>{ if(v!=null&&v!=="") st.estado[k]=v; });
+      drawMonitor();
+    }
+    if(res.consequencia_narrativa && res.classe!=="exame"){
+      pushMsg("consequence","Evolução do paciente", res.consequencia_narrativa);
+      narrar(res.consequencia_narrativa);
+    }
+    // sondagem neutra do examinador (sem revelar acerto)
+    if(res.sondagem){ pushMsg("probe","Examinador", res.sondagem); }
+  }
+
+  function revelarExame(st, res){
+    const caso=st.caso, ex=caso.exames_disponiveis||{};
+    const chave = res.exame_chave;
+    let achou=null, nomeReal=chave;
+    if(chave && ex[chave]!=null){ achou=ex[chave]; }
+    else {
+      // tenta casar por similaridade de nome
+      const alvo=(chave||res.conduta_reconhecida||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+      for(const k of Object.keys(ex)){
+        if(k==="NOTA") continue;
+        const kk=k.toLowerCase().replace(/[^a-z0-9]/g,"");
+        if(alvo&&(kk.includes(alvo)||alvo.includes(kk))){ achou=ex[k]; nomeReal=k; break; }
+      }
+    }
+    if(achou==null){
+      st.examesRevelados.push({ nome:(chave||res.conduta_reconhecida||"exame"), na:true });
+      pushMsg("exam-r","Resultado de exame", `"${chave||res.conduta_reconhecida||'exame'}" — não disponível neste caso.`);
+    } else {
+      if(!st.examesRevelados.some(e=>e.nome===nomeReal)){
+        st.examesRevelados.push({ nome:nomeReal, valor:achou });
+      }
+      const resumo = typeof achou==="object" ? Object.entries(achou).map(([k,v])=>`${humanize(k)}: ${v}`).join(" · ") : achou;
+      pushMsg("exam-r","Resultado: "+humanize(nomeReal), resumo);
+    }
+    drawExames();
+  }
+
+  function openCasoModal(caso){
+    openModal(`<button class="x" data-x>×</button><h3>Caso clínico</h3>
+      <p><b>Comando:</b> ${esc(caso.comando)}</p>
+      <p><b>Apresentação:</b> ${esc(caso.apresentacao)}</p>`);
+  }
+
+  // ============================ AVALIAÇÃO (IA) ============================
+  async function avaliarConduta(st, texto){
+    if(USE_MOCK_AI) return mockAvaliar(st, texto);
+    const prompt = montarPrompt(st, texto);
+    const resp = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST", headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ model:MODELO_IA, max_tokens:1000, messages:[{role:"user",content:prompt}] })
+    });
+    const data = await resp.json();
+    const txt = data.content[0].text;
+    return parseRespostaIA(txt);
+  }
+
+  function montarPrompt(st, texto){
+    const caso=st.caso;
+    const estadoStr = JSON.stringify(st.estado, null, 0);
+    const histStr = st.historico.map((h,i)=>`${i+1}. "${h.texto}" → ${h.res&&h.res.conduta_reconhecida||"?"}`).join("\n") || "(nenhuma ainda)";
+    const condutas = JSON.stringify(caso.condutas_esperadas);
+    const exames = JSON.stringify(Object.keys(caso.exames_disponiveis||{}));
+    const pont = JSON.stringify(caso.pontuacao||{});
+    return `Você é o EXAMINADOR de uma prova oral OSCE de medicina. Avalie UMA conduta do aluno, em silêncio didático (não corrija, não elogie — apenas aplique a consequência clínica e, se faltar complemento, sonde de forma neutra).
+
+CASO (área: ${caso.area}; tópico: ${caso.topico}):
+Comando: ${caso.comando}
+
+ESTADO ATUAL DO PACIENTE (JSON):
+${estadoStr}
+
+CONDUTAS JÁ REALIZADAS PELO ALUNO:
+${histStr}
+
+REGRAS DO CASO — condutas esperadas (grafo de dependências, com ordem, pré-requisitos, qualificadores exigidos, efeito e consequências):
+${condutas}
+
+EXAMES DISPONÍVEIS (apenas estas chaves existem; qualquer outro = não disponível, NUNCA invente resultado):
+${exames}
+
+TABELA DE PONTUAÇÃO (use EXATAMENTE estas chaves ao pontuar):
+${pont}
+
+CONDUTA QUE O ALUNO ACABOU DE DAR:
+"${texto}"
+
+Responda SOMENTE com um objeto JSON (sem texto fora dele, sem cercas de código) com estes campos:
+{
+ "conduta_reconhecida": "string curta do que o aluno quis fazer (entenda sinônimos: 'ambuzar'='VPP')",
+ "classe": "intervencao" | "exame" | "encerramento" | "nao_reconhecida",
+ "exame_chave": "se classe=exame, a chave exata da lista de exames, senão null",
+ "acerto_conceito": true|false,
+ "ordem_adequada": true|false,
+ "pre_requisitos_cumpridos": true|false,
+ "qualificadores": {"dose":"ok|faltou|errado|na","via":"ok|faltou|errado|na","frequencia":"ok|faltou|errado|na"},
+ "match_ordem": número da conduta esperada que melhor corresponde (ou null),
+ "gravidade_erro": 0|1|2|3,
+ "sondagem": "pergunta neutra pedindo complemento que faltou (dose? via?) ou null",
+ "consequencia_narrativa": "1-2 frases do que acontece com o paciente após esta conduta (o paciente melhora/piora conforme acerto, ordem e qualificadores). Sem corrigir.",
+ "novo_estado": { "apenas as chaves de sinais vitais que mudaram, com o novo valor como string" },
+ "pontos_ganhos": [ {"chave":"<chave da tabela passos_criticos>","valor":<n>} ],
+ "penalidades_aplicadas": [ {"chave":"<chave da tabela penalidades>","valor":<n negativo>} ]
+}`;
+  }
+
+  function parseRespostaIA(txt){
+    let s=String(txt||"").trim();
+    s=s.replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
+    const i=s.indexOf("{"), j=s.lastIndexOf("}");
+    if(i>=0&&j>i) s=s.slice(i,j+1);
+    try{ return JSON.parse(s); }
+    catch(e){ console.warn("parse IA falhou:",e,txt); return { classe:"nao_reconhecida", sondagem:"Não consegui interpretar. Pode reformular a conduta?" }; }
+  }
+
+  // -------------------- MOCK DA IA (só teste local) --------------------
+  // Casa o texto do aluno com a melhor conduta esperada por palavras-chave,
+  // e sintetiza a resposta no MESMO formato da IA real.
+  function mockAvaliar(st, texto){
+    return new Promise(resolve=>{
+      setTimeout(()=>resolve(_mock(st,texto)), 420);
+    });
+  }
+  const STOP=new Set("a o e de da do com para por no na em que se um uma os as ao aos e/ou ou faco faço fazer pedir peco peço solicito dar dou o paciente bebe rn".split(" "));
+  function tokens(s){ return (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9 ]/g," ").split(/\s+/).filter(w=>w.length>2&&!STOP.has(w)); }
+  function _mock(st, texto){
+    const caso=st.caso, t=texto.toLowerCase();
+    // encerramento? Exige VERBO de finalização — "aciono/chamo a UTI" (convocar equipe) NÃO encerra.
+    if(/\b(encaminho|encaminhar|transfiro|transferir|interno|internar|encerro|encerrar|terminei|terminar|finalizo|finalizar|finalizado|concluo|concluir|conclui|acabei|declaro)\b|\bfim do caso\b|\bdou alta\b/i.test(texto)){
+      const instavel = isAbnormal(JSON.stringify(st.estado).replace(/peso|IG|idade/gi,""));
+      const transferiu = /\buti\b|utin|transfer|encaminh|intern/.test(t);
+      return { conduta_reconhecida:"Encerramento do caso", classe:"encerramento",
+        consequencia_narrativa: transferiu? "Você declara o encerramento e encaminha o paciente." : "Você declara o encerramento do caso.",
+        pontos_ganhos: transferiu? pontosDe(caso,"cuidados pos reanimacao transferir UTIN encaminhar alta observacao"): [],
+        penalidades_aplicadas: (!transferiu && instavel)? penalDe(caso,"encerrar sem transferir UTIN instavel"): [] };
+    }
+    // exame?
+    if(/(pe[cç]o|solicito|gaso|glicemia|hemograma|raio|\brx\b|radiograf|usg|ultrass|exame|sorolog|tipagem|lactato|eletro|ecg|cultura)/.test(t)){
+      const ex=caso.exames_disponiveis||{}; const tk=tokens(texto); let best=null,bs=0;
+      Object.keys(ex).forEach(k=>{ if(k==="NOTA")return; const kk=tokens(k.replace(/_/g," ")); const sc=overlap(tk,kk); if(sc>bs){bs=sc;best=k;} });
+      return { conduta_reconhecida:"Solicitação de exame", classe:"exame", exame_chave: bs>0?best:(tk[0]||"exame") };
+    }
+    // casa com conduta esperada
+    const condutas=caso.condutas_esperadas||[]; const tk=tokens(texto);
+    let best=null,bs=0;
+    condutas.forEach(cd=>{ const base=tokens(cd.acao+" "+JSON.stringify(cd.qualificadores||{})); const sc=overlap(tk,base); if(sc>bs){bs=sc;best=cd;} });
+    if(!best||bs===0){
+      return { conduta_reconhecida:texto, classe:"nao_reconhecida", gravidade_erro:0,
+        sondagem:"Pode ser mais específico sobre a conduta?" };
+    }
+    // ordem: já fez os anteriores? (heurística: nº de condutas de ordem menor já reconhecidas)
+    const feitas=new Set(st.historico.map(h=>h.res&&h.res.match_ordem).filter(x=>x!=null));
+    const faltamAntes = condutas.filter(c=>c.ordem<best.ordem && c.tipo!=="avaliacao" && !feitas.has(c.ordem));
+    // conduta de prioridade (1ª linha / imediata) não é "adiantada" mesmo pulando passos anteriores
+    const prioridade = /imediat|primeira (linha|medida|medida farmac)|nunca atras|sem demora|1.?.?linha/i.test(best.janela||"") || /primeira linha|nunca atras/i.test(JSON.stringify(best.qualificadores||{}));
+    const adiantou = faltamAntes.length>=2 && !prioridade;
+    const ordem_adequada = !adiantou;
+    // qualificadores: o aluno citou dose/via/freq? E a conduta exige cada um?
+    const temNum=/\d/.test(t), temVia=/(\bim\b|\biv\b|\bev\b|via|umbilical|endotraqueal|\bet\b|inalat|nebuliz|\bvo\b|\bsc\b)/.test(t), temFreq=/(\/min|\/h|ciclo|vezes|repet|de \d|\dx)/.test(t);
+    const qjson=JSON.stringify(best.qualificadores||{});
+    const exigeDose=/dose|mg|mcg|\bml\b|fio2|diluicao|volume|\d\s*:\s*\d/i.test(qjson);
+    const exigeVia=/\bvia\b|\bim\b|\biv\b|endotraqueal|umbilical|inalat|nebuliz|\bvo\b|\bsc\b|via_/i.test(qjson);
+    const exigeFreq=/frequencia|\/min|\bciclo|vent.*min|repeticao/i.test(qjson);
+    const q={ dose: exigeDose?(temNum?"ok":"faltou"):"na", via: exigeVia?(temVia?"ok":"faltou"):"na", frequencia: exigeFreq?(temFreq?"ok":"na"):"na" };
+    let sondagem=null;
+    if(q.dose==="faltou"&&q.via==="faltou") sondagem="Qual a dose e a via?";
+    else if(q.dose==="faltou") sondagem="Qual a dose?";
+    else if(q.via==="faltou") sondagem="Por qual via?";
+    // consequência: usa o efeito do caso; se adiantou, paciente piora
+    let narrativa, novo={};
+    if(adiantou){
+      narrativa = (best.consequencia_se_adiantada && best.consequencia_se_adiantada!=="N/A (é o primeiro passo após avaliação)" ? best.consequencia_se_adiantada : "Conduta avançada sem cumprir o passo anterior — o paciente não responde bem.");
+      novo = piora(st.estado);
+    } else {
+      narrativa = best.efeito || "Conduta realizada.";
+      const ext=extrairVitalDoEfeito(best.efeito||"");
+      if(ext) Object.assign(novo, ext);
+    }
+    return {
+      conduta_reconhecida: best.acao, classe: best.tipo==="avaliacao"?"intervencao":"intervencao",
+      acerto_conceito: bs>0, ordem_adequada, pre_requisitos_cumpridos: ordem_adequada,
+      qualificadores:q, match_ordem:best.ordem, gravidade_erro: adiantou?2:(q.dose==="errado"?2:0),
+      sondagem, consequencia_narrativa:narrativa, novo_estado:novo,
+      pontos_ganhos: ordem_adequada? pontosDe(caso,best.acao): [],
+      penalidades_aplicadas: adiantou? penalDe(caso,best.acao): []
+    };
+  }
+  function overlap(a,b){ const sb=new Set(b); let n=0; a.forEach(w=>{ if(sb.has(w))n++; }); return n; }
+  // melhor correspondência por sobreposição de tokens entre uma ação e as chaves da tabela
+  function tokBest(srcTokens, dict){ let best=null,bs=0; for(const k in dict){ const sc=overlap(srcTokens, tokens(k.replace(/_/g," "))); if(sc>bs){bs=sc;best=k;} } return best&&bs>0?[{chave:best,valor:dict[best]}]:[]; }
+  function pontosDe(caso,acao){ return tokBest(tokens(acao),(caso.pontuacao&&caso.pontuacao.passos_criticos)||{}); }
+  function penalDe(caso,acao){ return tokBest(tokens(acao),(caso.pontuacao&&caso.pontuacao.penalidades)||{}); }
+  function extrairVitalDoEfeito(efeito){
+    // pega padrões "FC ... 80 bpm" / "FC cai para 40" — só pra mock dar vida ao monitor
+    const out={};
+    const m=efeito.match(/FC[^0-9]{0,18}(\d{1,3})\s*bpm/i) || efeito.match(/FC.{0,18}(?:para|vai para|sobe para|cai para)\s*(\d{1,3})/i);
+    if(m) out.FC=m[1]+" bpm";
+    return Object.keys(out).length?out:null;
+  }
+  function piora(estado){
+    const out={};
+    for(const k in estado){ const tp=tipoParam(k); const n=parseInt(String(estado[k]).match(/\d{1,3}/));
+      if(tp==="hr"&&n){ out[k]=Math.max(0,n-12)+" bpm ↓"; break; } }
+    return out;
+  }
+
+  // ============================ ENCERRAR / DEBRIEF ============================
+  function encerrarCaso(motivo){
+    const s=app.sessao, st=s.atual; if(st.encerrado) return; st.encerrado=true; stopTimers();
+    // pontuação do caso
+    const tabela=(st.caso.pontuacao&&st.caso.pontuacao.passos_criticos)||{};
+    const maxTotal=Object.values(tabela).reduce((a,b)=>a+b,0)||1;
+    const ganhosUnq={}; st.pontos.forEach(p=>{ ganhosUnq[p.chave]=p.valor; });
+    const penalUnq={}; st.penalidades.forEach(p=>{ penalUnq[p.chave]=p.valor; });
+    let soma=Object.values(ganhosUnq).reduce((a,b)=>a+b,0)+Object.values(penalUnq).reduce((a,b)=>a+b,0);
+    soma=Math.max(0,soma);
+    const resultado={ caso:st.caso, motivo, historico:st.historico, ganhos:ganhosUnq, penalidades:penalUnq, soma, max:maxTotal };
+    s.resultados.push(resultado);
+    // tracking (por tópico)
+    salvarTracking(st.caso.topico, st.caso.area, soma, maxTotal);
+    // próximo (OSCE) ou debrief
+    if(s.modo==="osce" && s.idx < s.casos.length-1){
+      s.idx++;
+      pushMsg("sys","", `Caso ${s.idx}/${s.casos.length} concluído. Próximo caso em instantes…`);
+      setTimeout(()=>iniciarCasoAtual(), 1200);
+    } else {
+      go("debrief", s.resultados);
+    }
+  }
+
+  function classifyTL(h){
+    const r=h.res||{};
+    if(r.classe==="exame") return {cls:"neutral",mark:"exame",label:"Exame"};
+    if(r.classe==="encerramento") return {cls:"neutral",mark:"fim",label:"Encerrou"};
+    if(r.classe==="nao_reconhecida") return {cls:"neutral",mark:"?",label:"Não reconhecida"};
+    if(r.gravidade_erro>=2 || r.pre_requisitos_cumpridos===false) return {cls:"bad",mark:"adiantou",label:"Adiantou / pré-req faltando"};
+    if(r.ordem_adequada===false) return {cls:"late",mark:"ordem",label:"Ordem inadequada"};
+    if(r.qualificadores && (r.qualificadores.dose==="faltou"||r.qualificadores.via==="faltou")) return {cls:"early",mark:"incompleto",label:"Faltou complemento"};
+    return {cls:"ok",mark:"ok",label:"Adequada"};
+  }
+
+  function renderDebrief(resultados){
+    stopTimers();
+    let html = topbar("Debrief","home")+`<div class="debrief">`;
+    resultados.forEach((R,ri)=>{
+      const pct=Math.round(R.soma/R.max*100);
+      const ringc = pct>=70?"var(--ok)":pct>=40?"var(--warn)":"var(--bad)";
+      const passosFeitos=new Set(R.historico.map(h=>h.res&&h.res.match_ordem).filter(x=>x!=null));
+      html+=`<div class="panel">
+        <div class="score-hero">
+          <div class="score-ring" style="--p:${pct};--ringc:${ringc}"><div class="inner"><span class="pct">${pct}%</span><span class="pl">${R.soma}/${R.max} pts</span></div></div>
+          <div style="flex:1;min-width:220px">
+            <div class="section-h">${esc(AREA_LABEL[R.caso.area]||R.caso.area)} · ${esc(R.caso.topico)}</div>
+            <h2 style="margin:.1em 0">${esc(tituloCaso(R.caso))}</h2>
+            <div style="color:var(--ink-dim);font-size:13.5px">Encerrado por: ${R.motivo==="tempo"?"tempo esgotado":R.motivo==="declaracao"?"sua declaração":"—"} · ${R.historico.length} condutas</div>
+          </div>
+        </div>
+        <div class="grid2">
+          <div>
+            <div class="section-h">Linha do tempo das suas condutas</div>
+            <div class="timeline">${renderTimeline(R.historico)}</div>
+          </div>
+          <div>
+            <div class="section-h">Fluxo-gabarito — seu caminho vs o ideal</div>
+            <div class="legend"><span><i class="flow-node" style="width:12px;height:12px;background:var(--ok);border-color:var(--ok)"></i> você passou</span><span><i class="flow-node" style="width:12px;height:12px"></i> não passou</span> <span style="color:var(--ink-dim)">clique p/ detalhe</span></div>
+            <div class="flow" data-flow="${ri}">${renderFlow(R.caso, passosFeitos)}</div>
+          </div>
+        </div>
+        <div class="grid2" style="margin-top:14px">
+          <div><div class="section-h">Pontos conquistados</div>${renderPoints(R.ganhos,"pos")||'<div class="exam-empty">Nenhum passo crítico pontuado.</div>'}</div>
+          <div><div class="section-h">Penalidades</div>${renderPoints(R.penalidades,"neg")||'<div class="exam-empty">Sem penalidades. 👏</div>'}</div>
+        </div>
+      </div>`;
+    });
+    html+=`<div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" data-go="home">Voltar ao início</button>
+      <button class="btn ghost" data-go="tracking">Ver balanço por tópico →</button>
+    </div></div>`;
+    app.root.innerHTML=html;
+    wireTopbar("home");
+    app.root.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ app.sessao=null; go(b.dataset.go); });
+    app.root.querySelectorAll(".flow-card").forEach(c=>c.onclick=()=>c.classList.toggle("open"));
+  }
+  function renderTimeline(hist){
+    if(!hist.length) return `<div class="exam-empty">Nenhuma conduta registrada.</div>`;
+    return hist.map(h=>{
+      const c=classifyTL(h); const r=h.res||{};
+      return `<div class="tl-item"><div class="tl-dot ${c.cls}"></div>
+        <div class="tl-body" style="flex:1"><div class="what">${esc(r.conduta_reconhecida||h.texto)}</div>
+        <div class="why">"${esc(h.texto)}"${r.consequencia_narrativa?` — ${esc(r.consequencia_narrativa)}`:""}</div></div>
+        <span class="tl-mark mk-${c.cls}">${esc(c.label)}</span></div>`;
+    }).join("");
+  }
+  function renderFlow(caso, feitas){
+    const seq=caso.condutas_esperadas||[];
+    return seq.map((cd,i)=>{
+      const hit=feitas.has(cd.ordem);
+      const last=i===seq.length-1;
+      const detail = [cd.janela?("Janela: "+cd.janela):"", cd.efeito?("Efeito: "+cd.efeito):"", qualResumo(cd.qualificadores)].filter(Boolean).join("\n\n");
+      return `<div class="flow-step ${hit?'hit':'miss'}">
+        <div class="flow-rail"><div class="flow-node">${cd.ordem}</div>${last?"":'<div class="flow-line"></div>'}</div>
+        <div class="flow-card"><div class="fc-t">${esc(cd.acao)}</div><div class="fc-s">${esc(cd.tipo)}${hit?" · você fez":""}</div><div class="fc-detail">${esc(detail)}</div></div>
+      </div>`;
+    }).join("");
+  }
+  function qualResumo(q){ if(!q) return ""; const flat=[]; const walk=(o,p)=>{ for(const k in o){ const v=o[k]; if(v&&typeof v==="object") walk(v,k); else flat.push(`${humanize(k)}: ${v}`); } }; walk(q,""); return flat.slice(0,8).join(" · "); }
+  function renderPoints(obj,sign){ const ks=Object.keys(obj||{}); if(!ks.length) return ""; return ks.map(k=>`<div class="point-row"><span>${esc(humanize(k))}</span><span class="pv ${sign}">${sign==='neg'?'':'+'}${obj[k]}</span></div>`).join(""); }
+
+  // ============================ TRACKING UI ============================
+  async function renderTracking(){
+    app.root.innerHTML=topbar("Balanço por tópico","home")+`<div class="wrap"><div id="tk">Carregando…</div></div>`;
+    wireTopbar("home");
+    const map=await carregarTracking();
+    const arr=Object.values(map);
+    const cont=document.getElementById("tk");
+    if(!arr.length){ cont.innerHTML=`<div class="panel">Ainda não há dados. Conclua casos para acumular o balanço de facilidade/dificuldade por tópico.<br><br><span style="color:var(--ink-dim);font-size:13px">No teste local o balanço usa localStorage; no artifact usa o armazenamento por usuário da claude.ai.</span></div>`; return; }
+    arr.sort((a,b)=>(a.soma/a.max)-(b.soma/b.max));
+    cont.innerHTML=`<div class="panel"><p style="color:var(--ink-dim);margin-top:0">Do mais difícil (vermelho) ao mais fácil (verde), acumulado entre sessões.</p>`+
+      arr.map(t=>{ const pct=Math.round(t.soma/Math.max(1,t.max)*100); const c=pct>=70?"var(--ok)":pct>=40?"var(--warn)":"var(--bad)";
+        return `<div class="track-row"><span class="tn">${esc(humanize(t.topico))}<br><span style="font-size:11px;color:var(--ink-dim)">${esc(AREA_LABEL[t.area]||t.area)} · ${t.tentativas}×</span></span>
+          <div class="track-bar"><i style="width:${pct}%;background:${c}"></i></div><span class="tp">${pct}%</span></div>`; }).join("")+`</div>`;
+  }
+
+  // ============================ CRONÔMETROS ============================
+  let clockTimer=null, clockLeft=0, clockCb=null;
+  function startClock(seg, onZero){ stopTimers(); clockLeft=seg; clockCb=onZero; placeClock(); clockTimer=setInterval(()=>{ clockLeft--; placeClock(); if(clockLeft<=0){ stopTimers(); if(clockCb) clockCb(); } },1000); }
+  function stopTimers(){ if(clockTimer){ clearInterval(clockTimer); clockTimer=null; } }
+  function placeClock(){
+    const slot=document.getElementById("clock-slot"); if(!slot) return;
+    if(!clockTimer && clockLeft<=0){ slot.innerHTML=""; return; }
+    const m=Math.floor(clockLeft/60), s=clockLeft%60; const lbl=app.sessao&&app.sessao.atual&&app.sessao.atual.fase==="leitura"?"LEITURA":"CONDUTA";
+    const cls=clockLeft<=15?"bad":clockLeft<=30?"warn":"";
+    slot.innerHTML=`<span class="clock ${cls}"><span class="lbl">${lbl}</span>${m}:${String(s).padStart(2,"0")}</span>`;
+  }
+
+  // ============================ VOZ ============================
+  let recog=null, recOn=false;
+  function setupMic(){
+    const btn=app.root.querySelector("#mic"); if(!btn) return;
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){ btn.style.opacity=.4; btn.title="Reconhecimento de voz indisponível neste navegador"; btn.onclick=()=>pushMsg("sys","","🎤 Voz indisponível aqui. No artifact, o microfone depende de uma extensão do Chrome — o texto sempre funciona."); return; }
+    btn.onclick=()=>{
+      if(recOn){ try{recog.stop();}catch(e){} return; }
+      recog=new SR(); recog.lang="pt-BR"; recog.interimResults=true; recog.continuous=false;
+      const ta=app.root.querySelector("#conduta"); const base=ta.value;
+      recog.onstart=()=>{ recOn=true; btn.classList.add("rec"); };
+      recog.onend=()=>{ recOn=false; btn.classList.remove("rec"); };
+      recog.onerror=()=>{ recOn=false; btn.classList.remove("rec"); };
+      recog.onresult=(ev)=>{ let txt=""; for(let i=0;i<ev.results.length;i++) txt+=ev.results[i][0].transcript; ta.value=(base?base+" ":"")+txt; ta.dispatchEvent(new Event("input")); };
+      try{ recog.start(); }catch(e){}
+    };
+  }
+  function narrar(texto){
+    if(!app.narracaoOn) return;
+    try{ if(!window.speechSynthesis) return; const u=new SpeechSynthesisUtterance(String(texto).slice(0,500)); u.lang="pt-BR"; u.rate=1.02; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); }catch(e){}
+  }
+  function cancelarFala(){ try{ if(window.speechSynthesis) window.speechSynthesis.cancel(); }catch(e){} }
+  function narrLabel(){ return app.narracaoOn ? "🔊 Narrador" : "🔇 Narrador mudo"; }
+  function paintNarrBtns(){ document.querySelectorAll("[data-narr]").forEach(b=>{ b.textContent=narrLabel(); b.classList.toggle("off",!app.narracaoOn); b.setAttribute("aria-pressed", app.narracaoOn?"true":"false"); b.title=app.narracaoOn?"Narrador ligado — clique para silenciar":"Narrador desligado — clique para ativar"; }); }
+  function wireNarr(){ document.querySelectorAll("[data-narr]").forEach(b=>{ b.onclick=toggleNarracao; }); paintNarrBtns(); }
+  function toggleNarracao(){ app.narracaoOn=!app.narracaoOn; if(!app.narracaoOn) cancelarFala(); try{ store.set(NARR_KEY, app.narracaoOn, PER_USER); }catch(e){} paintNarrBtns(); }
+
+  // ============================ MODAL ============================
+  function openModal(html){ closeModal(); const bg=el(`<div class="modal-bg"><div class="modal">${html}</div></div>`); bg.onclick=(e)=>{ if(e.target===bg) closeModal(); }; const x=bg.querySelector("[data-x]"); if(x)x.onclick=closeModal; document.body.appendChild(bg); app.modal=bg; }
+  function closeModal(){ if(app.modal){ app.modal.remove(); app.modal=null; } }
+
+  // ============================ MARKDOWN MINI ============================
+  function mdToHtml(md){
+    const lines=md.replace(/\r/g,"").split("\n");
+    let out=[], i=0;
+    const inline=(s)=> esc(s).replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>").replace(/`([^`]+)`/g,"<code>$1</code>");
+    while(i<lines.length){
+      let ln=lines[i];
+      // fence
+      if(/^```/.test(ln)){
+        const lang=ln.replace(/^```/,"").trim(); const buf=[]; i++;
+        while(i<lines.length && !/^```/.test(lines[i])){ buf.push(lines[i]); i++; }
+        i++;
+        if(lang==="mermaid"){ out.push(`<div class="mermaid">${esc(buf.join("\n").replace(/\\n/g,"<br/>"))}</div>`); }
+        else out.push(`<pre><code>${esc(buf.join("\n"))}</code></pre>`);
+        continue;
+      }
+      // table
+      if(/\|/.test(ln) && i+1<lines.length && /^\s*\|?[\s:-]+\|[\s:|-]*$/.test(lines[i+1])){
+        const head=ln.split("|").map(s=>s.trim()).filter((s,idx,a)=>!(idx===0&&s==="")&&!(idx===a.length-1&&s===""));
+        i+=2; const rows=[];
+        while(i<lines.length && /\|/.test(lines[i]) && lines[i].trim()!==""){ rows.push(lines[i].split("|").map(s=>s.trim()).filter((s,idx,a)=>!(idx===0&&s==="")&&!(idx===a.length-1&&s===""))); i++; }
+        out.push(`<table><thead><tr>${head.map(h=>`<th>${inline(h)}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${inline(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`);
+        continue;
+      }
+      if(/^#{1,4}\s/.test(ln)){ const lv=ln.match(/^#+/)[0].length; out.push(`<h${lv}>${inline(ln.replace(/^#+\s/,""))}</h${lv}>`); i++; continue; }
+      if(/^\s*(---|\*\*\*)\s*$/.test(ln)){ out.push("<hr>"); i++; continue; }
+      if(/^>\s?/.test(ln)){ const buf=[]; while(i<lines.length&&/^>\s?/.test(lines[i])){ buf.push(lines[i].replace(/^>\s?/,"")); i++; } out.push(`<blockquote>${buf.map(inline).join("<br>")}</blockquote>`); continue; }
+      if(/^\s*[-*]\s/.test(ln)){ const buf=[]; while(i<lines.length&&/^\s*[-*]\s/.test(lines[i])){ buf.push(`<li>${inline(lines[i].replace(/^\s*[-*]\s/,""))}</li>`); i++; } out.push(`<ul>${buf.join("")}</ul>`); continue; }
+      if(/^\s*\d+\.\s/.test(ln)){ const buf=[]; while(i<lines.length&&/^\s*\d+\.\s/.test(lines[i])){ buf.push(`<li>${inline(lines[i].replace(/^\s*\d+\.\s/,""))}</li>`); i++; } out.push(`<ol>${buf.join("")}</ol>`); continue; }
+      if(ln.trim()===""){ i++; continue; }
+      // parágrafo (junta linhas até branco)
+      const buf=[ln]; i++;
+      while(i<lines.length && lines[i].trim()!=="" && !/^(#{1,4}\s|>|\s*[-*]\s|\s*\d+\.\s|```|\|)/.test(lines[i])){ buf.push(lines[i]); i++; }
+      out.push(`<p>${buf.map(inline).join(" ")}</p>`);
+    }
+    return out.join("\n");
+  }
+  function runMermaid(){
+    if(!window.mermaid){ return; }
+    try{ window.mermaid.run({ querySelector:".mermaid" }); }catch(e){ console.warn("mermaid:",e); }
+  }
+
+  // ============================ BOOT ============================
+  async function boot(){
+    try{ const v = await store.get(NARR_KEY, PER_USER); if(v!==null && v!==undefined) app.narracaoOn = !!v; }catch(e){}
+    try{ await carregarDados(); }
+    catch(e){ app.root.innerHTML = `<div class="wrap"><div class="panel"><h2>Erro ao carregar os dados</h2><p>${esc(e.message)}</p></div></div>`; return; }
+    renderHome(); // renderHome chama wireNarr()
+  }
+  return { boot, _state:app, _casos:CASOS };
+})();
+</script>
+
+<!-- Mermaid p/ os fluxogramas dos resumos (CDN; no artifact funciona). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script>
+  try{ if(window.mermaid) mermaid.initialize({ startOnLoad:false, theme:"dark", securityLevel:"loose", flowchart:{useMaxWidth:true} }); }catch(e){}
+  App.boot();
+</script>
+</body>
+</html>
