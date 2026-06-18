@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abortamentos do 1º Trimestre — Os 6 Tipos</title>
+<style>
+  :root {
+    --bg: #0f1419; --bg2: #161d26; --card: #1c2530; --card2: #222d3a;
+    --ink: #e7eef6; --ink-dim: #9fb0c3; --line: #2c3a4a;
+    --accent: #3aa0ff; --accent-2: #1d7fe0;
+    --ok: #27c08a; --warn: #f5b53d; --bad: #ff5d73;
+    --radius: 14px;
+    --mono: 'SF Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
+    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  /* ---- HEADER ---- */
+  .header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--line);
+    padding: 28px 24px 22px;
+    text-align: center;
+  }
+  .header .eyebrow {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
+    color: var(--accent); font-weight: 700; margin-bottom: 10px;
+  }
+  .header h1 {
+    font-size: clamp(22px, 4vw, 34px); font-weight: 800; letter-spacing: -.5px;
+    color: var(--ink); line-height: 1.15;
+  }
+  .header .sub {
+    color: var(--ink-dim); font-size: 14.5px; margin-top: 10px; max-width: 640px;
+    margin-left: auto; margin-right: auto;
+  }
+  .header .ref {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 999px; padding: 5px 14px; font-size: 12px;
+    color: var(--ink-dim); margin-top: 16px;
+  }
+
+  /* ---- LAYOUT ---- */
+  .wrap { max-width: 960px; margin: 0 auto; padding: 32px 20px 60px; }
+  section { margin-bottom: 44px; }
+  .section-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--accent); font-weight: 700; margin-bottom: 14px;
+  }
+  h2 { font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 18px; }
+
+  /* ---- 3 PERGUNTAS ---- */
+  .three-q {
+    display: grid; gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    margin-bottom: 8px;
+  }
+  .q-card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 16px 18px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .q-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-size: 14px; font-weight: 800; display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .q-card b { font-size: 14px; color: var(--ink); display: block; margin-bottom: 4px; }
+  .q-card span { font-size: 12.5px; color: var(--ink-dim); line-height: 1.4; }
+
+  /* ---- TABELA COMPARATIVA ---- */
+  .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--line); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead tr { background: var(--card2); }
+  th {
+    padding: 11px 14px; text-align: left;
+    font-size: 11px; text-transform: uppercase; letter-spacing: .8px;
+    color: var(--ink-dim); font-weight: 700; white-space: nowrap;
+    border-bottom: 1px solid var(--line);
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--ink); line-height: 1.45; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: rgba(28,37,48,.5); }
+  .tag-tipo {
+    display: inline-block; padding: 3px 9px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 700; white-space: nowrap;
+  }
+  .tag-ameaca  { background: rgba(39,192,138,.15); color: var(--ok); border: 1px solid rgba(39,192,138,.3); }
+  .tag-retido  { background: rgba(58,160,255,.12); color: var(--accent); border: 1px solid rgba(58,160,255,.25); }
+  .tag-incomp  { background: rgba(255,93,115,.13); color: var(--bad); border: 1px solid rgba(255,93,115,.28); }
+  .tag-completo { background: rgba(159,176,195,.1); color: var(--ink-dim); border: 1px solid var(--line); }
+  .tag-infec   { background: rgba(245,181,61,.13); color: var(--warn); border: 1px solid rgba(245,181,61,.28); }
+  .tag-inev    { background: rgba(255,93,115,.08); color: #ff9a6c; border: 1px solid rgba(255,154,108,.28); }
+
+  /* ---- CARDS TIPO ---- */
+  .tipos-grid {
+    display: grid; gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  .tipo-card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 18px 18px 16px;
+    border-left: 3px solid var(--line);
+    transition: border-color .15s;
+  }
+  .tipo-card.c-ameaca  { border-left-color: var(--ok); }
+  .tipo-card.c-retido  { border-left-color: var(--accent); }
+  .tipo-card.c-incomp  { border-left-color: var(--bad); }
+  .tipo-card.c-completo{ border-left-color: #9fb0c3; }
+  .tipo-card.c-infec   { border-left-color: var(--warn); }
+  .tipo-card.c-inev    { border-left-color: #ff9a6c; }
+  .tipo-card .tc-head {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  }
+  .tipo-card .tc-title { font-size: 15px; font-weight: 700; }
+  .tipo-card .tc-oi {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .6px; padding: 2px 8px; border-radius: 999px;
+    background: #101820; color: var(--ink-dim); border: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  .tipo-card .tc-body { font-size: 13.5px; color: var(--ink-dim); line-height: 1.55; }
+  .tipo-card .tc-body strong { color: var(--ink); }
+  .tipo-card .tc-key {
+    margin-top: 10px; padding: 8px 11px;
+    background: #101820; border-radius: 8px; border: 1px solid var(--line);
+    font-size: 12.5px; color: var(--ink);
+  }
+  .tipo-card .tc-key::before { content: "🔑 "; }
+
+  /* ---- FLUXOGRAMA MERMAID ---- */
+  .flow-box {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 20px;
+  }
+  .flow-box h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--ink); }
+  .flow-box .flow-sub { font-size: 13px; color: var(--ink-dim); margin-bottom: 16px; }
+  .mermaid {
+    background: #070c10; border: 1px solid var(--line);
+    border-radius: 12px; padding: 20px; text-align: center;
+    overflow: auto; min-height: 80px;
+  }
+
+  /* ---- PONTOS QUE CAEM ---- */
+  .qa-list { display: flex; flex-direction: column; gap: 10px; }
+  .qa-item {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 14px 16px;
+  }
+  .qa-item .q { font-size: 13.5px; font-weight: 700; color: var(--accent); margin-bottom: 5px; }
+  .qa-item .a { font-size: 13.5px; color: var(--ink); line-height: 1.5; }
+
+  /* ---- COMUM A TODOS ---- */
+  .common-grid {
+    display: grid; gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+  .common-item {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 10px; padding: 12px 14px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .common-n {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--card2); border: 1px solid var(--line);
+    font-size: 12px; font-weight: 700; color: var(--ink-dim);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .common-item span { font-size: 13px; color: var(--ink); line-height: 1.4; }
+
+  /* ---- DIVIDER ---- */
+  hr { border: none; border-top: 1px solid var(--line); margin: 36px 0; }
+
+  @media (max-width: 600px) {
+    .three-q { grid-template-columns: 1fr; }
+    .tipos-grid { grid-template-columns: 1fr; }
+    .common-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">Obstetrícia · 1º Trimestre</div>
+  <h1>Abortamentos do Primeiro Trimestre — Os 6 Tipos</h1>
+  <p class="sub">Diagnóstico diferencial, condutas específicas e fluxogramas de decisão. Diferenciação baseada em 3 variáveis-chave.</p>
+  <div class="ref">📋 Protocolo: FEBRASGO / Ministério da Saúde</div>
+</div>
+
+<div class="wrap">
+
+  <!-- LÓGICA GERAL -->
+  <section>
+    <div class="section-label">Ponto de partida</div>
+    <h2>A lógica geral — 3 perguntas que definem o tipo</h2>
+    <div class="three-q">
+      <div class="q-card">
+        <div class="q-num">1</div>
+        <div>
+          <b>Orifício interno aberto ou fechado?</b>
+          <span>Fechado = ameaça, retido, completo, infectado<br>Aberto = incompleto, inevitável</span>
+        </div>
+      </div>
+      <div class="q-card">
+        <div class="q-num">2</div>
+        <div>
+          <b>Há BCF presente ao USG?</b>
+          <span>Presente = ameaça (gestação viável)<br>Ausente = todos os outros tipos</span>
+        </div>
+      </div>
+      <div class="q-card">
+        <div class="q-num">3</div>
+        <div>
+          <b>Material na cavidade, vazia, ou eliminação em curso?</b>
+          <span>Define retido · completo · incompleto · inevitável + infectado</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- TABELA COMPARATIVA -->
+  <section>
+    <div class="section-label">Visão geral</div>
+    <h2>Tabela Comparativa — Os 6 Tipos</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Sangramento</th>
+            <th>OI</th>
+            <th>USG</th>
+            <th>Conduta principal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag-tipo tag-ameaca">Ameaça</span></td>
+            <td>Pequeno</td>
+            <td>Fechado</td>
+            <td>SG + BCF presente</td>
+            <td>Tranquilizar + sinais de alarme</td>
+          </tr>
+          <tr>
+            <td><span class="tag-tipo tag-retido">Retido</span></td>
+            <td>Pequeno/mínimo</td>
+            <td>Fechado</td>
+            <td>Sem BCF / CCN&gt;7mm sem BCF</td>
+            <td>Expectante (até 28d) ou AMIU</td>
+          </tr>
+          <tr>
+            <td><span class="tag-tipo tag-incomp">Incompleto</span></td>
+            <td>Moderado/grande</td>
+            <td>Aberto</td>
+            <td>Material heterogêneo na cavidade</td>
+            <td>AMIU preferencial ou curetagem</td>
+          </tr>
+          <tr>
+            <td><span class="tag-tipo tag-completo">Completo</span></td>
+            <td>Grande (já regrediu)</td>
+            <td>Fechado ou aberto</td>
+            <td>Cavidade vazia, endométrio fino</td>
+            <td>Seriar beta-hCG — afastar DTG</td>
+          </tr>
+          <tr>
+            <td><span class="tag-tipo tag-infec">Infectado</span></td>
+            <td>Moderado/grande</td>
+            <td>Fechado</td>
+            <td>Conteúdo retido + sem BCF + infecção</td>
+            <td>ATB (genta+ampi+clinda) + esvaziamento</td>
+          </tr>
+          <tr>
+            <td><span class="tag-tipo tag-inev">Inevitável</span></td>
+            <td>Moderado/grande</td>
+            <td>Aberto</td>
+            <td>Membranas protrusas, OI dilatado</td>
+            <td>Expectante imediata — processo irreversível</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- DESCRIÇÕES DOS 6 TIPOS -->
+  <section>
+    <div class="section-label">Como diferenciar</div>
+    <h2>Descrição de cada tipo</h2>
+    <div class="tipos-grid">
+
+      <div class="tipo-card c-ameaca">
+        <div class="tc-head">
+          <span class="tag-tipo tag-ameaca">Ameaça</span>
+          <span class="tc-oi">OI fechado</span>
+        </div>
+        <div class="tc-body">
+          <strong>Gestação viável com sangramento de pequena monta.</strong> BCF presente ao USG, saco gestacional regular, OI fechado. A paciente sangra, mas não está perdendo o bebê ainda. É o único tipo em que a conduta é conservadora — tranquilizar com base nos achados objetivos, orientar sinais de alarme e manter pré-natal. Rh negativo → anti-D.
+        </div>
+        <div class="tc-key">Único tipo com BCF presente → gestação viável.</div>
+      </div>
+
+      <div class="tipo-card c-retido">
+        <div class="tc-head">
+          <span class="tag-tipo tag-retido">Retido</span>
+          <span class="tc-oi">OI fechado</span>
+        </div>
+        <div class="tc-body">
+          <strong>Óbito embrionário sem eliminação espontânea ainda.</strong> Frequentemente achado incidental na USG de rotina — a paciente nem sabe que o embrião morreu. OI fechado, sem BCF, CCN &gt; 7mm sem BCF (critério diagnóstico). Sem material heterogêneo na cavidade (ainda não houve eliminação). Conduta: expectante por até 28 dias ou ativa com misoprostol + AMIU (preferencial &lt;12 sem). A partir de 12 sem, atenção às espículas ósseas.
+        </div>
+        <div class="tc-key">CCN &gt; 7mm sem BCF = critério de óbito embrionário.</div>
+      </div>
+
+      <div class="tipo-card c-incomp">
+        <div class="tc-head">
+          <span class="tag-tipo tag-incomp">Incompleto</span>
+          <span class="tc-oi">OI aberto</span>
+        </div>
+        <div class="tc-body">
+          <strong>Eliminação parcial — material heterogêneo permanece na cavidade.</strong> OI aberto, sangramento intenso com coágulos e eliminação de material, frequentemente com instabilidade hemodinâmica (taquicardia, hipotensão leve). USG: endométrio espessado/heterogêneo. Prioridade: estabilização hemodinâmica ANTES do esvaziamento. Método preferencial: AMIU (menos invasivo, menor risco de perfuração).
+        </div>
+        <div class="tc-key">Instabilidade hemodinâmica é a marca registrada.</div>
+      </div>
+
+      <div class="tipo-card c-completo">
+        <div class="tc-head">
+          <span class="tag-tipo tag-completo">Completo</span>
+          <span class="tc-oi">OI ± fechado</span>
+        </div>
+        <div class="tc-body">
+          <strong>Eliminação total — cavidade uterina vazia ao USG.</strong> A paciente relata sangramento intenso anterior com eliminação de saco e tecido, seguido de <em>melhora espontânea</em>. Agora está estável, sangramento mínimo, cólicas cessaram. USG: cavidade vazia, endométrio fino (~4mm). <strong>Não há indicação de esvaziamento uterino.</strong> O passo crucial é seriar beta-hCG semanalmente até negativar para excluir Doença Trofoblástica Gestacional.
+        </div>
+        <div class="tc-key">Cavidade vazia → sem AMIU. Seriar beta-hCG → excluir DTG.</div>
+      </div>
+
+      <div class="tipo-card c-infec">
+        <div class="tc-head">
+          <span class="tag-tipo tag-infec">Infectado</span>
+          <span class="tc-oi">OI fechado</span>
+        </div>
+        <div class="tc-body">
+          <strong>Conteúdo retido com infecção — frequentemente pós-aborto inseguro.</strong> Febre (&gt;38°C), corrimento fétido, leucocitose com desvio à esquerda, dor abdominal, mau estado geral. Pode evoluir para sepse. Conduta: estabilização + hemocultura ANTES do ATB → ATB amplo espectro imediato (Gentamicina + Ampicilina + Clindamicina IV, até 48h afebril) → esvaziamento NÃO retardado (foco infeccioso está no útero). Acolhimento sem julgamento = item de pontuação.
+        </div>
+        <div class="tc-key">Caso mais grave. Único com componente ético explícito.</div>
+      </div>
+
+      <div class="tipo-card c-inev">
+        <div class="tc-head">
+          <span class="tag-tipo tag-inev">Inevitável</span>
+          <span class="tc-oi">OI aberto</span>
+        </div>
+        <div class="tc-body">
+          <strong>Processo de eliminação já em curso e irreversível.</strong> OI dilatado ao exame físico e USG, membranas protrusas pelo orifício cervical, saco gestacional parcialmente herniado. O embrião ainda pode estar no útero mas o processo não pode ser interrompido. Conduta: expectante imediata (aguardar a eliminação). Após eliminação, reavaliar: se completa → tratar como completo; se parcial → tratar como incompleto.
+        </div>
+        <div class="tc-key">Estado de transição → evolui para completo ou incompleto.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- CONDUTAS COMUNS -->
+  <section>
+    <div class="section-label">Elemento universal</div>
+    <h2>Condutas comuns a TODOS os 6 tipos</h2>
+    <div class="common-grid">
+      <div class="common-item"><div class="common-n">1</div><span><strong>Estabilidade hemodinâmica</strong> — prioridade variável conforme o tipo</span></div>
+      <div class="common-item"><div class="common-n">2</div><span><strong>Tipagem sanguínea + Rh</strong> — se Rh negativo: imunoglobulina anti-D</span></div>
+      <div class="common-item"><div class="common-n">3</div><span><strong>Investigar sífilis, HIV, hepatites</strong></span></div>
+      <div class="common-item"><div class="common-n">4</div><span><strong>Contracepção</strong> após resolução do quadro</span></div>
+      <div class="common-item"><div class="common-n">5</div><span><strong>Acolhimento + suporte emocional</strong> (nuance ética especial no infectado)</span></div>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- FLUXOGRAMA 1: DIAGNÓSTICO -->
+  <section>
+    <div class="section-label">Fluxograma 1 de 2</div>
+    <h2>Diagnóstico Diferencial dos 6 Tipos</h2>
+    <div class="flow-box">
+      <h3>🔀 Algoritmo de diagnóstico — do sangramento ao tipo</h3>
+      <p class="flow-sub">Três perguntas sequenciais definem o diagnóstico. Siga o fluxo a partir do orifício interno.</p>
+      <div class="mermaid">
+flowchart TD
+    A[Sangramento vaginal<br>1º trimestre] --> B{Orifício<br>Interno?}
+
+    B -->|FECHADO| C{BCF presente<br>ao USG?}
+    B -->|ABERTO| D{Material já<br>eliminado?}
+
+    C -->|SIM| E[AMEAÇA DE ABORTAMENTO<br>SG regular + BCF + sem hematoma<br>Tranquilizar + sinais alarme]
+
+    C -->|NÃO —<br>CCN>7mm sem BCF| F{Sinais de<br>infecção?<br>febre + leucocitose<br>+ corrimento fétido}
+
+    F -->|NÃO| G[ABORTAMENTO RETIDO<br>Sem material heterogêneo<br>Expectante até 28 dias<br>OU misoprostol + AMIU]
+
+    F -->|SIM| H{Cavidade<br>vazia?}
+
+    H -->|NÃO —<br>conteúdo retido| I[ABORTAMENTO INFECTADO<br>Estabilizar + hemocultura<br>+ ATB amplo espectro<br>+ esvaziamento não retardado<br>+ acolher sem julgamento]
+
+    H -->|SIM —<br>cavidade vazia| N[ABORTAMENTO COMPLETO<br>Endométrio fino<br>Seriar beta-hCG<br>afastar DTG<br>SEM esvaziamento]
+
+    D -->|Parcial —<br>material heterogêneo<br>na cavidade| J[ABORTAMENTO INCOMPLETO<br>Instabilidade possível<br>Estabilizar + AMIU/curetagem]
+
+    D -->|Eliminação em curso —<br>membranas protrusas<br>OI dilatado| K[ABORTAMENTO INEVITÁVEL<br>Processo IRREVERSÍVEL<br>Expectante imediata<br>Reavaliar pós-eliminação]
+
+    K --> L{Pós-eliminação:<br>completa ou<br>parcial?}
+    L -->|Completa| N
+    L -->|Parcial| J
+      </div>
+    </div>
+  </section>
+
+  <!-- FLUXOGRAMA 2: CONDUTAS -->
+  <section>
+    <div class="section-label">Fluxograma 2 de 2</div>
+    <h2>Condutas Comuns + Específicas por Tipo</h2>
+    <div class="flow-box">
+      <h3>💊 Algoritmo de conduta — do diagnóstico ao tratamento</h3>
+      <p class="flow-sub">Após definir o tipo, aplique as condutas comuns e ramifique para a conduta específica.</p>
+      <div class="mermaid">
+flowchart TD
+    A[Diagnóstico definido<br>entre os 6 tipos] --> B[CONDUTAS COMUNS<br>a TODOS os casos]
+
+    B --> C[1. Garantir estabilidade<br>hemodinâmica]
+    B --> D[2. Tipagem Rh<br>Se negativo: ANTI-D]
+    B --> E[3. Sífilis/HIV/hepatites]
+    B --> F[4. Contracepção<br>pós-resolução]
+    B --> G[5. Acolhimento +<br>suporte emocional]
+
+    C --> H{Qual tipo?}
+
+    H -->|Ameaça| I[Tranquilizar c/ achados<br>objetivos + sinais alarme<br>+ sintomáticos]
+
+    H -->|Retido| J[Expectante até 28 dias<br>OU misoprostol + AMIU<br>AMIU preferencial<12sem<br>≥12sem: espículas ósseas]
+
+    H -->|Incompleto| K[ESTABILIZAR primeiro<br>AMIU preferencial<br>ou curetagem]
+
+    H -->|Completo| L[SERIAR beta-hCG<br>afastar DTG<br>SEM esvaziamento]
+
+    H -->|Infectado| M[ESTABILIZAR + hemocultura<br>ATB amplo espectro IMEDIATO<br>Esvaziamento NÃO retardado<br>ACOLHER SEM JULGAMENTO]
+
+    H -->|Inevitável| N[Expectante imediata<br>processo irreversível<br>Reavaliar pós-eliminação<br>→ completo ou incompleto]
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- PONTOS QUE CAEM -->
+  <section>
+    <div class="section-label">Prova oral / OSCE</div>
+    <h2>Pontos que caem — perguntas e respostas rápidas</h2>
+    <div class="qa-list">
+      <div class="qa-item">
+        <div class="q">Quais as 3 variáveis que definem o tipo de abortamento?</div>
+        <div class="a">Estado do orifício interno (aberto/fechado), presença de BCF ao USG, e estado da cavidade/eliminação (material presente, vazia, ou eliminação em curso).</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Qual o critério diagnóstico de abortamento retido?</div>
+        <div class="a">CCN &gt; 7mm SEM BCF ao USG.</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Qual o prazo da conduta expectante no retido?</div>
+        <div class="a">Até 28 dias para eliminação espontânea.</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">A partir de quantas semanas a AMIU exige atenção redobrada e por quê?</div>
+        <div class="a">A partir de 12 semanas, pela presença de espículas ósseas fetais.</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Por que seriar o beta-hCG no abortamento completo?</div>
+        <div class="a">Para afastar Doença Trofoblástica Gestacional (DTG), que cursa com beta-hCG persistentemente positivo e elevado.</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Cavidade vazia ao USG — indica AMIU/curetagem?</div>
+        <div class="a">NÃO. Cavidade vazia não tem indicação de esvaziamento. O passo importante é a vigilância do beta-hCG para excluir DTG.</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Qual o esquema de ATB no abortamento infectado?</div>
+        <div class="a">Gentamicina + Ampicilina + Clindamicina (ou Metronidazol como alternativa), IV, até 48h afebril + melhora clínica.</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Por que não retardar o esvaziamento no abortamento infectado?</div>
+        <div class="a">O foco infeccioso está dentro do útero — removê-lo é parte indispensável do tratamento. Retardar piora o quadro séptico.</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">O abortamento inevitável pode ser revertido?</div>
+        <div class="a">NÃO. OI dilatado + membranas protrusas = processo irreversível. A conduta é expectante imediata.</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Após eliminação no inevitável, o que fazer?</div>
+        <div class="a">Reavaliar: se eliminação completa → tratar como completo (seriar beta-hCG); se parcial → tratar como incompleto (AMIU/curetagem).</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Quando administrar imunoglobulina anti-D?</div>
+        <div class="a">Sempre que a gestante for Rh negativo, independentemente do tipo de abortamento.</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Qual postura correta diante de tentativa de aborto inseguro?</div>
+        <div class="a">Acolhimento SEM JULGAMENTO — direito a cuidado integral e humanizado, independentemente da causa. Este item é cobrado como pontuação no OSCE.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script>
+  try {
+    if (window.mermaid) {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        securityLevel: 'loose',
+        flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+        themeVariables: {
+          darkMode: true,
+          background: '#070c10',
+          primaryColor: '#1c2530',
+          primaryTextColor: '#e7eef6',
+          primaryBorderColor: '#2c3a4a',
+          lineColor: '#3aa0ff',
+          secondaryColor: '#222d3a',
+          tertiaryColor: '#161d26',
+          edgeLabelBackground: '#0f1419',
+          clusterBkg: '#1c2530',
+          nodeTextColor: '#e7eef6',
+          fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
+          fontSize: '14px'
+        }
+      });
+    }
+  } catch(e) { console.warn('mermaid:', e); }
+</script>
+</body>
+</html>
