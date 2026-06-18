@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de páginas</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --card: #1a1d24;
+    --card-hover: #232730;
+    --border: #2a2f3a;
+    --text: #e6e8ec;
+    --muted: #9aa3b2;
+    --accent: #4f8cff;
+    --accent-soft: rgba(79, 140, 255, 0.15);
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f4f6fa;
+      --card: #ffffff;
+      --card-hover: #f0f3f8;
+      --border: #e2e6ee;
+      --text: #1a1d24;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-soft: rgba(37, 99, 235, 0.1);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 40px 20px 80px; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.7rem; margin: 0 0 6px; }
+  .sub { color: var(--muted); font-size: 0.95rem; }
+  .search {
+    width: 100%;
+    padding: 12px 16px;
+    margin: 22px 0 8px;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    outline: none;
+  }
+  .search:focus { border-color: var(--accent); }
+  .count { color: var(--muted); font-size: 0.85rem; margin-bottom: 18px; }
+  .group-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin: 24px 0 10px;
+    font-weight: 600;
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+  a.card {
+    display: block;
+    padding: 16px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.15s, transform 0.1s, border-color 0.15s;
+  }
+  a.card:hover { background: var(--card-hover); border-color: var(--accent); transform: translateY(-2px); }
+  .card .name { font-weight: 600; word-break: break-word; }
+  .card .path { font-size: 0.8rem; color: var(--muted); margin-top: 4px; word-break: break-all; }
+  .state { padding: 40px 0; color: var(--muted); text-align: center; }
+  .error { background: var(--accent-soft); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .error code { background: rgba(127,127,127,0.15); padding: 2px 6px; border-radius: 4px; }
+  .manual { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .manual input { flex: 1; min-width: 120px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+  .manual button { padding: 10px 18px; border-radius: 8px; border: none; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; }
+  .repo-tag { color: var(--muted); font-size: 0.85rem; }
+  .repo-tag a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>📂 Páginas do repositório</h1>
+    <div class="sub" id="sub">Carregando…</div>
+  </header>
+
+  <input type="text" class="search" id="search" placeholder="Filtrar por nome…" autocomplete="off" style="display:none">
+  <div class="count" id="count"></div>
+  <div id="list"></div>
+  <div class="state" id="state">Buscando arquivos…</div>
+</div>
+
+<script>
+(function () {
+  const listEl   = document.getElementById('list');
+  const stateEl  = document.getElementById('state');
+  const searchEl = document.getElementById('search');
+  const countEl  = document.getElementById('count');
+  const subEl    = document.getElementById('sub');
+
+  // Nome deste próprio arquivo, para não listá-lo como opção.
+  const SELF = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+
+  // ---- 1. Descobrir owner / repo a partir da URL (ou de ?owner=&repo=&branch=) ----
+  function detect() {
+    const q = new URLSearchParams(location.search);
+    if (q.get('owner') && q.get('repo')) {
+      return { owner: q.get('owner'), repo: q.get('repo'), branch: q.get('branch') || null };
+    }
+    const host = location.hostname;            // ex.: "usuario.github.io"
+    if (!host.endsWith('.github.io')) return null;
+    const owner = host.split('.')[0];
+    const parts = location.pathname.split('/').filter(Boolean);
+    // Página de projeto: usuario.github.io/repo/...  -> repo = primeiro segmento
+    // Página de usuário: usuario.github.io/...        -> repo = usuario.github.io
+    let repo;
+    const firstIsFile = parts.length && parts[0].includes('.');
+    if (parts.length && !firstIsFile) repo = parts[0];
+    else repo = host;
+    return { owner, repo, branch: null };
+  }
+
+  let cfg = detect();
+
+  // ---- 2. Buscar a lista de arquivos via API do GitHub ----
+  async function load(cfg) {
+    stateEl.style.display = 'block';
+    stateEl.classList.remove('error');
+    stateEl.textContent = 'Buscando arquivos…';
+    listEl.innerHTML = '';
+    searchEl.style.display = 'none';
+    countEl.textContent = '';
+
+    try {
+      let branch = cfg.branch;
+      if (!branch) {
+        const meta = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}`);
+        if (!meta.ok) throw new Error(`Repositório não encontrado (${meta.status})`);
+        branch = (await meta.json()).default_branch || 'main';
+      }
+      const treeRes = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/git/trees/${branch}?recursive=1`);
+      if (!treeRes.ok) throw new Error(`Não consegui ler os arquivos (${treeRes.status})`);
+      const tree = await treeRes.json();
+
+      const files = (tree.tree || [])
+        .filter(n => n.type === 'blob' && /\.html?$/i.test(n.path))
+        .filter(n => n.path.toLowerCase() !== SELF)   // exclui este index
+        .map(n => n.path)
+        .sort((a, b) => a.localeCompare(b));
+
+      subEl.innerHTML = `<span class="repo-tag">Repositório: <a href="https://github.com/${cfg.owner}/${cfg.repo}" target="_blank" rel="noopener">${cfg.owner}/${cfg.repo}</a> · branch <b>${branch}</b></span>`;
+      render(files);
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  // ---- 3. Renderizar os cartões ----
+  let allFiles = [];
+  function render(files) {
+    allFiles = files;
+    stateEl.style.display = 'none';
+    if (!files.length) {
+      stateEl.style.display = 'block';
+      stateEl.textContent = 'Nenhum outro arquivo .html encontrado no repositório.';
+      return;
+    }
+    searchEl.style.display = 'block';
+    draw(files);
+    searchEl.oninput = () => {
+      const t = searchEl.value.trim().toLowerCase();
+      draw(allFiles.filter(f => f.toLowerCase().includes(t)));
+    };
+  }
+
+  function draw(files) {
+    countEl.textContent = `${files.length} página${files.length === 1 ? '' : 's'}`;
+    // Agrupar por pasta
+    const groups = {};
+    for (const f of files) {
+      const slash = f.lastIndexOf('/');
+      const folder = slash === -1 ? '' : f.slice(0, slash);
+      (groups[folder] = groups[folder] || []).push(f);
+    }
+    listEl.innerHTML = '';
+    Object.keys(groups).sort().forEach(folder => {
+      if (folder) {
+        const t = document.createElement('div');
+        t.className = 'group-title';
+        t.textContent = '📁 ' + folder;
+        listEl.appendChild(t);
+      }
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+      for (const path of groups[folder]) {
+        const a = document.createElement('a');
+        a.className = 'card';
+        a.href = path;                                  // caminho relativo = abre direto
+        const name = path.split('/').pop().replace(/\.html?$/i, '');
+        a.innerHTML = `<div class="name">${escapeHtml(name)}</div><div class="path">${escapeHtml(path)}</div>`;
+        grid.appendChild(a);
+      }
+      listEl.appendChild(grid);
+    });
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  // ---- 4. Erro / entrada manual (ex.: testando localmente) ----
+  function showError(msg) {
+    subEl.textContent = '';
+    stateEl.style.display = 'block';
+    stateEl.classList.add('error');
+    stateEl.innerHTML = `
+      <p style="margin-top:0"><b>Não foi possível detectar automaticamente.</b><br>${escapeHtml(msg)}</p>
+      <p>Informe usuário e repositório do GitHub:</p>
+      <div class="manual">
+        <input id="m-owner" placeholder="usuário" value="${cfg ? escapeHtml(cfg.owner || '') : ''}">
+        <input id="m-repo"  placeholder="repositório" value="${cfg ? escapeHtml(cfg.repo || '') : ''}">
+        <input id="m-branch" placeholder="branch (opcional)">
+        <button id="m-go">Carregar</button>
+      </div>`;
+    document.getElementById('m-go').onclick = () => {
+      const owner = document.getElementById('m-owner').value.trim();
+      const repo  = document.getElementById('m-repo').value.trim();
+      const branch = document.getElementById('m-branch').value.trim() || null;
+      if (owner && repo) { cfg = { owner, repo, branch }; load(cfg); }
+    };
+  }
+
+  if (cfg) load(cfg);
+  else showError('Esta página não está em um endereço *.github.io.');
+})();
+</script>
+</body>
+</html>

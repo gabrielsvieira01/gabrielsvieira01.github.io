@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reanimação Neonatal — Fluxogramas & Diferenças</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg:     #0f1419;
+    --bg2:    #161d26;
+    --card:   #1c2530;
+    --card2:  #222d3a;
+    --ink:    #e7eef6;
+    --dim:    #9fb0c3;
+    --line:   #2c3a4a;
+    --accent: #3aa0ff;
+    --ok:     #27c08a;
+    --warn:   #f5b53d;
+    --bad:    #ff5d73;
+    --pre:    #7c6cff;   /* roxo para pré-termo */
+    --term:   #3aa0ff;   /* azul para termo */
+    --mono: 'SF Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
+    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    --r: 14px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  .topnav {
+    position: sticky; top: 0; z-index: 40;
+    background: rgba(15,20,25,.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+    padding: 0 24px;
+    display: flex; align-items: center; gap: 0;
+    height: 54px;
+  }
+  .topnav .logo {
+    font-size: 13px; font-weight: 700; color: var(--dim);
+    letter-spacing: .5px; text-transform: uppercase;
+    margin-right: 24px; white-space: nowrap;
+  }
+  .nav-links { display: flex; gap: 2px; flex: 1; overflow-x: auto; }
+  .nav-links a {
+    color: var(--dim); text-decoration: none;
+    font-size: 13px; padding: 6px 12px;
+    border-radius: 8px; white-space: nowrap;
+    transition: .15s;
+  }
+  .nav-links a:hover { background: var(--card); color: var(--ink); }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(160deg, #0d1a2a 0%, #0f1419 60%);
+    border-bottom: 1px solid var(--line);
+    padding: 52px 24px 44px;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 500px 300px at 20% 50%, rgba(124,108,255,.07) 0%, transparent 70%),
+      radial-gradient(ellipse 500px 300px at 80% 50%, rgba(58,160,255,.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero .eyebrow {
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-size: clamp(26px, 5vw, 42px);
+    font-weight: 800; line-height: 1.15;
+    margin-bottom: 14px;
+  }
+  .hero h1 .hl-pre { color: var(--pre); }
+  .hero h1 .hl-term { color: var(--term); }
+  .hero p {
+    color: var(--dim); max-width: 560px;
+    margin: 0 auto 28px; font-size: 15px;
+  }
+  .badge-row {
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 14px; font-size: 12.5px;
+    color: var(--dim);
+  }
+  .badge .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── WRAP ── */
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+  /* ── SECTION ── */
+  .section { padding: 52px 0; border-bottom: 1px solid var(--line); }
+  .section:last-child { border-bottom: none; }
+  .section-label {
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--dim); font-weight: 700; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--line);
+  }
+  .section h2 {
+    font-size: clamp(20px, 3vw, 28px); font-weight: 700;
+    margin-bottom: 18px; line-height: 1.2;
+  }
+  .section .intro {
+    color: var(--dim); font-size: 14.5px; max-width: 740px;
+    margin-bottom: 28px; line-height: 1.7;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--r); padding: 22px 24px;
+    margin-bottom: 16px;
+  }
+  .card h3 {
+    font-size: 16px; font-weight: 700; margin-bottom: 4px;
+  }
+  .card .subtitle { color: var(--dim); font-size: 13px; margin-bottom: 14px; }
+
+  /* ── MERMAID ── */
+  .mermaid-wrap {
+    background: #090e13;
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 20px 16px;
+    overflow-x: auto;
+    margin-bottom: 16px;
+  }
+  .mermaid { text-align: center; }
+
+  /* ── DIFF TABLE ── */
+  .diff-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .diff-header {
+    padding: 14px 18px;
+    font-size: 13px; font-weight: 700; letter-spacing: .3px;
+    text-align: center;
+    border-bottom: 2px solid;
+  }
+  .diff-header.pre { background: rgba(124,108,255,.12); border-color: var(--pre); color: var(--pre); }
+  .diff-header.term { background: rgba(58,160,255,.12); border-color: var(--term); color: var(--term); }
+  .diff-rows { display: contents; }
+  .diff-row-label {
+    grid-column: 1 / -1;
+    background: var(--card2);
+    border-top: 1px solid var(--line);
+    padding: 8px 18px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--dim);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .diff-cell {
+    padding: 13px 18px;
+    font-size: 13.5px; line-height: 1.55;
+    border-top: 1px solid var(--line);
+  }
+  .diff-cell.pre  { background: rgba(124,108,255,.04); border-left: 3px solid var(--pre); }
+  .diff-cell.term { background: rgba(58,160,255,.04); }
+  .diff-cell strong { display: block; font-size: 13px; margin-bottom: 3px; }
+  .diff-cell span { color: var(--dim); font-size: 13px; }
+
+  /* ── TAG ── */
+  .tag {
+    display: inline-flex; align-items: center;
+    border-radius: 6px; padding: 2px 8px;
+    font-size: 11.5px; font-weight: 700; margin-right: 5px;
+    letter-spacing: .3px;
+  }
+  .tag.diff  { background: rgba(245,181,61,.13); color: var(--warn); }
+  .tag.same  { background: rgba(39,192,138,.1); color: var(--ok); }
+  .tag.crit  { background: rgba(255,93,115,.12); color: var(--bad); }
+
+  /* ── QUICK TABLE ── */
+  .qtable { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-bottom: 20px; }
+  .qtable th {
+    background: var(--card2);
+    padding: 10px 14px; text-align: left;
+    font-size: 11.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .5px;
+    color: var(--dim); border: 1px solid var(--line);
+  }
+  .qtable td {
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    vertical-align: top; line-height: 1.5;
+  }
+  .qtable tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  .qtable td.pre-val  { color: #b0a4ff; }
+  .qtable td.term-val { color: #7ecfff; }
+  .qtable td.same-val { color: var(--ok); }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-left: 3px solid;
+    padding: 12px 16px;
+    border-radius: 0 10px 10px 0;
+    margin: 14px 0;
+    font-size: 13.5px; line-height: 1.6;
+  }
+  .callout.warn { border-color: var(--warn); background: rgba(245,181,61,.07); }
+  .callout.ok   { border-color: var(--ok);   background: rgba(39,192,138,.07); }
+  .callout.info { border-color: var(--accent);background: rgba(58,160,255,.07); }
+  .callout.crit { border-color: var(--bad);  background: rgba(255,93,115,.07); }
+  .callout strong { display: block; margin-bottom: 4px; font-size: 12px;
+    text-transform: uppercase; letter-spacing: .5px; }
+
+  /* ── ORAL QA ── */
+  .qa-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .qa-item {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; overflow: hidden;
+  }
+  .qa-q {
+    padding: 14px 18px;
+    font-size: 14px; font-weight: 600; color: var(--ink);
+    cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+    user-select: none;
+  }
+  .qa-q::after { content: '▸'; color: var(--dim); font-size: 12px; flex-shrink: 0; margin-left: 8px; }
+  .qa-q.open::after { content: '▾'; }
+  .qa-a {
+    display: none;
+    padding: 0 18px 14px;
+    font-size: 13.5px; color: var(--dim); line-height: 1.65;
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+  }
+  .qa-a.show { display: block; }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 28px 20px; text-align: center;
+    color: var(--dim); font-size: 12.5px;
+    border-top: 1px solid var(--line);
+  }
+
+  @media (max-width: 640px) {
+    .diff-grid { grid-template-columns: 1fr; }
+    .diff-header.term { border-top: 1px solid var(--line); }
+    .diff-row-label { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="topnav">
+  <div class="logo">NRP · SBP</div>
+  <div class="nav-links">
+    <a href="#fluxo-termo">Fluxo ≥ 34 sem</a>
+    <a href="#fluxo-pre">Fluxo &lt; 34 sem</a>
+    <a href="#comparativo">Comparativo</a>
+    <a href="#diferencas">Diferenças-chave</a>
+    <a href="#oral">Oral OSCE</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="wrap">
+    <div class="eyebrow">NRP / PRN — SBP / AAP</div>
+    <h1>Reanimação Neonatal<br>
+      <span class="hl-term">≥ 34 semanas</span> &amp; <span class="hl-pre">&lt; 34 semanas</span>
+    </h1>
+    <p>Fluxogramas completos dos resumos do simulador + principais diferenças entre os dois protocolos.</p>
+    <div class="badge-row">
+      <div class="badge"><span class="dot" style="background:var(--term)"></span> RN a Termo / Pré-termo Tardio</div>
+      <div class="badge"><span class="dot" style="background:var(--pre)"></span> Pré-termo &lt; 34 semanas</div>
+      <div class="badge"><span class="dot" style="background:var(--warn)"></span> Conferir diretriz SBP vigente</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ FLUXO ≥ 34 SEM ══════════════ -->
+<div class="section" id="fluxo-termo">
+  <div class="wrap">
+    <div class="section-label">Fluxograma 1</div>
+    <h2 style="color:var(--term)">Reanimação do RN ≥ 34 Semanas</h2>
+    <p class="intro">
+      Algoritmo completo — das 3 perguntas iniciais até a adrenalina e cuidados pós-reanimação.
+      O pulmão é o órgão-alvo: ventila-se antes de comprimir, comprime-se antes de drogar.
+    </p>
+
+    <div class="callout warn">
+      <strong>⚠️ Regra de ouro</strong>
+      FC &lt; 100 bpm OU apneia → VPP imediata. Nunca pula essa etapa.
+    </div>
+
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart TD
+    A([RN nasce]) --> B{3 perguntas\n≥34 sem?\nrespira/chora?\ntônus flexão MMII?}
+    B -->|Todos SIM| C[Boa vitalidade\nCordão TARDIO 1–3 min\nColo da mãe]
+    B -->|≥1 NÃO| D[Má vitalidade\nCordão IMEDIATO\nMesa de reanimação]
+
+    D --> E[PASSOS INICIAIS — 30s\nEsquentar · Secar vigorosamente\nPosicionar · Aspirar se necessário\nMonitor ECG + Oxímetro MSD]
+
+    E --> F{FC + respiração?}
+    F -->|FC≥100 + resp. regular| G[Observação\nO₂ inalatório se cianose]
+    F -->|FC<100 OU apneia| H[VPP MÁSCARA FACIAL\nFiO₂ 21% · 40–60 vent/min · 30s]
+
+    H --> I{Após 30s: FC?}
+    I -->|FC≥100| J[Desmame gradual]
+    I -->|FC<100| K[Revisar técnica\nVedação · Posição · VA · Pressão\nNovo ciclo 30s]
+
+    K --> L{FC?}
+    L -->|FC≥100| J
+    L -->|FC<100| M[VPP MÁSCARA LARÍNGEA nº1\n≥34sem E ≥2.000g · 30s]
+
+    M --> N{FC?}
+    N -->|FC≥100| J
+    N -->|FC<60| O[INTUBAÇÃO OROTRAQUEAL\nCânula 3,5mm · Lâmina 1\nConfirmar posição\nVPP por cânula · 30s]
+
+    O --> P{FC?}
+    P -->|FC≥60| Q[Manter VPP\nReduzir FiO₂ guiado oximetria]
+    P -->|FC<60| R[MASSAGEM CARDÍACA\n2 polegares · ⅓ AP\n3:1 → 90+30/min\nFiO₂ 100% · Cateter umbilical · 60s]
+
+    R --> S{FC após 60s?}
+    S -->|FC≥60| T[Cessar massagem\nManter VPP · Reduzir FiO₂]
+    S -->|FC<60| U[ADRENALINA\nET: 1 mL/kg sol. 0,1 mg/mL\nUmbilical: 0,2 mL/kg\nRepetir a cada 3–5 min]
+
+    U --> V{FC 3–5 min após?}
+    V -->|FC≥60| T
+    V -->|FC<60| W[Continuar massagem\nRepetir adrenalina\nAvaliar causas reversíveis]
+
+    T --> X[PÓS-REANIMAÇÃO\nHipoglicemia → SG10% 2 mL/kg\nVolume se hipovolemia → SF 10 mL/kg\nHipotermia terapêutica se EHI ≥36 sem\nUTIN]
+
+    style A fill:#1c2f42,stroke:#3aa0ff,color:#e7eef6
+    style C fill:#0d1f16,stroke:#27c08a,color:#e7eef6
+    style D fill:#1f1519,stroke:#ff5d73,color:#e7eef6
+    style H fill:#132030,stroke:#3aa0ff,color:#e7eef6
+    style M fill:#132030,stroke:#3aa0ff,color:#e7eef6
+    style O fill:#1a1630,stroke:#7c6cff,color:#e7eef6
+    style R fill:#221618,stroke:#ff5d73,color:#e7eef6
+    style U fill:#221618,stroke:#ff5d73,color:#e7eef6
+    style X fill:#0d1f16,stroke:#27c08a,color:#e7eef6
+      </div>
+    </div>
+
+    <!-- Fluxo adrenalina -->
+    <div class="card">
+      <h3>Detalhe: Adrenalina</h3>
+      <div class="subtitle">Diluição, vias e doses</div>
+      <div class="mermaid-wrap" style="margin-bottom:0">
+        <div class="mermaid">
+flowchart TD
+    A[Indicação: FC<60 após\n60s massagem + VPP cânula] --> B[Diluição\n1 mg/mL + 9 mL SF\n= sol. 0,1 mg/mL em 10 mL]
+    B --> C{Cateter umbilical\ndisponível?}
+    C -->|NÃO| D[Via ENDOTRAQUEAL\n0,05–0,1 mg/kg\n= 1 mL/kg]
+    C -->|SIM| E[Via UMBILICAL\n0,01–0,03 mg/kg\n= 0,2 mL/kg]
+    D --> F[Manter massagem +\nVPP cânula + FiO₂ 100%]
+    E --> F
+    F --> G[Avaliar FC após 3–5 min]
+    G -->|FC≥60| H[Cessar massagem · Manter VPP]
+    G -->|FC<60| I[Repetir · Priorizar umbilical\nAvaliar causas reversíveis]
+
+    style D fill:#221618,stroke:#ff5d73,color:#e7eef6
+    style E fill:#221618,stroke:#f5b53d,color:#e7eef6
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ FLUXO < 34 SEM ══════════════ -->
+<div class="section" id="fluxo-pre">
+  <div class="wrap">
+    <div class="section-label">Fluxograma 2</div>
+    <h2 style="color:var(--pre)">Reanimação do RN &lt; 34 Semanas</h2>
+    <p class="intro">
+      O pré-termo não é apenas "um bebê menor". Pulmões sem surfactante, pele sem barreira
+      epidérmica e vasos cerebrais frágeis obrigam a mudanças específicas em cada etapa do protocolo.
+    </p>
+
+    <div class="callout crit">
+      <strong>🔴 Regra absoluta</strong>
+      RN &lt; 34 semanas → mesa de reanimação SEMPRE, independentemente de respirar, chorar ou ter tônus.
+    </div>
+
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart TD
+    A([RN < 34 semanas nasce]) --> B[SEMPRE à mesa de reanimação\nIndependente de respirar ou ter tônus]
+
+    B --> C{Vitalidade?\nRespira/chora + tônus?}
+    C -->|SIM — boa vitalidade| D[Clampeamento TARDIO ≥30s]
+    C -->|NÃO — má vitalidade| E[Clampeamento IMEDIATO]
+
+    D --> F[PASSOS INICIAIS — 30s\nNÃO SECAR → saco plástico estéril\nTouca dupla: plástica + algodão\nPosicionar · Aspirar se necessário\nMonitor + Oxímetro MSD pré-ductal]
+    E --> F
+
+    F --> G{FC + respiração + SpO₂?}
+
+    G -->|FC≥100 + resp. espontânea\n+ desconforto resp. OU SpO₂ baixo| H[CPAP com VMM peça T\nFiO₂ titulada pelo blender\nAlvos SpO₂ por faixa etária]
+    G -->|FC<100 OU apneia| I[VPP MÁSCARA FACIAL\nVMM peça T — NUNCA ambu\nFiO₂ 30% · 40–60 vent/min · 30s]
+    G -->|FC≥100 + resp. regular + SpO₂ ok| J[Observação\nCPAP preventivo se < 32 sem]
+
+    H --> K{Reavaliação\nFC + SpO₂?}
+    K -->|FC≥100 + SpO₂ no alvo| L[Manter CPAP\nTitular FiO₂]
+    K -->|FC<100 OU apneia| I
+
+    I --> M{Após 30s: FC?}
+    M -->|FC≥100| N[Desmame gradual do suporte]
+    M -->|FC<100| O[Revisar técnica · Novo ciclo 30s]
+
+    O --> P{FC?}
+    P -->|FC≥100| N
+    P -->|FC<60| Q[INTUBAÇÃO OROTRAQUEAL\nCânula 2,5 mm · Lâmina 00 ou 0\nVPP por cânula — VMM peça T\nFiO₂ 30% · 30s\nML CONTRAINDICADA < 2.000g]
+
+    Q --> R{Após VPP por cânula: FC?}
+    R -->|FC≥60| S[Continuar VPP por cânula\nReduzir FiO₂ guiado SpO₂]
+    R -->|FC<60| T[MASSAGEM CARDÍACA\n2 polegares · ⅓ AP · 3:1\n90+30/min · FiO₂ 100%\nCateter umbilical]
+
+    T --> U{FC após 60s?}
+    U -->|FC≥60| S
+    U -->|FC<60| V[ADRENALINA\nET: 1 mL/kg sol. 0,1 mg/mL\nUmbilical: 0,2 mL/kg]
+
+    S --> W[PÓS-REANIMAÇÃO\nSaco plástico + touca até UTIN\nSG10% 2 mL/kg se hipoglicemia\nSurfactante se DMH\nOximetria contínua · Alvos SpO₂\nUTIN + VM]
+
+    style A fill:#1e1a30,stroke:#7c6cff,color:#e7eef6
+    style B fill:#1e1a30,stroke:#7c6cff,color:#e7eef6
+    style F fill:#1e1a30,stroke:#7c6cff,color:#e7eef6
+    style H fill:#132030,stroke:#3aa0ff,color:#e7eef6
+    style I fill:#132030,stroke:#f5b53d,color:#e7eef6
+    style Q fill:#1a1630,stroke:#ff5d73,color:#e7eef6
+    style T fill:#221618,stroke:#ff5d73,color:#e7eef6
+    style V fill:#221618,stroke:#ff5d73,color:#e7eef6
+    style W fill:#0d1f16,stroke:#27c08a,color:#e7eef6
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ FLUXO COMPARATIVO ══════════════ -->
+<div class="section" id="comparativo">
+  <div class="wrap">
+    <div class="section-label">Fluxograma 3</div>
+    <h2>Comparativo lado a lado</h2>
+    <p class="intro">
+      Visão simultânea dos dois protocolos — os pontos de divergência ficam evidentes quando os
+      fluxos correm em paralelo.
+    </p>
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart LR
+    subgraph PT["🟣  RN < 34 SEMANAS"]
+        direction TB
+        PT1["Mesa de reanimação SEMPRE"] --> PT2["NÃO secar → saco plástico\nTouca dupla"]
+        PT2 --> PT3["CPAP antes de VPP\nse FC≥100 + desconforto"]
+        PT3 --> PT4["VMM peça T SEMPRE\nnunca ambu"]
+        PT4 --> PT5["VPP com FiO₂ 30%"]
+        PT5 --> PT6["Alvos SpO₂ por faixa etária\n<5min: 70–80% · 5–10min: 80–90%\n>10min: 85–95%"]
+        PT6 --> PT7["IOT se falha máscara\nML contraindicada < 2.000g\nCânula 2,5mm · Lâmina 00"]
+    end
+
+    subgraph AT["🔵  RN ≥ 34 SEMANAS"]
+        direction TB
+        AT1["Triagem 3 perguntas"] --> AT2["Secar vigorosamente\nCampos aquecidos + touca algodão"]
+        AT2 --> AT3["Sem passo CPAP\nVPP se FC<100 ou apneia"]
+        AT3 --> AT4["Ambu OU VMM peça T\nambos aceitos"]
+        AT4 --> AT5["VPP com FiO₂ 21%"]
+        AT5 --> AT6["Alvos SpO₂ fixos\nprotocolo padrão"]
+        AT6 --> AT7["ML nº1 se falha máscara\n≥34sem + ≥2.000g\nCânula 3,5mm · Lâmina 1"]
+    end
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ DIFERENÇAS-CHAVE ══════════════ -->
+<div class="section" id="diferencas">
+  <div class="wrap">
+    <div class="section-label">Diferenças-chave</div>
+    <h2>Pré-termo vs. Termo — O que muda em cada etapa</h2>
+    <p class="intro">
+      As diferenças não são arbitrárias — cada uma tem uma racionalidade fisiopatológica.
+      Entender o "por quê" é o que separa quem sabe o protocolo de quem conduz o caso.
+    </p>
+
+    <!-- GRID DIFF -->
+    <div class="diff-grid">
+      <div class="diff-header pre">🟣 &lt; 34 SEMANAS</div>
+      <div class="diff-header term">🔵 ≥ 34 SEMANAS</div>
+
+      <!-- Ida para mesa -->
+      <div class="diff-row-label">📋 Ida para a mesa de reanimação</div>
+      <div class="diff-cell pre">
+        <strong>SEMPRE, sem exceção</strong>
+        <span>Mesmo respirando, chorando e com tônus — a imaturidade estrutural obriga intervenção em todos.</span>
+      </div>
+      <div class="diff-cell term">
+        <strong>Triagem pelas 3 perguntas</strong>
+        <span>Se as três respostas forem SIM → boa vitalidade → fica com a mãe. Mesa só se ≥ 1 resposta NÃO.</span>
+      </div>
+
+      <!-- Controle térmico -->
+      <div class="diff-row-label">🌡️ Controle térmico</div>
+      <div class="diff-cell pre">
+        <strong>NÃO secar → saco plástico + touca dupla</strong>
+        <span>Pele imatura perde calor por evaporação em segundos. Saco plástico retém calor e umidade. Touca dupla (plástica + algodão) sobre a cabeça descoberta.</span>
+      </div>
+      <div class="diff-cell term">
+        <strong>Secar vigorosamente</strong>
+        <span>Campos aquecidos + touca de algodão. A secagem remove o líquido e também estimula a respiração. Sem saco plástico.</span>
+      </div>
+
+      <!-- Clampeamento do cordão -->
+      <div class="diff-row-label">🩸 Clampeamento do cordão</div>
+      <div class="diff-cell pre">
+        <strong>Tardio ≥ 30 s (se boa vitalidade) · Imediato (se má vitalidade)</strong>
+        <span>Transfusão placentária é ainda mais crítica no pré-termo: aumenta estoques de ferro e reduz necessidade de transfusão.</span>
+      </div>
+      <div class="diff-cell term">
+        <strong>Tardio 1–3 min (boa vitalidade) · Imediato (má vitalidade)</strong>
+        <span>Mesma lógica, mas o intervalo mínimo é mais flexível (1–3 min) vs. o mínimo de 30 s do pré-termo.</span>
+      </div>
+
+      <!-- CPAP -->
+      <div class="diff-row-label">💨 CPAP</div>
+      <div class="diff-cell pre">
+        <strong>Passo intermediário obrigatório</strong>
+        <span>FC≥100 + respiração espontânea + desconforto resp. OU SpO₂ baixo → CPAP antes de VPP. O pulmão sem surfactante colaba entre cada ciclo; CPAP mantém pressão contínua.</span>
+      </div>
+      <div class="diff-cell term">
+        <strong>Não existe como etapa separada</strong>
+        <span>Avaliação pós-passos iniciais vai direto para VPP ou observação. O surfactante presente mantém a CRF sem precisar de CPAP.</span>
+      </div>
+
+      <!-- Dispositivo de ventilação -->
+      <div class="diff-row-label">🫁 Dispositivo de ventilação</div>
+      <div class="diff-cell pre">
+        <strong>Apenas VMM com peça T — nunca ambu</strong>
+        <span>Motivo triplo: (1) controle de PIP + PEEP separados; (2) capacidade de CPAP; (3) FiO₂ titulável pelo blender. Ambu não tem PEEP e a pressão é imprevisível.</span>
+      </div>
+      <div class="diff-cell term">
+        <strong>Ambu OU VMM peça T — ambos aceitos</strong>
+        <span>Para ≥ 34 semanas, o balão auto-inflável é adequado. O surfactante já presente protege os alvéolos de barotrauma por pressão não controlada.</span>
+      </div>
+
+      <!-- FiO₂ inicial VPP -->
+      <div class="diff-row-label">🫧 FiO₂ inicial da VPP</div>
+      <div class="diff-cell pre">
+        <strong>30%</strong>
+        <span>Maior que o ar ambiente, mas abaixo de 100%. O risco imediato de colapso por hipóxia supera o risco de toxicidade oxidativa — mas 100% causaria lesão retiniana e pulmonar.</span>
+      </div>
+      <div class="diff-cell term">
+        <strong>21% (ar ambiente)</strong>
+        <span>Hiperóxia precoce causa lesão oxidativa cerebral em asfixia. O oxigênio suplementar só entra se SpO₂ não atingir os alvos.</span>
+      </div>
+
+      <!-- Alvos de SpO₂ -->
+      <div class="diff-row-label">📊 Alvos de SpO₂ (MSD pré-ductal)</div>
+      <div class="diff-cell pre">
+        <strong>Dinâmicos por faixa etária</strong>
+        <span>&lt;5 min → 70–80% · 5–10 min → 80–90% · &gt;10 min → 85–95%</span>
+      </div>
+      <div class="diff-cell term">
+        <strong>Alvos fixos conforme protocolo</strong>
+        <span>Seguem as faixas padrão do NRP sem subdivisão tão estrita — a transição do ambiente uterino já foi mais completa em RN a termo.</span>
+      </div>
+
+      <!-- Máscara laríngea -->
+      <div class="diff-row-label">🩺 Máscara Laríngea</div>
+      <div class="diff-cell pre">
+        <strong>Contraindicada se &lt; 2.000 g</strong>
+        <span>Não cabe anatomicamente. A sequência pula direto para intubação orotraqueal se a máscara facial falhar.</span>
+      </div>
+      <div class="diff-cell term">
+        <strong>ML nº1 se falha máscara facial</strong>
+        <span>Indicada quando falha VPP por máscara + ≥ 34 sem + ≥ 2.000 g. Mais rápida e mais fácil que intubação para quem tem menos experiência em laringoscopia.</span>
+      </div>
+
+      <!-- Intubação orotraqueal -->
+      <div class="diff-row-label">🔧 Intubação Orotraqueal</div>
+      <div class="diff-cell pre">
+        <strong>Cânula 2,5 mm · Lâmina 00 (ou 0)</strong>
+        <span>Para 28–34 sem: 2,5–3,0 mm. Profundidade: peso (kg) + 6 cm pelo lábio. Ex.: 1,2 kg → ≈ 7,2 cm.</span>
+      </div>
+      <div class="diff-cell term">
+        <strong>Cânula 3,5 mm · Lâmina 1</strong>
+        <span>Para ≥ 34 sem / ≥ 38 sem. Profundidade: peso (kg) + 6 cm pelo lábio. Ex.: 3,2 kg → ≈ 9,2 cm.</span>
+      </div>
+
+      <!-- Pós-reanimação específico -->
+      <div class="diff-row-label">🏥 Pós-reanimação (diferença)</div>
+      <div class="diff-cell pre">
+        <strong>Manter saco + touca dupla até UTIN · Surfactante exógeno se DMH</strong>
+        <span>A normotermia só é garantida dentro do incubador. Surfactante via cânula se SDR/DMH — decisão neonatológica. Técnicas: INSURE ou LISA.</span>
+      </div>
+      <div class="diff-cell term">
+        <strong>Hipotermia terapêutica se EHI</strong>
+        <span>Para RN ≥ 36 sem com EHI moderada-grave. Iniciar até 6h de vida, apenas com critérios formais. Decisão neonatológica.</span>
+      </div>
+    </div>
+
+    <!-- Tabela rápida -->
+    <h3 style="margin:28px 0 14px; font-size:17px;">Tabela-resumo: dispositivos, doses e parâmetros</h3>
+    <table class="qtable">
+      <thead>
+        <tr>
+          <th>Parâmetro</th>
+          <th>🟣 &lt; 34 semanas</th>
+          <th>🔵 ≥ 34 semanas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Controle térmico</td>
+          <td class="pre-val">Saco plástico + touca dupla</td>
+          <td class="term-val">Secar + touca algodão</td>
+        </tr>
+        <tr>
+          <td>Clampeamento (boa vitalidade)</td>
+          <td class="pre-val">Tardio ≥ 30 s</td>
+          <td class="term-val">Tardio 1–3 min</td>
+        </tr>
+        <tr>
+          <td>Passo CPAP</td>
+          <td class="pre-val">SIM (antes da VPP)</td>
+          <td class="term-val">NÃO</td>
+        </tr>
+        <tr>
+          <td>Dispositivo VPP</td>
+          <td class="pre-val">Apenas VMM peça T</td>
+          <td class="term-val">Ambu ou VMM peça T</td>
+        </tr>
+        <tr>
+          <td>FiO₂ inicial VPP</td>
+          <td class="pre-val">30%</td>
+          <td class="term-val">21%</td>
+        </tr>
+        <tr>
+          <td>Alvo SpO₂</td>
+          <td class="pre-val">Dinâmico por faixa etária</td>
+          <td class="term-val">Fixo — padrão NRP</td>
+        </tr>
+        <tr>
+          <td>Máscara laríngea</td>
+          <td class="pre-val">Contraindicada se &lt; 2.000 g</td>
+          <td class="term-val">ML nº1 (≥34sem + ≥2.000g)</td>
+        </tr>
+        <tr>
+          <td>Cânula IOT (sem cuff)</td>
+          <td class="pre-val">2,5 mm · Lâmina 00</td>
+          <td class="term-val">3,5 mm · Lâmina 1</td>
+        </tr>
+        <tr>
+          <td>Massagem cardíaca</td>
+          <td class="same-val">Idêntica: 2 polegares · ⅓ AP · 3:1 · FiO₂ 100%</td>
+          <td class="same-val">Idêntica</td>
+        </tr>
+        <tr>
+          <td>Adrenalina ET</td>
+          <td class="same-val">1 mL/kg sol. 0,1 mg/mL</td>
+          <td class="same-val">1 mL/kg sol. 0,1 mg/mL</td>
+        </tr>
+        <tr>
+          <td>Adrenalina umbilical</td>
+          <td class="same-val">0,2 mL/kg sol. 0,1 mg/mL</td>
+          <td class="same-val">0,2 mL/kg sol. 0,1 mg/mL</td>
+        </tr>
+        <tr>
+          <td>Hipoglicemia pós-reanimação</td>
+          <td class="same-val">SG10% 2 mL/kg IV</td>
+          <td class="same-val">SG10% 2 mL/kg IV</td>
+        </tr>
+        <tr>
+          <td>Pós-reanimação específico</td>
+          <td class="pre-val">Surfactante (DMH) · Saco até UTIN</td>
+          <td class="term-val">Hipotermia terapêutica (EHI)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout ok">
+      <strong>✅ O que não muda</strong>
+      Massagem cardíaca (técnica, relação, profundidade), doses de adrenalina, SF 10 mL/kg para hipovolemia, SG10% para hipoglicemia, cateter umbilical durante massagem, objetivo de FC ≥ 60 para cessar massagem.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ORAL OSCE ══════════════ -->
+<div class="section" id="oral">
+  <div class="wrap">
+    <div class="section-label">Preparação para a oral</div>
+    <h2>Perguntas frequentes no OSCE</h2>
+    <p class="intro">
+      Clique na pergunta para revelar a resposta ideal para verbalizar na estação.
+    </p>
+    <ul class="qa-list">
+      <li class="qa-item">
+        <div class="qa-q" onclick="toggle(this)">Por que o pré-termo &lt; 34 sem vai sempre para a mesa, mesmo respirando?</div>
+        <div class="qa-a">A imaturidade estrutural do pré-termo — pulmões sem surfactante, pele sem barreira epidérmica, vasos cerebrais frágeis — obriga à intervenção ativa em todos, independentemente da vitalidade. "Boa vitalidade suficiente para ficar com a mãe" existe para o RN a termo; no pré-termo, não existe.</div>
+      </li>
+      <li class="qa-item">
+        <div class="qa-q" onclick="toggle(this)">Por que não se seca o RN pré-termo?</div>
+        <div class="qa-a">A pele imatura do pré-termo perde calor por evaporação em segundos quando exposta ao ar frio da sala de parto. O saco plástico estéril impede essa perda ao criar uma câmara úmida ao redor do corpo. Secar o pré-termo com compressas causaria hipotermia antes mesmo de completar os passos iniciais.</div>
+      </li>
+      <li class="qa-item">
+        <div class="qa-q" onclick="toggle(this)">Por que usar VMM com peça T no pré-termo e não o ambu?</div>
+        <div class="qa-a">Três motivos: (1) Controle de pressão — o VMM com peça T permite definir PIP e PEEP separadamente; o ambu não tem PEEP e a pressão gerada é imprevisível, com risco de barotrauma no pulmão imaturo. (2) Capacidade de CPAP — o VMM pode oferecer pressão contínua sem ventilação ativa. (3) FiO₂ titulável — conectado ao blender, permite qualquer FiO₂ entre 21% e 100%.</div>
+      </li>
+      <li class="qa-item">
+        <div class="qa-q" onclick="toggle(this)">O que é CPAP e quando está indicado no pré-termo?</div>
+        <div class="qa-a">CPAP (Continuous Positive Airway Pressure) é pressão contínua nas vias aéreas, mantida em todos os momentos do ciclo respiratório. No pré-termo, está indicado quando FC ≥ 100 bpm + respiração espontânea presente + desconforto respiratório E/OU SpO₂ abaixo do alvo. Mantém os alvéolos abertos entre cada ciclo, compensando a ausência de surfactante.</div>
+      </li>
+      <li class="qa-item">
+        <div class="qa-q" onclick="toggle(this)">Qual FiO₂ para iniciar a VPP no pré-termo? E no a termo? Por quê a diferença?</div>
+        <div class="qa-a">Pré-termo: 30%. A termo: 21% (ar ambiente). A diferença existe porque o pré-termo tem risco maior de colapso circulatório imediato por hipóxia, mas 100% causaria lesão oxidativa pulmonar e retinopatia da prematuridade. O RN a termo inicia com ar porque hiperóxia precoce causa lesão oxidativa cerebral no contexto de asfixia perinatal.</div>
+      </li>
+      <li class="qa-item">
+        <div class="qa-q" onclick="toggle(this)">Quais os alvos de SpO₂ no pré-termo? Por que são dinâmicos?</div>
+        <div class="qa-a">Menos de 5 min → 70–80%; 5–10 min → 80–90%; mais de 10 min → 85–95%. São dinâmicos porque o RN faz transição do ambiente uterino (baixa pO₂) para o ar gradualmente. Cobrar SpO₂ de 95% com 3 minutos de vida seria cobrar o que não é fisiologicamente possível nesse momento.</div>
+      </li>
+      <li class="qa-item">
+        <div class="qa-q" onclick="toggle(this)">Pode usar máscara laríngea no pré-termo &lt; 34 sem?</div>
+        <div class="qa-a">Não, se o peso for inferior a 2.000 g. A ML nº 1 não tem o tamanho anatômico adequado para RN abaixo desse peso. A sequência vai diretamente de falha da máscara facial para intubação orotraqueal, sem a etapa da ML.</div>
+      </li>
+      <li class="qa-item">
+        <div class="qa-q" onclick="toggle(this)">Qual cânula e lâmina para RN de 29 semanas? E para RN de 38 semanas?</div>
+        <div class="qa-a">29 semanas: cânula 2,5 mm, lâmina reta 00 (ou 0). 38 semanas: cânula 3,5 mm, lâmina reta 1. A profundidade de inserção pela regra prática é peso em kg + 6 cm pelo lábio. Ex.: 1,2 kg → ≈ 7,2 cm; 3,2 kg → ≈ 9,2 cm.</div>
+      </li>
+      <li class="qa-item">
+        <div class="qa-q" onclick="toggle(this)">Qual a dose de adrenalina ET vs umbilical? É a mesma solução?</div>
+        <div class="qa-a">Sim, mesma solução: diluir 1 ampola (1 mg/mL) + 9 mL de SF → solução de 0,1 mg/mL. Via endotraqueal: 1 mL/kg (0,05–0,1 mg/kg). Via umbilical: 0,2 mL/kg (0,01–0,03 mg/kg). A dose ET é maior porque a absorção pulmonar é menos previsível.</div>
+      </li>
+      <li class="qa-item">
+        <div class="qa-q" onclick="toggle(this)">Por que a relação compressão:ventilação é 3:1 no neonato e não 15:2 como no adulto?</div>
+        <div class="qa-a">Porque no neonato a causa da parada é quase sempre respiratória, não cardíaca. A ventilação é parte fundamental do ciclo de reanimação, não um intervalo entre séries de compressões. A proporção 3:1 garante 30 ventilações por minuto — muito mais do que os 8–10 do adulto —, o que é essencial para corrigir a hipóxia subjacente.</div>
+      </li>
+      <li class="qa-item">
+        <div class="qa-q" onclick="toggle(this)">O que é surfactante e quando está indicado?</div>
+        <div class="qa-a">Surfactante é uma mistura de fosfolipídios produzida pelos pneumócitos tipo II que reduz a tensão superficial alveolar, impedindo o colabamento dos alvéolos ao final da expiração. No RN &lt; 34 semanas, a produção é insuficiente, causando a Síndrome de Dificuldade Respiratória (SDR) / Doença da Membrana Hialina (DMH). Indicado após intubação, via cânula traqueal — decisão neonatológica.</div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    Material de estudo baseado nos resumos NRP/PRN — SBP/AAP.<br>
+    Confirme sempre a versão vigente da diretriz SBP antes de usar em avaliação formal.
+  </div>
+</footer>
+
+<script>
+  // mermaid
+  try {
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      securityLevel: 'loose',
+      flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+      themeVariables: {
+        darkMode: true,
+        background: '#090e13',
+        primaryColor: '#1c2530',
+        primaryTextColor: '#e7eef6',
+        primaryBorderColor: '#2c3a4a',
+        lineColor: '#9fb0c3',
+        secondaryColor: '#161d26',
+        tertiaryColor: '#0f1419',
+        edgeLabelBackground: '#161d26',
+        clusterBkg: '#161d26',
+        clusterBorder: '#2c3a4a',
+        titleColor: '#e7eef6',
+        nodeTextColor: '#e7eef6',
+        fontSize: '13px',
+      }
+    });
+  } catch(e) {}
+
+  // accordion Q&A
+  function toggle(el) {
+    const a = el.nextElementSibling;
+    const open = a.classList.contains('show');
+    document.querySelectorAll('.qa-a.show').forEach(x => x.classList.remove('show'));
+    document.querySelectorAll('.qa-q.open').forEach(x => x.classList.remove('open'));
+    if (!open) { a.classList.add('show'); el.classList.add('open'); }
+  }
+</script>
+</body>
+</html>
