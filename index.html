@@ -3,141 +3,204 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel de páginas</title>
+<title>Gabriel's Repository</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f1115;
-    --card: #1a1d24;
-    --card-hover: #232730;
-    --border: #2a2f3a;
-    --text: #e6e8ec;
-    --muted: #9aa3b2;
-    --accent: #4f8cff;
-    --accent-soft: rgba(79, 140, 255, 0.15);
-  }
-  @media (prefers-color-scheme: light) {
-    :root {
-      --bg: #f4f6fa;
-      --card: #ffffff;
-      --card-hover: #f0f3f8;
-      --border: #e2e6ee;
-      --text: #1a1d24;
-      --muted: #6b7280;
-      --accent: #2563eb;
-      --accent-soft: rgba(37, 99, 235, 0.1);
-    }
+    --bg: #07090f;
+    --glass: rgba(22, 27, 38, 0.55);
+    --glass-hover: rgba(34, 41, 58, 0.75);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-glow: rgba(120, 160, 255, 0.55);
+    --text: #eef1f7;
+    --muted: #8b93a7;
+    --accent: #5b8cff;
+    --accent2: #a978ff;
+    --accent3: #46e0c8;
   }
   * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--bg);
     color: var(--text);
     line-height: 1.5;
+    overflow-x: hidden;
+    min-height: 100%;
   }
-  .wrap { max-width: 880px; margin: 0 auto; padding: 40px 20px 80px; }
-  header { margin-bottom: 28px; }
-  h1 { font-size: 1.7rem; margin: 0 0 6px; }
+
+  /* ---------- Fundo aurora animado ---------- */
+  .aurora { position: fixed; inset: 0; z-index: -2; overflow: hidden; }
+  .blob {
+    position: absolute;
+    width: 55vmax; height: 55vmax;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.5;
+    will-change: transform;
+  }
+  .blob.b1 { background: radial-gradient(circle, var(--accent), transparent 60%); top: -15%; left: -10%; animation: drift1 22s ease-in-out infinite; }
+  .blob.b2 { background: radial-gradient(circle, var(--accent2), transparent 60%); bottom: -20%; right: -10%; animation: drift2 26s ease-in-out infinite; }
+  .blob.b3 { background: radial-gradient(circle, var(--accent3), transparent 60%); top: 30%; left: 40%; opacity: 0.3; animation: drift3 30s ease-in-out infinite; }
+  @keyframes drift1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(12vw, 10vh) scale(1.15); } }
+  @keyframes drift2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-14vw, -8vh) scale(1.1); } }
+  @keyframes drift3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-10vw, 12vh) scale(1.2); } }
+  .grain { position: fixed; inset: 0; z-index: -1; opacity: 0.04; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 64px 22px 100px; }
+
+  /* ---------- Cabeçalho ---------- */
+  header { margin-bottom: 30px; animation: rise 0.7s cubic-bezier(.2,.8,.2,1) both; }
+  h1 {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: clamp(2.2rem, 6vw, 3.4rem);
+    font-weight: 700;
+    margin: 0 0 8px;
+    letter-spacing: -0.02em;
+    background: linear-gradient(110deg, var(--accent3), var(--accent), var(--accent2), var(--accent3));
+    background-size: 300% auto;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 8s linear infinite;
+  }
+  @keyframes shine { to { background-position: 300% center; } }
   .sub { color: var(--muted); font-size: 0.95rem; }
+  .sub a { color: var(--accent); text-decoration: none; }
+  .sub a:hover { text-decoration: underline; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent3); box-shadow: 0 0 10px var(--accent3); margin-right: 7px; vertical-align: middle; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  /* ---------- Busca ---------- */
+  .searchbar { position: relative; margin: 26px 0 18px; animation: rise 0.7s 0.05s cubic-bezier(.2,.8,.2,1) both; display: none; }
+  .searchbar svg { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; stroke: var(--muted); }
   .search {
     width: 100%;
-    padding: 12px 16px;
-    margin: 22px 0 8px;
-    font-size: 1rem;
-    border-radius: 10px;
+    padding: 15px 18px 15px 50px;
+    font-size: 1rem; font-family: inherit;
+    border-radius: 14px;
     border: 1px solid var(--border);
-    background: var(--card);
+    background: var(--glass);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     color: var(--text);
     outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .search:focus { border-color: var(--accent); }
-  .count { color: var(--muted); font-size: 0.85rem; margin-bottom: 18px; }
-  .group-title {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--muted);
-    margin: 24px 0 10px;
-    font-weight: 600;
-  }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-  a.card {
-    display: block;
-    padding: 16px 18px;
-    background: var(--card);
+  .search::placeholder { color: var(--muted); }
+  .search:focus { border-color: var(--border-glow); box-shadow: 0 0 0 4px rgba(91,140,255,0.12), 0 0 30px rgba(91,140,255,0.15); }
+
+  /* ---------- Breadcrumb ---------- */
+  .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-bottom: 16px; font-size: 0.9rem; min-height: 24px; }
+  .crumb { background: none; border: none; color: var(--muted); font: inherit; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: background 0.15s, color 0.15s; }
+  .crumb:hover { background: var(--glass); color: var(--text); }
+  .crumb:last-child { color: var(--text); font-weight: 600; }
+  .crumb-sep { color: var(--muted); opacity: 0.5; }
+  .count { color: var(--muted); font-size: 0.82rem; margin-bottom: 16px; }
+
+  /* ---------- Grid de cards ---------- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 18px;
+    background: var(--glass);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    text-decoration: none;
-    color: var(--text);
-    transition: background 0.15s, transform 0.1s, border-color 0.15s;
+    border-radius: 16px;
+    text-decoration: none; color: var(--text);
+    cursor: pointer;
+    position: relative; overflow: hidden;
+    transition: transform 0.18s cubic-bezier(.2,.8,.2,1), background 0.18s, border-color 0.18s, box-shadow 0.18s;
+    animation: pop 0.5s cubic-bezier(.2,.8,.2,1) both;
   }
-  a.card:hover { background: var(--card-hover); border-color: var(--accent); transform: translateY(-2px); }
-  .card .name { font-weight: 600; word-break: break-word; }
-  .card .path { font-size: 0.8rem; color: var(--muted); margin-top: 4px; word-break: break-all; }
-  .state { padding: 40px 0; color: var(--muted); text-align: center; }
-  .error { background: var(--accent-soft); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-  .error code { background: rgba(127,127,127,0.15); padding: 2px 6px; border-radius: 4px; }
-  .manual { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-  .manual input { flex: 1; min-width: 120px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
-  .manual button { padding: 10px 18px; border-radius: 8px; border: none; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; }
-  .repo-tag { color: var(--muted); font-size: 0.85rem; }
-  .repo-tag a { color: var(--accent); }
+  .card::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.06), transparent);
+    transform: translateX(-100%); transition: transform 0.5s;
+  }
+  .card:hover { transform: translateY(-4px); background: var(--glass-hover); border-color: var(--border-glow); box-shadow: 0 14px 40px rgba(0,0,0,0.45), 0 0 24px rgba(91,140,255,0.18); }
+  .card:hover::before { transform: translateX(100%); }
+  .card:active { transform: translateY(-1px) scale(0.99); }
+  .ico { flex: none; width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 1.2rem; }
+  .ico.folder { background: linear-gradient(135deg, rgba(169,120,255,0.22), rgba(91,140,255,0.22)); }
+  .ico.file   { background: linear-gradient(135deg, rgba(70,224,200,0.18), rgba(91,140,255,0.18)); }
+  .meta { min-width: 0; flex: 1; }
+  .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .desc { font-size: 0.78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+  .badge { flex: none; font-size: 0.72rem; color: var(--muted); background: rgba(255,255,255,0.06); padding: 3px 9px; border-radius: 999px; }
+  .arrow { flex: none; color: var(--muted); transition: transform 0.18s, color 0.18s; }
+  .card:hover .arrow { transform: translateX(3px); color: var(--text); }
+
+  @keyframes pop { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ---------- Estados ---------- */
+  .state { padding: 60px 0; color: var(--muted); text-align: center; }
+  .spinner { width: 42px; height: 42px; margin: 0 auto 18px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--accent); animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error { background: var(--glass); border: 1px solid var(--border); border-radius: 16px; padding: 26px; text-align: left; max-width: 520px; margin: 0 auto; backdrop-filter: blur(14px); }
+  .manual { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .manual input { flex: 1; min-width: 110px; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.25); color: var(--text); font: inherit; }
+  .manual button { padding: 11px 20px; border-radius: 10px; border: none; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-weight: 600; cursor: pointer; }
+  .manual button:hover { filter: brightness(1.1); }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 </style>
 </head>
 <body>
+<div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+<div class="grain"></div>
+
 <div class="wrap">
   <header>
-    <h1>📂 Páginas do repositório</h1>
-    <div class="sub" id="sub">Carregando…</div>
+    <h1>Gabriel's Repository</h1>
+    <div class="sub" id="sub"><span class="dot"></span>Carregando…</div>
   </header>
 
-  <input type="text" class="search" id="search" placeholder="Filtrar por nome…" autocomplete="off" style="display:none">
+  <div class="searchbar" id="searchbar">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" class="search" id="search" placeholder="Buscar em todas as pastas…" autocomplete="off">
+  </div>
+
+  <div class="breadcrumb" id="breadcrumb"></div>
   <div class="count" id="count"></div>
   <div id="list"></div>
-  <div class="state" id="state">Buscando arquivos…</div>
+  <div class="state" id="state"><div class="spinner"></div>Buscando arquivos…</div>
 </div>
 
 <script>
 (function () {
-  const listEl   = document.getElementById('list');
-  const stateEl  = document.getElementById('state');
-  const searchEl = document.getElementById('search');
-  const countEl  = document.getElementById('count');
-  const subEl    = document.getElementById('sub');
+  const listEl    = document.getElementById('list');
+  const stateEl   = document.getElementById('state');
+  const searchEl  = document.getElementById('search');
+  const searchBar = document.getElementById('searchbar');
+  const countEl   = document.getElementById('count');
+  const subEl     = document.getElementById('sub');
+  const crumbEl   = document.getElementById('breadcrumb');
 
-  // Nome deste próprio arquivo, para não listá-lo como opção.
   const SELF = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
 
-  // ---- 1. Descobrir owner / repo a partir da URL (ou de ?owner=&repo=&branch=) ----
+  // ---- 1. Detectar owner / repo (ou via ?owner=&repo=&branch=) ----
   function detect() {
     const q = new URLSearchParams(location.search);
-    if (q.get('owner') && q.get('repo')) {
+    if (q.get('owner') && q.get('repo'))
       return { owner: q.get('owner'), repo: q.get('repo'), branch: q.get('branch') || null };
-    }
-    const host = location.hostname;            // ex.: "usuario.github.io"
+    const host = location.hostname;
     if (!host.endsWith('.github.io')) return null;
     const owner = host.split('.')[0];
     const parts = location.pathname.split('/').filter(Boolean);
-    // Página de projeto: usuario.github.io/repo/...  -> repo = primeiro segmento
-    // Página de usuário: usuario.github.io/...        -> repo = usuario.github.io
-    let repo;
     const firstIsFile = parts.length && parts[0].includes('.');
-    if (parts.length && !firstIsFile) repo = parts[0];
-    else repo = host;
+    const repo = (parts.length && !firstIsFile) ? parts[0] : host;
     return { owner, repo, branch: null };
   }
-
   let cfg = detect();
 
-  // ---- 2. Buscar a lista de arquivos via API do GitHub ----
+  // ---- 2. Buscar arquivos via API do GitHub ----
   async function load(cfg) {
-    stateEl.style.display = 'block';
-    stateEl.classList.remove('error');
-    stateEl.textContent = 'Buscando arquivos…';
-    listEl.innerHTML = '';
-    searchEl.style.display = 'none';
-    countEl.textContent = '';
-
+    showState('<div class="spinner"></div>Buscando arquivos…');
+    listEl.innerHTML = ''; searchBar.style.display = 'none'; crumbEl.innerHTML = ''; countEl.textContent = '';
     try {
       let branch = cfg.branch;
       if (!branch) {
@@ -145,87 +208,121 @@
         if (!meta.ok) throw new Error(`Repositório não encontrado (${meta.status})`);
         branch = (await meta.json()).default_branch || 'main';
       }
-      const treeRes = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/git/trees/${branch}?recursive=1`);
-      if (!treeRes.ok) throw new Error(`Não consegui ler os arquivos (${treeRes.status})`);
-      const tree = await treeRes.json();
-
-      const files = (tree.tree || [])
+      const res = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/git/trees/${branch}?recursive=1`);
+      if (!res.ok) throw new Error(`Não consegui ler os arquivos (${res.status})`);
+      const tree = await res.json();
+      allFiles = (tree.tree || [])
         .filter(n => n.type === 'blob' && /\.html?$/i.test(n.path))
-        .filter(n => n.path.toLowerCase() !== SELF)   // exclui este index
+        .filter(n => n.path.toLowerCase() !== SELF)
         .map(n => n.path)
         .sort((a, b) => a.localeCompare(b));
-
-      subEl.innerHTML = `<span class="repo-tag">Repositório: <a href="https://github.com/${cfg.owner}/${cfg.repo}" target="_blank" rel="noopener">${cfg.owner}/${cfg.repo}</a> · branch <b>${branch}</b></span>`;
-      render(files);
-    } catch (err) {
-      showError(err.message);
-    }
+      subEl.innerHTML = `<span class="dot"></span>${allFiles.length} página${allFiles.length===1?'':'s'} · <a href="https://github.com/${cfg.owner}/${cfg.repo}" target="_blank" rel="noopener">${cfg.owner}/${cfg.repo}</a> · branch <b>${branch}</b>`;
+      start();
+    } catch (err) { showError(err.message); }
   }
 
-  // ---- 3. Renderizar os cartões ----
+  // ---- 3. Navegação por pastas ----
   let allFiles = [];
-  function render(files) {
-    allFiles = files;
+  let currentPath = '';   // "" = raiz, ou "pasta/sub/"
+
+  function start() {
     stateEl.style.display = 'none';
-    if (!files.length) {
-      stateEl.style.display = 'block';
-      stateEl.textContent = 'Nenhum outro arquivo .html encontrado no repositório.';
-      return;
-    }
-    searchEl.style.display = 'block';
-    draw(files);
-    searchEl.oninput = () => {
-      const t = searchEl.value.trim().toLowerCase();
-      draw(allFiles.filter(f => f.toLowerCase().includes(t)));
-    };
+    if (!allFiles.length) { showState('Nenhum arquivo .html encontrado no repositório.'); searchBar.style.display='none'; return; }
+    searchBar.style.display = 'block';
+    searchEl.value = '';
+    searchEl.oninput = () => searchEl.value.trim() ? renderSearch(searchEl.value.trim()) : renderFolder(currentPath);
+    renderFolder('');
   }
 
-  function draw(files) {
-    countEl.textContent = `${files.length} página${files.length === 1 ? '' : 's'}`;
-    // Agrupar por pasta
-    const groups = {};
-    for (const f of files) {
-      const slash = f.lastIndexOf('/');
-      const folder = slash === -1 ? '' : f.slice(0, slash);
-      (groups[folder] = groups[folder] || []).push(f);
+  // O que existe diretamente dentro de "prefix"
+  function childrenOf(prefix) {
+    const folders = new Map();   // nome -> qtd de htmls dentro
+    const files = [];
+    for (const path of allFiles) {
+      if (!path.startsWith(prefix)) continue;
+      const rest = path.slice(prefix.length);
+      const slash = rest.indexOf('/');
+      if (slash === -1) files.push(path);
+      else { const f = rest.slice(0, slash); folders.set(f, (folders.get(f) || 0) + 1); }
     }
+    return { folders: [...folders.entries()].sort((a,b)=>a[0].localeCompare(b[0])), files };
+  }
+
+  function renderFolder(prefix) {
+    currentPath = prefix;
+    renderBreadcrumb(prefix);
+    const { folders, files } = childrenOf(prefix);
+    const total = folders.length + files.length;
+    countEl.textContent = `${folders.length} pasta${folders.length===1?'':'s'} · ${files.length} página${files.length===1?'':'s'}`;
     listEl.innerHTML = '';
-    Object.keys(groups).sort().forEach(folder => {
-      if (folder) {
-        const t = document.createElement('div');
-        t.className = 'group-title';
-        t.textContent = '📁 ' + folder;
-        listEl.appendChild(t);
-      }
-      const grid = document.createElement('div');
-      grid.className = 'grid';
-      for (const path of groups[folder]) {
-        const a = document.createElement('a');
-        a.className = 'card';
-        a.href = path;                                  // caminho relativo = abre direto
-        const name = path.split('/').pop().replace(/\.html?$/i, '');
-        a.innerHTML = `<div class="name">${escapeHtml(name)}</div><div class="path">${escapeHtml(path)}</div>`;
-        grid.appendChild(a);
-      }
-      listEl.appendChild(grid);
+    const grid = document.createElement('div'); grid.className = 'grid';
+    let i = 0;
+    for (const [name, qtd] of folders) grid.appendChild(folderCard(prefix + name + '/', name, qtd, i++));
+    for (const path of files) grid.appendChild(fileCard(path, path.split('/').pop().replace(/\.html?$/i,''), i++));
+    listEl.appendChild(grid);
+  }
+
+  function renderSearch(query) {
+    crumbEl.innerHTML = '<button class="crumb">🔎 Resultados da busca</button>';
+    const q = query.toLowerCase();
+    const hits = allFiles.filter(p => p.toLowerCase().includes(q));
+    countEl.textContent = `${hits.length} resultado${hits.length===1?'':'s'}`;
+    listEl.innerHTML = '';
+    const grid = document.createElement('div'); grid.className = 'grid';
+    hits.forEach((path, i) => grid.appendChild(fileCard(path, path.split('/').pop().replace(/\.html?$/i,''), i, path)));
+    if (!hits.length) { listEl.innerHTML = '<div class="state">Nada encontrado 🤷</div>'; return; }
+    listEl.appendChild(grid);
+  }
+
+  function folderCard(fullPrefix, name, qtd, i) {
+    const el = document.createElement('div');
+    el.className = 'card'; el.style.animationDelay = Math.min(i*35, 400) + 'ms';
+    el.innerHTML = `<div class="ico folder">📁</div>
+      <div class="meta"><div class="name">${esc(name)}</div><div class="desc">${qtd} página${qtd===1?'':'s'}</div></div>
+      <span class="arrow">›</span>`;
+    el.onclick = () => { listEl.style.opacity=0; setTimeout(()=>{ renderFolder(fullPrefix); listEl.style.opacity=1; }, 80); };
+    return el;
+  }
+
+  function fileCard(path, name, i, subtitle) {
+    const a = document.createElement('a');
+    a.className = 'card'; a.href = path; a.style.animationDelay = Math.min(i*35, 400) + 'ms';
+    a.innerHTML = `<div class="ico file">📄</div>
+      <div class="meta"><div class="name">${esc(name)}</div><div class="desc">${esc(subtitle || (path.split('/').pop()))}</div></div>
+      <span class="arrow">↗</span>`;
+    return a;
+  }
+
+  function renderBreadcrumb(prefix) {
+    const parts = prefix.split('/').filter(Boolean);
+    crumbEl.innerHTML = '';
+    const home = mkCrumb('🏠 Início', '');
+    crumbEl.appendChild(home);
+    let acc = '';
+    parts.forEach(p => {
+      acc += p + '/';
+      const sep = document.createElement('span'); sep.className = 'crumb-sep'; sep.textContent = '/';
+      crumbEl.appendChild(sep);
+      crumbEl.appendChild(mkCrumb(p, acc));
     });
   }
-
-  function escapeHtml(s) {
-    return s.replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  function mkCrumb(label, target) {
+    const b = document.createElement('button'); b.className = 'crumb'; b.textContent = label;
+    b.onclick = () => { searchEl.value=''; renderFolder(target); };
+    return b;
   }
 
-  // ---- 4. Erro / entrada manual (ex.: testando localmente) ----
+  // ---- 4. Estados / erro ----
+  function showState(html) { stateEl.style.display = 'block'; stateEl.classList.remove('error'); stateEl.innerHTML = html; }
   function showError(msg) {
-    subEl.textContent = '';
-    stateEl.style.display = 'block';
-    stateEl.classList.add('error');
+    subEl.innerHTML = '<span class="dot" style="background:#ff6b6b;box-shadow:0 0 10px #ff6b6b"></span>Detecção falhou';
+    stateEl.style.display = 'block'; stateEl.classList.add('error');
     stateEl.innerHTML = `
-      <p style="margin-top:0"><b>Não foi possível detectar automaticamente.</b><br>${escapeHtml(msg)}</p>
+      <p style="margin-top:0"><b>Não foi possível detectar automaticamente.</b><br>${esc(msg)}</p>
       <p>Informe usuário e repositório do GitHub:</p>
       <div class="manual">
-        <input id="m-owner" placeholder="usuário" value="${cfg ? escapeHtml(cfg.owner || '') : ''}">
-        <input id="m-repo"  placeholder="repositório" value="${cfg ? escapeHtml(cfg.repo || '') : ''}">
+        <input id="m-owner" placeholder="usuário" value="${cfg?esc(cfg.owner||''):''}">
+        <input id="m-repo"  placeholder="repositório" value="${cfg?esc(cfg.repo||''):''}">
         <input id="m-branch" placeholder="branch (opcional)">
         <button id="m-go">Carregar</button>
       </div>`;
@@ -237,8 +334,10 @@
     };
   }
 
-  if (cfg) load(cfg);
-  else showError('Esta página não está em um endereço *.github.io.');
+  function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  listEl.style.transition = 'opacity 0.12s';
+  if (cfg) load(cfg); else showError('Esta página não está em um endereço *.github.io.');
 })();
 </script>
 </body>
