@@ -1,5 +1,9 @@
 {
     "hidden": [
-        "OSCE 7P/"
+        "assets/",
+        "output/",
+        "scripts/",
+        "data/",
+        "README.md"
     ]
 }
