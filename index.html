@@ -212,7 +212,21 @@
   let cfg = detect();
 
   // ---- 2. Buscar arquivos via API do GitHub ----
-  async function load(cfg) {
+async function load(cfg) {
+
+    let hidden = [];
+
+    try {
+        const response = await fetch("hidden.json");
+
+        if (response.ok) {
+            const data = await response.json();
+            hidden = data.hidden || [];
+        }
+    } catch (e) {
+        console.log("Nenhum hidden.json encontrado.");
+    }
+
     showState('<div class="spinner"></div>Buscando arquivos…');
     listEl.innerHTML = ''; searchBar.style.display = 'none'; crumbEl.innerHTML = ''; countEl.textContent = '';
     try {
@@ -225,11 +239,26 @@
       const res = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/git/trees/${branch}?recursive=1`);
       if (!res.ok) throw new Error(`Não consegui ler os arquivos (${res.status})`);
       const tree = await res.json();
-      allFiles = (tree.tree || [])
-        .filter(n => n.type === 'blob' && /\.html?$/i.test(n.path))
-        .filter(n => n.path.toLowerCase() !== SELF)
-        .map(n => n.path)
-        .sort((a, b) => a.localeCompare(b));
+allFiles = (tree.tree || [])
+  .filter(n => n.type === 'blob' && /\.html?$/i.test(n.path))
+  .filter(n => n.path.toLowerCase() !== SELF)
+
+  .filter(n => {
+
+      return !hidden.some(item => {
+
+          if (item.endsWith("/")) {
+              return n.path.startsWith(item);
+          }
+
+          return n.path === item;
+
+      });
+
+  })
+
+  .map(n => n.path)
+  .sort((a, b) => a.localeCompare(b));
       subEl.innerHTML = `<span class="dot"></span>${allFiles.length} página${allFiles.length===1?'':'s'} · <a href="https://github.com/${cfg.owner}/${cfg.repo}" target="_blank" rel="noopener">${cfg.owner}/${cfg.repo}</a> · branch <b>${branch}</b>`;
       start();
     } catch (err) { showError(err.message); }
