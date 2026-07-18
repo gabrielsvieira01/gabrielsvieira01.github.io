@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Semana Padrão — 8º Período</title>
+<style id="main-styles">
+/* =========================================================================
+   Semana Padrão — 8º Período
+   Estilos: tema claro/escuro + grid de agenda responsivo
+   ========================================================================= */
+
+:root {
+  /* --- Paleta fixa por categoria (não muda entre temas) --- */
+  --cat-ham: #3b5bdb;
+  --cat-ham-ink: #ffffff;
+  --cat-ci: #2f9e44;
+  --cat-ci-ink: #ffffff;
+  --cat-piepe: #e8590c;
+  --cat-piepe-ink: #ffffff;
+  --cat-iesc: #ae3ec9;
+  --cat-iesc-ink: #ffffff;
+  --cat-marc: #0c8599;
+  --cat-marc-ink: #ffffff;
+
+  /* --- Tipografia --- */
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --hour-height: 64px; /* altura de 60min no grid; ajustada por JS em telas pequenas */
+}
+
+/* --- Tema claro (padrão) --- */
+:root,
+[data-theme="light"] {
+  --bg: #f4f5f7;
+  --bg-elevated: #ffffff;
+  --bg-inset: #eceef1;
+  --text: #1a1d23;
+  --text-muted: #62697a;
+  --text-faint: #9aa1b0;
+  --border: #dde1e8;
+  --border-strong: #c3c9d4;
+  --accent: #3b5bdb;
+  --accent-ink: #ffffff;
+  --shadow: 0 1px 2px rgba(20, 24, 32, 0.06), 0 8px 24px -12px rgba(20, 24, 32, 0.18);
+  --now-line: #e03131;
+  --scrollbar-thumb: #c3c9d4;
+}
+
+/* --- Tema escuro --- */
+[data-theme="dark"] {
+  --bg: #14161c;
+  --bg-elevated: #1c1f28;
+  --bg-inset: #22252f;
+  --text: #edeef2;
+  --text-muted: #a1a8b8;
+  --text-faint: #6b7181;
+  --border: #2c2f3a;
+  --border-strong: #3a3e4c;
+  --accent: #6c8bff;
+  --accent-ink: #0c0e13;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
+  --now-line: #ff6b6b;
+  --scrollbar-thumb: #3a3e4c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+button, select, input {
+  font-family: inherit;
+}
+
+/* ========================================================================
+   Layout geral
+   ======================================================================== */
+
+.page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 20px 48px;
+}
+
+.app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.app-header h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0 0 2px;
+}
+
+.app-header .subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-elevated);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 9px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  white-space: nowrap;
+}
+
+.icon-btn:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.icon-btn:active {
+  transform: translateY(0);
+}
+
+.icon-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* ========================================================================
+   Barra de filtros
+   ======================================================================== */
+
+.filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.filter-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+}
+
+.filter-chip .swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.filter-chip label.chip-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  color: var(--text);
+}
+
+.filter-chip input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.filter-chip select {
+  border: 1px solid var(--border-strong);
+  background: var(--bg-elevated);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filter-chip select:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ========================================================================
+   Grid da agenda
+   ======================================================================== */
+
+.grid-scroll-wrap {
+  position: relative;
+}
+
+.scroll-hint {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 36px;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, var(--bg) 88%);
+  z-index: 5;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.scroll-hint svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-faint);
+  margin-right: 6px;
+  animation: nudge 1.4s ease-in-out infinite;
+}
+
+@keyframes nudge {
+  0%, 100% { transform: translateX(0); opacity: 0.5; }
+  50% { transform: translateX(4px); opacity: 1; }
+}
+
+.grid-scroll-wrap.scrollable .scroll-hint {
+  display: flex;
+}
+
+.agenda {
+  overflow-x: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+.agenda::-webkit-scrollbar {
+  height: 8px;
+}
+.agenda::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 8px;
+}
+
+.agenda-inner {
+  display: grid;
+  grid-template-columns: 56px repeat(5, minmax(150px, 1fr));
+  min-width: 820px;
+}
+
+.day-head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.day-head.today {
+  color: var(--accent);
+}
+
+.corner-head {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+
+.time-axis {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--bg-elevated);
+  border-right: 1px solid var(--border);
+}
+
+.time-axis .tick {
+  position: relative;
+  height: var(--hour-height);
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+}
+
+.time-axis .tick span {
+  position: absolute;
+  top: -6px;
+  right: 6px;
+  background: var(--bg-elevated);
+  padding-left: 3px;
+}
+
+.day-col {
+  position: relative;
+  border-right: 1px solid var(--border);
+}
+
+.day-col:last-child {
+  border-right: none;
+}
+
+.hour-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--border);
+}
+
+.hour-row.half {
+  border-top: 1px dashed var(--border);
+  opacity: 0.6;
+}
+
+.now-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 2px solid var(--now-line);
+  z-index: 6;
+}
+
+.now-line::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--now-line);
+}
+
+.event-block {
+  position: absolute;
+  border-radius: 8px;
+  padding: 5px 7px;
+  overflow: hidden;
+  font-size: 0.72rem;
+  line-height: 1.28;
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.18);
+  cursor: default;
+  transition: filter 0.12s ease, transform 0.12s ease;
+}
+
+.event-block:hover {
+  filter: brightness(1.08);
+  z-index: 10 !important;
+}
+
+.event-block .ev-time {
+  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  opacity: 0.92;
+}
+
+.event-block .ev-title {
+  font-weight: 700;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-block .ev-sub {
+  opacity: 0.92;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-block.compact .ev-sub,
+.event-block.compact .ev-time {
+  display: none;
+}
+
+.event-block.cat-HAM { background: var(--cat-ham); }
+.event-block.cat-CI_PRATICA { background: var(--cat-ci); }
+.event-block.cat-PIEPE { background: var(--cat-piepe); }
+.event-block.cat-IESC_COMUNIDADES { background: var(--cat-iesc); }
+.event-block.cat-CI_MARC_PALESTRA { background: var(--cat-marc); }
+
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ========================================================================
+   Responsivo
+   ======================================================================== */
+
+@media (max-width: 720px) {
+  .app-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .header-actions {
+    justify-content: flex-end;
+  }
+  .filters-bar {
+    padding: 10px;
+    gap: 8px;
+  }
+  .filter-chip {
+    flex: 1 1 calc(50% - 8px);
+  }
+  .agenda-inner {
+    min-width: 720px;
+  }
+}
+
+@media (max-width: 420px) {
+  .page {
+    padding: 12px 12px 32px;
+  }
+  .filter-chip {
+    flex: 1 1 100%;
+  }
+}
+
+/* ========================================================================
+   Modo foto (janela separada)
+   ======================================================================== */
+
+body.photo-mode {
+  background: var(--bg);
+}
+
+.photo-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+}
+
+.photo-toolbar h2 {
+  font-size: 1rem;
+  margin: 0;
+  font-weight: 800;
+}
+
+.photo-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--bg-inset);
+}
+
+.photo-toggle button {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+.photo-toggle button.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.photo-stage {
+  width: 100%;
+  height: calc(100vh - 49px);
+  overflow: hidden;
+  position: relative;
+}
+
+.photo-stage.list-mode {
+  overflow-y: auto;
+  height: auto;
+  min-height: calc(100vh - 49px);
+}
+
+.photo-grid-scaler {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  transform-origin: top left;
+}
+
+.list-day {
+  padding: 16px 18px 4px;
+}
+
+.list-day h3 {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 6px;
+}
+
+.list-day .empty {
+  color: var(--text-faint);
+  font-size: 0.82rem;
+  padding-bottom: 10px;
+}
+
+.list-card {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+}
+
+.list-card .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.list-card .lc-time {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 98px;
+}
+
+.list-card .lc-body .lc-title {
+  font-weight: 700;
+  font-size: 0.86rem;
+  color: var(--text);
+}
+
+.list-card .lc-body .lc-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+@media print {
+  .photo-toolbar { position: static; }
+  .photo-stage { height: auto !important; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="app-header">
+    <div>
+      <h1>Semana Padrão — 8º Período</h1>
+      <p class="subtitle">HAM · CI Prática (5/6) · PIEPE · IESC/Comunidades · CI MARC/Palestra — clique nos filtros abaixo pra ajustar</p>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="theme-toggle" type="button" title="Alternar tema claro/escuro">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+        <span class="theme-label">Tema</span>
+      </button>
+      <button class="icon-btn" id="photo-mode-btn" type="button" title="Abrir visualização para print/screenshot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+        <span>Modo foto</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="filters-bar" id="filters-bar"></div>
+
+  <div class="grid-scroll-wrap" id="grid-scroll-wrap">
+    <div class="agenda" id="agenda">
+      <div class="agenda-inner" id="agenda-inner"></div>
+    </div>
+    <div class="scroll-hint" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
+    </div>
+  </div>
+
+</div>
+
+<script src="output/events.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
