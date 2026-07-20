@@ -1,0 +1,6 @@
+{
+    "_como_usar": "Cada item aqui é uma página escondida (em hidden.json) que você quer ver de novo na tela inicial. 'path' é o caminho real do arquivo no repositório. 'as' é o nome que vai aparecer no card (opcional; se remover, usa o nome do arquivo).",
+    "pinned": [
+        { "path": "agenda/horarios-interativos.html", "as": "Horários Interativos" }
+    ]
+}
