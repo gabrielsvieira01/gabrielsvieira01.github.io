@@ -215,6 +215,7 @@
 async function load(cfg) {
 
     let hidden = [];
+    let pinned = [];
 
     try {
         const response = await fetch("hidden.json");
@@ -225,6 +226,17 @@ async function load(cfg) {
         }
     } catch (e) {
         console.log("Nenhum hidden.json encontrado.");
+    }
+
+    try {
+        const response = await fetch("pinned.json");
+
+        if (response.ok) {
+            const data = await response.json();
+            pinned = data.pinned || [];
+        }
+    } catch (e) {
+        console.log("Nenhum pinned.json encontrado.");
     }
 
     showState('<div class="spinner"></div>Buscando arquivos…');
@@ -239,26 +251,32 @@ async function load(cfg) {
       const res = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/git/trees/${branch}?recursive=1`);
       if (!res.ok) throw new Error(`Não consegui ler os arquivos (${res.status})`);
       const tree = await res.json();
-allFiles = (tree.tree || [])
+const rawPaths = (tree.tree || [])
   .filter(n => n.type === 'blob' && /\.html?$/i.test(n.path))
   .filter(n => n.path.toLowerCase() !== SELF)
+  .map(n => n.path);
 
-  .filter(n => {
+const isHidden = (p) => hidden.some(item => item.endsWith("/") ? p.startsWith(item) : p === item);
 
-      return !hidden.some(item => {
+// pinned: páginas escondidas por hidden.json que devem reaparecer no topo,
+// com um "caminho virtual" (sem a pasta) — o arquivo continua no lugar de sempre.
+const pinnedList = pinned
+  .map(p => (typeof p === 'string') ? { path: p, as: null } : p)
+  .filter(p => p && p.path && rawPaths.includes(p.path));
+const pinnedRealPaths = new Set(pinnedList.map(p => p.path));
 
-          if (item.endsWith("/")) {
-              return n.path.startsWith(item);
-          }
-
-          return n.path === item;
-
-      });
-
+allFiles = rawPaths
+  .filter(p => pinnedRealPaths.has(p) || !isHidden(p))
+  .map(p => {
+      const pin = pinnedList.find(x => x.path === p);
+      if (pin) {
+          const displayName = (pin.as || p.split('/').pop().replace(/\.html?$/i, ''))
+              .replace(/\.html?$/i, '');
+          return { path: displayName + '.html', real: p };
+      }
+      return { path: p, real: p };
   })
-
-  .map(n => n.path)
-  .sort((a, b) => a.localeCompare(b));
+  .sort((a, b) => a.path.localeCompare(b.path));
       subEl.innerHTML = `<span class="dot"></span>${allFiles.length} página${allFiles.length===1?'':'s'} · <a href="https://github.com/${cfg.owner}/${cfg.repo}" target="_blank" rel="noopener">${cfg.owner}/${cfg.repo}</a> · branch <b>${branch}</b>`;
       start();
     } catch (err) { showError(err.message); }
@@ -281,12 +299,12 @@ allFiles = (tree.tree || [])
   function childrenOf(prefix) {
     const folders = new Map();   // nome -> qtd de htmls dentro
     const files = [];
-    for (const path of allFiles) {
-      if (!path.startsWith(prefix)) continue;
-      const rest = path.slice(prefix.length);
+    for (const f of allFiles) {
+      if (!f.path.startsWith(prefix)) continue;
+      const rest = f.path.slice(prefix.length);
       const slash = rest.indexOf('/');
-      if (slash === -1) files.push(path);
-      else { const f = rest.slice(0, slash); folders.set(f, (folders.get(f) || 0) + 1); }
+      if (slash === -1) files.push(f);
+      else { const name = rest.slice(0, slash); folders.set(name, (folders.get(name) || 0) + 1); }
     }
     return { folders: [...folders.entries()].sort((a,b)=>a[0].localeCompare(b[0])), files };
   }
@@ -302,7 +320,7 @@ allFiles = (tree.tree || [])
     let i = 0;
     if (prefix) grid.appendChild(backCard(prefix));
     for (const [name, qtd] of folders) grid.appendChild(folderCard(prefix + name + '/', name, qtd, i++));
-    for (const path of files) grid.appendChild(fileCard(path, path.split('/').pop().replace(/\.html?$/i,''), i++));
+    for (const f of files) grid.appendChild(fileCard(f.real, f.path.split('/').pop().replace(/\.html?$/i,''), i++));
     listEl.appendChild(grid);
   }
 
@@ -327,11 +345,11 @@ allFiles = (tree.tree || [])
   function renderSearch(query) {
     crumbEl.innerHTML = '<button class="crumb">🔎 Resultados da busca</button>';
     const q = query.toLowerCase();
-    const hits = allFiles.filter(p => p.toLowerCase().includes(q));
+    const hits = allFiles.filter(f => f.path.toLowerCase().includes(q));
     countEl.textContent = `${hits.length} resultado${hits.length===1?'':'s'}`;
     listEl.innerHTML = '';
     const grid = document.createElement('div'); grid.className = 'grid';
-    hits.forEach((path, i) => grid.appendChild(fileCard(path, path.split('/').pop().replace(/\.html?$/i,''), i, path)));
+    hits.forEach((f, i) => grid.appendChild(fileCard(f.real, f.path.split('/').pop().replace(/\.html?$/i,''), i, f.path)));
     if (!hits.length) { listEl.innerHTML = '<div class="state">Nada encontrado 🤷</div>'; return; }
     listEl.appendChild(grid);
   }
