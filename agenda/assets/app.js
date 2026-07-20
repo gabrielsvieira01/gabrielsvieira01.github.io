@@ -112,6 +112,88 @@
 
   let filterState = loadFilterState();
 
+  // ---------------------------------------------------------------------
+  // Estado compartilhável via URL (?state=...)
+  // Reaproveita a mesma forma de filterState (enabled/group) + tema.
+  // Não usa nenhuma lista fixa: serializa só as chaves que já existem
+  // em filterState/DATA em tempo de execução, então acompanha
+  // automaticamente novas categorias/grupos/horários no futuro.
+  // ---------------------------------------------------------------------
+  const STATE_PARAM = "state";
+
+  function encodeState(obj) {
+    const json = JSON.stringify(obj);
+    return btoa(unescape(encodeURIComponent(json)))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+  }
+
+  function decodeState(str) {
+    try {
+      let b64 = str.replace(/-/g, "+").replace(/_/g, "/");
+      while (b64.length % 4) b64 += "=";
+      return JSON.parse(decodeURIComponent(escape(atob(b64))));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function readStateFromUrl() {
+    const raw = new URLSearchParams(window.location.search).get(STATE_PARAM);
+    return raw ? decodeState(raw) : null;
+  }
+
+  // Aplica um estado vindo da URL em cima do filterState já carregado.
+  // Só aceita categorias/grupos que existem de fato agora (ignora o resto
+  // silenciosamente), e NUNCA persiste em localStorage — é só pra essa
+  // visualização compartilhada, sem sobrescrever as preferências salvas
+  // de quem está abrindo o link.
+  function applyUrlState(urlState) {
+    if (!urlState || typeof urlState !== "object") return false;
+    let applied = false;
+
+    if (urlState.enabled && typeof urlState.enabled === "object") {
+      Object.keys(urlState.enabled).forEach((cat) => {
+        if (Object.prototype.hasOwnProperty.call(filterState.enabled, cat)) {
+          filterState.enabled[cat] = !!urlState.enabled[cat];
+          applied = true;
+        }
+      });
+    }
+
+    if (urlState.group && typeof urlState.group === "object") {
+      Object.keys(urlState.group).forEach((cat) => {
+        const options = DATA.group_options[cat];
+        if (options && options.indexOf(urlState.group[cat]) !== -1) {
+          filterState.group[cat] = urlState.group[cat];
+          applied = true;
+        }
+      });
+    }
+
+    if (urlState.theme === "dark" || urlState.theme === "light") {
+      applied = true;
+    }
+
+    return applied;
+  }
+
+  function currentShareState() {
+    return {
+      enabled: Object.assign({}, filterState.enabled),
+      group: Object.assign({}, filterState.group),
+      theme: document.documentElement.getAttribute("data-theme") || "light",
+    };
+  }
+
+  function buildShareUrl() {
+    const url = new URL(window.location.href);
+    url.search = "?" + STATE_PARAM + "=" + encodeState(currentShareState());
+    url.hash = "";
+    return url.toString();
+  }
+
   function isEventVisible(ev, state) {
     if (!state.enabled[ev.category]) return false;
     const meta = CATEGORY_META[ev.category];
@@ -415,14 +497,19 @@
     if (btn) btn.querySelector(".theme-label").textContent = theme === "dark" ? "Escuro" : "Claro";
   }
 
-  function initTheme() {
-    let saved = null;
-    try {
-      saved = localStorage.getItem(THEME_KEY);
-    } catch (e) {
-      saved = null;
+  function initTheme(forcedTheme) {
+    let theme;
+    if (forcedTheme === "dark" || forcedTheme === "light") {
+      theme = forcedTheme;
+    } else {
+      let saved = null;
+      try {
+        saved = localStorage.getItem(THEME_KEY);
+      } catch (e) {
+        saved = null;
+      }
+      theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     }
-    const theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     applyTheme(theme);
 
     document.getElementById("theme-toggle").addEventListener("click", () => {
@@ -435,6 +522,71 @@
         /* ignore */
       }
     });
+  }
+
+  // ---------------------------------------------------------------------
+  // Link compartilhável — botão + toast
+  // ---------------------------------------------------------------------
+  function setupShareButton() {
+    const shareBar = document.createElement("div");
+    shareBar.className = "share-bar";
+
+    const btn = document.createElement("button");
+    btn.className = "icon-btn";
+    btn.type = "button";
+    btn.id = "share-link-btn";
+    btn.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"></line><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"></line></svg>' +
+      "<span>Copiar link desta visualização</span>";
+    btn.addEventListener("click", () => copyShareLink());
+
+    shareBar.appendChild(btn);
+    scrollWrap.parentNode.insertBefore(shareBar, scrollWrap);
+  }
+
+  async function copyShareLink() {
+    const url = buildShareUrl();
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(url);
+      copied = true;
+    } catch (e) {
+      copied = fallbackCopy(url);
+    }
+    showToast(copied ? "Link copiado!" : "Não consegui copiar automaticamente.");
+  }
+
+  function fallbackCopy(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    let ok = false;
+    try {
+      ok = document.execCommand("copy");
+    } catch (e) {
+      ok = false;
+    }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  let toastTimer = null;
+  function showToast(message) {
+    let toast = document.getElementById("app-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "app-toast";
+      toast.className = "app-toast";
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.classList.add("visible");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("visible"), 2200);
   }
 
   // ---------------------------------------------------------------------
@@ -709,11 +861,19 @@
   // Inicialização
   // ---------------------------------------------------------------------
   function init() {
-    initTheme();
+    const urlState = readStateFromUrl();
+    const isSharedView = urlState ? applyUrlState(urlState) : false;
+
+    initTheme(isSharedView ? urlState.theme : null);
     renderFilters();
     renderGrid();
+    setupShareButton();
 
-    document.getElementById("photo-mode-btn").addEventListener("click", openPhotoMode);
+    if (isSharedView) {
+      document.body.classList.add("embed-mode");
+    } else {
+      document.getElementById("photo-mode-btn").addEventListener("click", openPhotoMode);
+    }
 
     window.addEventListener("resize", debounce(renderGrid, 150));
     setInterval(renderGrid, 60000); // atualiza a linha de "agora" a cada minuto

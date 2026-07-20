@@ -124,6 +124,19 @@ erro de leitura):
     inteiro na tela sem rolar (mesmo no celular);
   - **Lista**: os dias empilhados verticalmente, eventos em ordem
     cronológica, com rolagem normal.
+- **Link compartilhável / modo Embed**: o botão "Copiar link desta
+  visualização" (perto do calendário) captura o estado atual — categorias
+  ligadas, grupo escolhido em cada uma e tema — e gera uma URL no formato
+  `horarios-interativos.html?state=<estado codificado>`. Quem abrir esse
+  link vê exatamente a mesma configuração, já com o calendário renderizado
+  e todos os controles escondidos automaticamente (modo embed), o que deixa
+  a página ideal pra incorporar como bloco de "Embed" no Notion. Um link
+  compartilhado nunca sobrescreve as preferências salvas de quem abre o
+  link; é só um estado temporário daquela visualização. Link inválido ou
+  incompatível é ignorado silenciosamente e a página cai no modo normal.
+  Não há nada fixo/cadastrado manualmente nesse mecanismo — ele lê as
+  categorias e grupos que existirem em `output/events.js` no momento, então
+  continua funcionando sozinho se o horário mudar no futuro.
 
 Tudo em HTML/CSS/JS puro, sem nenhuma dependência externa (nenhum CDN,
 nenhuma biblioteca) — basta abrir o `horarios-interativos.html` direto no navegador.
