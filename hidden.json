@@ -1,9 +1,9 @@
 {
     "hidden": [
-        "assets/",
-        "output/",
-        "scripts/",
-        "data/",
-        "README.md"
+        "agenda/assets/",
+        "agenda/output/",
+        "agenda/scripts/",
+        "agenda/data/",
+        "agenda/README.md"
     ]
 }
