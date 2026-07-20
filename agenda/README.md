@@ -16,11 +16,15 @@ Agenda visual interativa da semana padrão, gerada a partir da planilha oficial
 ├── output/
 │   ├── events.json          <- dados extraídos, formato legível/reaproveitável
 │   └── events.js            <- os mesmos dados, como `window.SCHEDULE_DATA = {...}`
-│                                (é o que o index.html realmente carrega)
+│                                (é o que o horarios-interativos.html realmente carrega)
 ├── assets/
 │   └── app.js                <- toda a lógica do app (grid, filtros, tema, modo foto)
-└── index.html                <- página principal (HTML + CSS inline + carrega assets/app.js)
+└── horarios-interativos.html <- página principal (HTML + CSS inline + carrega assets/app.js)
 ```
+
+> Esta pasta (`agenda/`) fica dentro do repositório do site; a `index.html`
+> na raiz do repo é só um índice/navegador de páginas e não faz parte deste
+> projeto.
 
 ## Como atualizar quando o horário mudar
 
@@ -42,7 +46,7 @@ Agenda visual interativa da semana padrão, gerada a partir da planilha oficial
      geralmente é normal, grupos rodando em paralelo, mas fica registrado
      pra você revisar se achar estranho).
 
-3. Abra (ou recarregue) o `index.html` no navegador. Como ele carrega os
+3. Abra (ou recarregue) o `horarios-interativos.html` no navegador. Como ele carrega os
    dados via `<script src="output/events.js">`, as mudanças aparecem
    automaticamente — não é preciso editar HTML/JS na mão.
 
@@ -98,7 +102,7 @@ erro de leitura):
    na íntegra no `output/events.json` (`warnings.notas_informativas`) caso
    quiser conferir.
 
-## Sobre o app (index.html)
+## Sobre o app (horarios-interativos.html)
 
 - **Grid principal**: dias em colunas, horário em linhas; eventos que se
   sobrepõem no mesmo dia ficam lado a lado automaticamente.
@@ -122,4 +126,4 @@ erro de leitura):
     cronológica, com rolagem normal.
 
 Tudo em HTML/CSS/JS puro, sem nenhuma dependência externa (nenhum CDN,
-nenhuma biblioteca) — basta abrir o `index.html` direto no navegador.
+nenhuma biblioteca) — basta abrir o `horarios-interativos.html` direto no navegador.
