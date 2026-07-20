@@ -134,6 +134,9 @@ erro de leitura):
   compartilhado nunca sobrescreve as preferências salvas de quem abre o
   link; é só um estado temporário daquela visualização. Link inválido ou
   incompatível é ignorado silenciosamente e a página cai no modo normal.
+  A grade é automaticamente redimensionada pra caber inteira na tela
+  disponível (a mesma técnica de "encaixar" do modo foto), então dá pra
+  colar num bloco de Embed do Notion sem precisar rolar dentro dele.
   Não há nada fixo/cadastrado manualmente nesse mecanismo — ele lê as
   categorias e grupos que existirem em `output/events.js` no momento, então
   continua funcionando sozinho se o horário mudar no futuro.

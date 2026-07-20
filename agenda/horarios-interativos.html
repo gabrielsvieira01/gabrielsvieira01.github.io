@@ -655,12 +655,35 @@ body.embed-mode .share-bar {
 body.embed-mode .page {
   padding: 0;
   max-width: none;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+body.embed-mode .grid-scroll-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.embed-mode .scroll-hint {
+  display: none !important;
 }
 
 body.embed-mode .agenda {
   border-radius: 0;
   border: none;
   box-shadow: none;
+  overflow: visible;
+}
+
+body.embed-mode #embed-scaler {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  transform-origin: top left;
 }
 
 @media print {

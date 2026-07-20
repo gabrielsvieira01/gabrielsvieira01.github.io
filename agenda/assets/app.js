@@ -858,8 +858,50 @@
 `;
 
   // ---------------------------------------------------------------------
+  // Modo embed: encaixa a grade inteira na tela (igual o modo foto faz),
+  // sem precisar rolar dentro do bloco de Embed do Notion.
+  // Reaproveita a mesma técnica de scale-to-fit do modo foto, só que
+  // aplicada direto no grid ao vivo (#agenda), em vez de um documento
+  // separado.
+  // ---------------------------------------------------------------------
+  function enterEmbedMode() {
+    document.body.classList.add("embed-mode");
+
+    const agenda = document.getElementById("agenda");
+    const scaler = document.createElement("div");
+    scaler.id = "embed-scaler";
+    agenda.parentNode.insertBefore(scaler, agenda);
+    scaler.appendChild(agenda);
+
+    fitEmbedGrid();
+  }
+
+  function fitEmbedGrid() {
+    if (!document.body.classList.contains("embed-mode")) return;
+    const stage = document.getElementById("grid-scroll-wrap");
+    const scaler = document.getElementById("embed-scaler");
+    if (!stage || !scaler) return;
+
+    scaler.style.transform = "none"; // reseta pra medir o tamanho natural
+    const PAD = 24; // 12px de respiro de cada lado
+    const availW = stage.clientWidth - PAD;
+    const availH = stage.clientHeight - PAD;
+    const natW = scaler.scrollWidth;
+    const natH = scaler.scrollHeight;
+    if (!natW || !natH || availW <= 0 || availH <= 0) return;
+
+    const scale = Math.min(availW / natW, availH / natH, 2);
+    scaler.style.transform = "scale(" + scale + ")";
+  }
+
+  // ---------------------------------------------------------------------
   // Inicialização
   // ---------------------------------------------------------------------
+  function handleResize() {
+    renderGrid();
+    fitEmbedGrid();
+  }
+
   function init() {
     const urlState = readStateFromUrl();
     const isSharedView = urlState ? applyUrlState(urlState) : false;
@@ -870,13 +912,13 @@
     setupShareButton();
 
     if (isSharedView) {
-      document.body.classList.add("embed-mode");
+      enterEmbedMode();
     } else {
       document.getElementById("photo-mode-btn").addEventListener("click", openPhotoMode);
     }
 
-    window.addEventListener("resize", debounce(renderGrid, 150));
-    setInterval(renderGrid, 60000); // atualiza a linha de "agora" a cada minuto
+    window.addEventListener("resize", debounce(handleResize, 150));
+    setInterval(handleResize, 60000); // atualiza a linha de "agora" a cada minuto
   }
 
   function debounce(fn, wait) {
