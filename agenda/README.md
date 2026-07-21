@@ -137,6 +137,15 @@ erro de leitura):
   A grade é automaticamente redimensionada pra caber inteira na tela
   disponível (a mesma técnica de "encaixar" do modo foto), então dá pra
   colar num bloco de Embed do Notion sem precisar rolar dentro dele.
+
+  ⚠️ **Limitação do Notion, não da página**: no app mobile do Notion, a
+  altura do bloco de Embed é fixa e não pode ser redimensionada por lá —
+  isso só é possível arrastando a borda do bloco no Notion **desktop**
+  (ou no notion.so pelo navegador). Se a caixa que o Notion deu pro embed
+  for baixa/larga, a grade (que é naturalmente alta, de 07h a 21h) vai
+  encolher bastante pra caber e sobrar espaço nas laterais. Resolvendo
+  uma vez pelo desktop (arrastando o embed pra ficar mais alto/quadrado),
+  a altura fica salva no bloco e passa a exibir bem também no mobile.
   Não há nada fixo/cadastrado manualmente nesse mecanismo — ele lê as
   categorias e grupos que existirem em `output/events.js` no momento, então
   continua funcionando sozinho se o horário mudar no futuro.
