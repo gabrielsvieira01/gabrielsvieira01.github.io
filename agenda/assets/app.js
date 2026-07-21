@@ -863,6 +863,12 @@
   // Reaproveita a mesma técnica de scale-to-fit do modo foto, só que
   // aplicada direto no grid ao vivo (#agenda), em vez de um documento
   // separado.
+  //
+  // Importante: o WebView do Notion (principalmente no app mobile) pode
+  // redimensionar o iframe do embed de forma assíncrona, sem disparar um
+  // 'resize' de verdade, e fontes podem terminar de carregar depois do
+  // primeiro layout. Por isso a gente reforça com ResizeObserver +
+  // document.fonts.ready + algumas tentativas espaçadas no início.
   // ---------------------------------------------------------------------
   function enterEmbedMode() {
     document.body.classList.add("embed-mode");
@@ -873,7 +879,24 @@
     agenda.parentNode.insertBefore(scaler, agenda);
     scaler.appendChild(agenda);
 
+    scheduleEmbedFit();
+  }
+
+  function scheduleEmbedFit() {
     fitEmbedGrid();
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(fitEmbedGrid).catch(() => {});
+    }
+
+    // Retentativas espaçadas: cobre layout tardio do WebView/iframe do
+    // Notion, que nem sempre dispara 'resize' quando redimensiona o embed.
+    [50, 150, 400, 900, 1800, 3000].forEach((ms) => setTimeout(fitEmbedGrid, ms));
+
+    if (window.ResizeObserver) {
+      const stage = document.getElementById("grid-scroll-wrap");
+      new ResizeObserver(() => fitEmbedGrid()).observe(stage);
+    }
   }
 
   function fitEmbedGrid() {
@@ -890,7 +913,8 @@
     const natH = scaler.scrollHeight;
     if (!natW || !natH || availW <= 0 || availH <= 0) return;
 
-    const scale = Math.min(availW / natW, availH / natH, 2);
+    // pequena folga (2%) pra absorver arredondamento e não cortar borda
+    const scale = Math.min(availW / natW, availH / natH, 2) * 0.98;
     scaler.style.transform = "scale(" + scale + ")";
   }
 
