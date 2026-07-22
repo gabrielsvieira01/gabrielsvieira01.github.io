@@ -514,6 +514,19 @@
     block.title =
       titleFor(ev) + "\n" + fmtRange(ev.start, ev.end) + "\n" + subtitleFor(ev) +
       (wc ? "\n" + (wc === "week-1" ? "Semana 1" : "Semana 2") : "");
+
+    // Clique/toque expande temporariamente o card (largura e altura),
+    // útil quando o evento está espremido numa coluna estreita por causa
+    // de sobreposição, ou numa tela pequena (ex: embutido no Notion).
+    block.addEventListener("click", (evt) => {
+      evt.stopPropagation();
+      const wasExpanded = block.classList.contains("expanded");
+      document.querySelectorAll(".event-block.expanded").forEach((b) => {
+        b.classList.remove("expanded");
+      });
+      if (!wasExpanded) block.classList.add("expanded");
+    });
+
     return block;
   }
 
@@ -1341,6 +1354,12 @@
 
     window.addEventListener("resize", debounce(handleResize, 150));
     setInterval(handleResize, 60000); // atualiza a linha de "agora" a cada minuto
+
+    document.addEventListener("click", () => {
+      document.querySelectorAll(".event-block.expanded").forEach((b) => {
+        b.classList.remove("expanded");
+      });
+    });
   }
 
   function debounce(fn, wait) {
