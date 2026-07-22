@@ -16,15 +16,11 @@ Agenda visual interativa da semana padrão, gerada a partir da planilha oficial
 ├── output/
 │   ├── events.json          <- dados extraídos, formato legível/reaproveitável
 │   └── events.js            <- os mesmos dados, como `window.SCHEDULE_DATA = {...}`
-│                                (é o que o horarios-interativos.html realmente carrega)
+│                                (é o que o index.html realmente carrega)
 ├── assets/
 │   └── app.js                <- toda a lógica do app (grid, filtros, tema, modo foto)
-└── horarios-interativos.html <- página principal (HTML + CSS inline + carrega assets/app.js)
+└── index.html                <- página principal (HTML + CSS inline + carrega assets/app.js)
 ```
-
-> Esta pasta (`agenda/`) fica dentro do repositório do site; a `index.html`
-> na raiz do repo é só um índice/navegador de páginas e não faz parte deste
-> projeto.
 
 ## Como atualizar quando o horário mudar
 
@@ -46,7 +42,7 @@ Agenda visual interativa da semana padrão, gerada a partir da planilha oficial
      geralmente é normal, grupos rodando em paralelo, mas fica registrado
      pra você revisar se achar estranho).
 
-3. Abra (ou recarregue) o `horarios-interativos.html` no navegador. Como ele carrega os
+3. Abra (ou recarregue) o `index.html` no navegador. Como ele carrega os
    dados via `<script src="output/events.js">`, as mudanças aparecem
    automaticamente — não é preciso editar HTML/JS na mão.
 
@@ -102,7 +98,7 @@ erro de leitura):
    na íntegra no `output/events.json` (`warnings.notas_informativas`) caso
    quiser conferir.
 
-## Sobre o app (horarios-interativos.html)
+## Sobre o app (index.html)
 
 - **Grid principal**: dias em colunas, horário em linhas; eventos que se
   sobrepõem no mesmo dia ficam lado a lado automaticamente.
@@ -124,31 +120,6 @@ erro de leitura):
     inteiro na tela sem rolar (mesmo no celular);
   - **Lista**: os dias empilhados verticalmente, eventos em ordem
     cronológica, com rolagem normal.
-- **Link compartilhável / modo Embed**: o botão "Copiar link desta
-  visualização" (perto do calendário) captura o estado atual — categorias
-  ligadas, grupo escolhido em cada uma e tema — e gera uma URL no formato
-  `horarios-interativos.html?state=<estado codificado>`. Quem abrir esse
-  link vê exatamente a mesma configuração, já com o calendário renderizado
-  e todos os controles escondidos automaticamente (modo embed), o que deixa
-  a página ideal pra incorporar como bloco de "Embed" no Notion. Um link
-  compartilhado nunca sobrescreve as preferências salvas de quem abre o
-  link; é só um estado temporário daquela visualização. Link inválido ou
-  incompatível é ignorado silenciosamente e a página cai no modo normal.
-  A grade é automaticamente redimensionada pra caber inteira na tela
-  disponível (a mesma técnica de "encaixar" do modo foto), então dá pra
-  colar num bloco de Embed do Notion sem precisar rolar dentro dele.
-
-  ⚠️ **Limitação do Notion, não da página**: no app mobile do Notion, a
-  altura do bloco de Embed é fixa e não pode ser redimensionada por lá —
-  isso só é possível arrastando a borda do bloco no Notion **desktop**
-  (ou no notion.so pelo navegador). Se a caixa que o Notion deu pro embed
-  for baixa/larga, a grade (que é naturalmente alta, de 07h a 21h) vai
-  encolher bastante pra caber e sobrar espaço nas laterais. Resolvendo
-  uma vez pelo desktop (arrastando o embed pra ficar mais alto/quadrado),
-  a altura fica salva no bloco e passa a exibir bem também no mobile.
-  Não há nada fixo/cadastrado manualmente nesse mecanismo — ele lê as
-  categorias e grupos que existirem em `output/events.js` no momento, então
-  continua funcionando sozinho se o horário mudar no futuro.
 
 Tudo em HTML/CSS/JS puro, sem nenhuma dependência externa (nenhum CDN,
-nenhuma biblioteca) — basta abrir o `horarios-interativos.html` direto no navegador.
+nenhuma biblioteca) — basta abrir o `index.html` direto no navegador.
