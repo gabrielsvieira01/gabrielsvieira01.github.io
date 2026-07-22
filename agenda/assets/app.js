@@ -492,19 +492,24 @@
     const top = (s / 60) * px;
     const height = Math.max(((e - s) / 60) * px, 20);
 
+    const isCompact = height < 40;
+    const isBrief = !isCompact && height < 58;
+
     const block = document.createElement("div");
     block.className = "event-block cat-" + ev.category;
-    if (height < 40) block.classList.add("compact");
-    else if (height < 58) block.classList.add("brief");
+    if (isCompact) block.classList.add("compact");
+    else if (isBrief) block.classList.add("brief");
     const wc = weekClassFor(ev);
     if (wc) block.classList.add(wc);
 
     const widthPct = 100 / colCount;
     const leftPct = col * widthPct;
+    const baseLeft = "calc(" + leftPct + "% + 2px)";
+    const baseWidth = "calc(" + widthPct + "% - 4px)";
     block.style.top = top + "px";
     block.style.height = height + "px";
-    block.style.left = "calc(" + leftPct + "% + 2px)";
-    block.style.width = "calc(" + widthPct + "% - 4px)";
+    block.style.left = baseLeft;
+    block.style.width = baseWidth;
     block.style.zIndex = String(2 + col);
 
     block.innerHTML =
@@ -515,17 +520,76 @@
       titleFor(ev) + "\n" + fmtRange(ev.start, ev.end) + "\n" + subtitleFor(ev) +
       (wc ? "\n" + (wc === "week-1" ? "Semana 1" : "Semana 2") : "");
 
-    // Clique/toque expande temporariamente o card (largura e altura),
-    // útil quando o evento está espremido numa coluna estreita por causa
-    // de sobreposição, ou numa tela pequena (ex: embutido no Notion).
+    const timeEl = block.querySelector(".ev-time");
+    const titleEl = block.querySelector(".ev-title");
+    const subEl = block.querySelector(".ev-sub");
+
+    // Calcula quantas linhas de título/subtítulo cabem de verdade no
+    // espaço vertical disponível do card, pra nunca cortar um caractere
+    // no meio (o que acontecia com um -webkit-line-clamp fixo em cards
+    // baixos/estreitos). Estimativas de altura de linha batem com o
+    // font-size/line-height definidos no CSS pra cada elemento.
+    const PAD_V = 10; // padding: 5px top + 5px bottom
+    const TIME_LINE_H = 14;
+    const TITLE_LINE_H = 15;
+    const SUB_LINE_H = 13;
+
+    let remaining = height - PAD_V;
+    if (!isCompact) remaining -= TIME_LINE_H; // 1 linha reservada pro horário
+    remaining -= 1; // margin-top do título
+
+    const titleLines = Math.max(1, Math.floor((remaining * 0.62) / TITLE_LINE_H));
+    const subLines = (isCompact || isBrief)
+      ? 0
+      : Math.max(0, Math.floor((remaining - titleLines * TITLE_LINE_H) / SUB_LINE_H));
+
+    function applyClamp() {
+      titleEl.style.webkitLineClamp = String(titleLines);
+      titleEl.style.overflow = "hidden";
+      if (subLines > 0) {
+        subEl.style.display = "-webkit-box";
+        subEl.style.webkitLineClamp = String(subLines);
+        subEl.style.overflow = "hidden";
+      } else if (!isCompact && !isBrief) {
+        // sem espaço sobrando pro subtítulo mesmo num card "normal"
+        subEl.style.display = "none";
+      }
+    }
+    applyClamp();
+
+    // Clique/toque expande temporariamente o card: ele passa a ocupar
+    // toda a largura da própria coluna do dia (nunca invade dias
+    // vizinhos) e cresce em altura só o necessário pra mostrar o texto
+    // inteiro, sem limite de linhas. Clicar de novo ou fora fecha.
+    function collapse() {
+      block.classList.remove("expanded");
+      block.style.left = baseLeft;
+      block.style.width = baseWidth;
+      block.style.height = height + "px";
+      timeEl.style.display = "";
+      subEl.style.display = subLines > 0 ? "-webkit-box" : "none";
+      applyClamp();
+    }
+
     block.addEventListener("click", (evt) => {
       evt.stopPropagation();
       const wasExpanded = block.classList.contains("expanded");
       document.querySelectorAll(".event-block.expanded").forEach((b) => {
-        b.classList.remove("expanded");
+        if (b !== block && b._collapse) b._collapse();
       });
-      if (!wasExpanded) block.classList.add("expanded");
+      if (wasExpanded) {
+        collapse();
+      } else {
+        block.classList.add("expanded");
+        timeEl.style.display = "block";
+        subEl.style.display = "-webkit-box";
+        titleEl.style.webkitLineClamp = "unset";
+        titleEl.style.overflow = "visible";
+        subEl.style.webkitLineClamp = "unset";
+        subEl.style.overflow = "visible";
+      }
     });
+    block._collapse = collapse;
 
     return block;
   }
@@ -1357,7 +1421,7 @@
 
     document.addEventListener("click", () => {
       document.querySelectorAll(".event-block.expanded").forEach((b) => {
-        b.classList.remove("expanded");
+        if (b._collapse) b._collapse();
       });
     });
   }
