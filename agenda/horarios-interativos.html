@@ -413,6 +413,9 @@ button, select, input {
   font-family: var(--font-mono);
   font-size: 0.68rem;
   opacity: 0.92;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .event-block .ev-title {
@@ -432,6 +435,10 @@ button, select, input {
 
 .event-block.compact .ev-sub,
 .event-block.compact .ev-time {
+  display: none;
+}
+
+.event-block.brief .ev-sub {
   display: none;
 }
 
@@ -615,8 +622,21 @@ body.photo-mode {
 
 .share-bar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
   margin-bottom: 10px;
+}
+
+.action-bar-left {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#marc-config-btn[hidden] {
+  display: none;
 }
 
 .app-toast {
@@ -644,12 +664,142 @@ body.photo-mode {
 }
 
 /* ========================================================================
+   Painel "Semanas" (marcação manual semana 1 / semana 2 da CI Prática)
+   ======================================================================== */
+
+.week-panel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.week-panel p.week-panel-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0 0 10px;
+}
+
+.week-panel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.week-panel-row:first-of-type {
+  border-top: none;
+}
+
+.week-panel-row .wp-label {
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.week-panel-row .wp-label .wp-sub {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.wp-toggle {
+  display: inline-flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.wp-toggle button {
+  border: 1px solid var(--border-strong);
+  background: var(--bg-inset);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wp-toggle button.active[data-week="1"] {
+  background: var(--cat-ci);
+  color: var(--cat-ci-ink);
+  border-color: var(--cat-ci);
+}
+
+.wp-toggle button.active[data-week="2"] {
+  background: var(--cat-ci);
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.35),
+    rgba(255, 255, 255, 0.35) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  color: var(--cat-ci-ink);
+  border-color: var(--cat-ci);
+}
+
+.wp-toggle button.active[data-slot] {
+  background: var(--cat-marc);
+  color: var(--cat-marc-ink);
+  border-color: var(--cat-marc);
+}
+
+.week-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.week-legend .wl-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.week-legend .wl-swatch {
+  width: 16px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--cat-ci);
+}
+
+.week-legend .wl-swatch.wl-2 {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.35),
+    rgba(255, 255, 255, 0.35) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+.event-block.cat-CI_PRATICA.week-2 {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.22),
+    rgba(255, 255, 255, 0.22) 5px,
+    transparent 5px,
+    transparent 10px
+  );
+}
+
+/* ========================================================================
    Modo compartilhado / Embed (?state=... na URL)
    Mostra só o calendário — ideal pra incorporar no Notion.
    ======================================================================== */
 
 body.embed-mode .app-header,
 body.embed-mode .filters-bar,
+body.embed-mode .week-panel,
 body.embed-mode .share-bar {
   display: none !important;
 }
@@ -719,6 +869,9 @@ body.embed-mode #embed-scaler {
   </header>
 
   <div class="filters-bar" id="filters-bar"></div>
+
+  <div class="week-panel" id="week-panel" hidden></div>
+  <div class="week-panel" id="marc-panel" hidden></div>
 
   <div class="grid-scroll-wrap" id="grid-scroll-wrap">
     <div class="agenda" id="agenda">
