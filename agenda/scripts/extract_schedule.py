@@ -55,7 +55,11 @@ DAY_LABELS = {
     "SEXTA": "Sexta-feira",
 }
 
-TIME_RE = re.compile(r"(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})")
+TIME_RE = re.compile(r"(\d{1,2}):(\d{1,2})\s*-\s*(\d{1,2}):(\d{1,2})")
+
+
+def fmt_hhmm(h, m):
+    return f"{int(h):02d}:{int(m):02d}"
 
 
 def strip_accents(s):
@@ -141,13 +145,15 @@ def parse_group_and_preceptor(text):
     # "Fulano - 5/6" / "Fulano -5/6" / "Fulano - Grupos 7/8"
     m = re.match(r"(?i)^(.+?)\s*-\s*(?:grupos?\s*)?(\d+)\s*/\s*(\d+)\s*$", text_norm)
     if m:
-        group = f"{m.group(2)}/{m.group(3)}"
+        n1, n2 = int(m.group(2)), int(m.group(3))
+        group = f"{min(n1, n2)}/{max(n1, n2)}"
         return {"group": group, "preceptor": m.group(1).strip(), "raw": text_norm}
 
     # "Fulano 9/10" (sem hífen antes do grupo)
     m = re.match(r"(?i)^(.+?)\s+(\d+)\s*/\s*(\d+)\s*$", text_norm)
     if m:
-        group = f"{m.group(2)}/{m.group(3)}"
+        n1, n2 = int(m.group(2)), int(m.group(3))
+        group = f"{min(n1, n2)}/{max(n1, n2)}"
         return {"group": group, "preceptor": m.group(1).strip(), "raw": text_norm}
 
     # Sem grupo identificável (ex: preceptores de CI MARC/Palestra) -> comum
@@ -164,6 +170,7 @@ def extract_events(xlsx_path):
 
     events = []
     warnings = []
+    time_typos = []
     event_id = 0
 
     for day_key, col1, col2 in DAY_COLUMNS:
@@ -192,7 +199,15 @@ def extract_events(xlsx_path):
 
                 category, subtype = cat
 
-                start, end = time_match.group(1), time_match.group(2)
+                start, end = fmt_hhmm(time_match.group(1), time_match.group(2)), fmt_hhmm(time_match.group(3), time_match.group(4))
+                # só é typo de verdade se algum componente tiver 1 dígito só
+                # (ex: "18:0" em vez de "18:00"); diferenças de espaço/traço
+                # no separador são só formatação, não erro de dado.
+                if any(len(g) == 1 for g in time_match.groups()):
+                    time_typos.append(
+                        f'{DAY_LABELS[day_key]} - {current_type_raw} (cél. {col1}{row}): '
+                        f'planilha tem "{time_match.group(0)}", interpretado como "{start} - {end}" — confirme se está certo'
+                    )
 
                 # o texto do grupo/preceptor pode estar na coluna 2, ou
                 # (caso de HAM-PALESTRA) embutido na mesma célula da coluna 1
@@ -281,7 +296,7 @@ def extract_events(xlsx_path):
                 else:
                     info.append(msg)
 
-    return events, critical, info
+    return events, critical, info, time_typos
 
 
 def build_group_options(events):
@@ -312,7 +327,7 @@ def main():
         print(f"ERRO: arquivo não encontrado: {xlsx_path}", file=sys.stderr)
         sys.exit(1)
 
-    events, critical, info = extract_events(xlsx_path)
+    events, critical, info, time_typos = extract_events(xlsx_path)
     group_options = build_group_options(events)
 
     out_data = {
@@ -330,6 +345,7 @@ def main():
         "warnings": {
             "conflitos_criticos": critical,
             "notas_informativas": info,
+            "horarios_fora_do_padrao": time_typos,
         },
     }
 
@@ -360,6 +376,11 @@ def main():
             print(f"  - {w}")
     else:
         print("\nNenhum conflito critico (mesmo preceptor em horarios cruzados) detectado.")
+
+    if time_typos:
+        print(f"\n[ATENCAO] {len(time_typos)} horario(s) fora do padrao HH:MM na planilha (interpretados, mas CONFIRME):")
+        for w in time_typos:
+            print(f"  - {w}")
 
     if info:
         print(f"\n[INFO] {len(info)} coincidencia(s) de horario (provavelmente grupos paralelos, revisar se quiser):")
