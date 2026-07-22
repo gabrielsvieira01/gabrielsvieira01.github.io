@@ -486,7 +486,7 @@
     return w === "1" || w === "2" ? "week-" + w : null;
   }
 
-  function renderEventBlock(ev, col, colCount, px) {
+  function renderEventBlock(ev, col, colCount, px, dayColEl, totalHeight) {
     const s = toMinutes(ev.start) - BOUNDS.startHour * 60;
     const e = toMinutes(ev.end) - BOUNDS.startHour * 60;
     const top = (s / 60) * px;
@@ -520,54 +520,80 @@
       titleFor(ev) + "\n" + fmtRange(ev.start, ev.end) + "\n" + subtitleFor(ev) +
       (wc ? "\n" + (wc === "week-1" ? "Semana 1" : "Semana 2") : "");
 
+    // O bloco precisa estar de verdade no DOM (dentro da coluna do dia,
+    // que já está anexada à página) antes de medir, senão o navegador
+    // não calcula largura/altura reais do texto.
+    dayColEl.appendChild(block);
+
     const timeEl = block.querySelector(".ev-time");
     const titleEl = block.querySelector(".ev-title");
     const subEl = block.querySelector(".ev-sub");
 
-    // Calcula quantas linhas de título/subtítulo cabem de verdade no
-    // espaço vertical disponível do card, pra nunca cortar um caractere
-    // no meio (o que acontecia com um -webkit-line-clamp fixo em cards
-    // baixos/estreitos). Estimativas de altura de linha batem com o
-    // font-size/line-height definidos no CSS pra cada elemento.
-    const PAD_V = 10; // padding: 5px top + 5px bottom
-    const TIME_LINE_H = 14;
-    const TITLE_LINE_H = 15;
-    const SUB_LINE_H = 13;
+    // Antes de medir, garante exibição em bloco normal (o -webkit-box do
+    // CSS, sem um line-clamp definido, distorceria a medição real).
+    titleEl.style.display = "block";
+    subEl.style.display = "block";
 
-    let remaining = height - PAD_V;
-    if (!isCompact) remaining -= TIME_LINE_H; // 1 linha reservada pro horário
-    remaining -= 1; // margin-top do título
+    // Mede quantas linhas cabem de verdade (em vez de estimar), pra nunca
+    // cortar um caractere no meio nem desperdiçar espaço disponível.
+    function measureLines(el) {
+      const lh = parseFloat(getComputedStyle(el).lineHeight) || 14;
+      return { lineHeight: lh, naturalLines: Math.max(1, Math.round(el.scrollHeight / lh)) };
+    }
 
-    const titleLines = Math.max(1, Math.floor((remaining * 0.62) / TITLE_LINE_H));
+    const padTop = parseFloat(getComputedStyle(block).paddingTop) || 5;
+    const padBottom = parseFloat(getComputedStyle(block).paddingBottom) || 5;
+    const titleMarginTop = parseFloat(getComputedStyle(titleEl).marginTop) || 0;
+
+    const timeH = isCompact ? 0 : timeEl.getBoundingClientRect().height;
+    const { lineHeight: titleLH, naturalLines: titleNaturalLines } = measureLines(titleEl);
+    const { lineHeight: subLH, naturalLines: subNaturalLines } = measureLines(subEl);
+
+    let available = height - padTop - padBottom - timeH - titleMarginTop;
+    const titleLines = Math.max(1, Math.min(titleNaturalLines, Math.floor(available / titleLH) || 1));
+    available -= titleLines * titleLH;
     const subLines = (isCompact || isBrief)
       ? 0
-      : Math.max(0, Math.floor((remaining - titleLines * TITLE_LINE_H) / SUB_LINE_H));
+      : Math.max(0, Math.min(subNaturalLines, Math.floor(available / subLH)));
 
     function applyClamp() {
-      titleEl.style.webkitLineClamp = String(titleLines);
-      titleEl.style.overflow = "hidden";
+      if (titleLines >= titleNaturalLines) {
+        titleEl.style.display = "block";
+        titleEl.style.webkitLineClamp = "unset";
+        titleEl.style.overflow = "visible";
+      } else {
+        titleEl.style.display = "-webkit-box";
+        titleEl.style.webkitLineClamp = String(titleLines);
+        titleEl.style.overflow = "hidden";
+      }
       if (subLines > 0) {
-        subEl.style.display = "-webkit-box";
-        subEl.style.webkitLineClamp = String(subLines);
-        subEl.style.overflow = "hidden";
-      } else if (!isCompact && !isBrief) {
-        // sem espaço sobrando pro subtítulo mesmo num card "normal"
+        if (subLines >= subNaturalLines) {
+          subEl.style.display = "block";
+          subEl.style.webkitLineClamp = "unset";
+          subEl.style.overflow = "visible";
+        } else {
+          subEl.style.display = "-webkit-box";
+          subEl.style.webkitLineClamp = String(subLines);
+          subEl.style.overflow = "hidden";
+        }
+      } else {
         subEl.style.display = "none";
       }
     }
     applyClamp();
 
-    // Clique/toque expande temporariamente o card: ele passa a ocupar
-    // toda a largura da própria coluna do dia (nunca invade dias
-    // vizinhos) e cresce em altura só o necessário pra mostrar o texto
-    // inteiro, sem limite de linhas. Clicar de novo ou fora fecha.
+    // Clique/toque expande temporariamente o card: ele ocupa toda a
+    // largura da coluna do dia e cresce em altura o suficiente pra
+    // mostrar o texto inteiro, mas nunca além do limite de baixo do
+    // próprio calendário (usa scroll interno no raro caso de não caber).
     function collapse() {
       block.classList.remove("expanded");
       block.style.left = baseLeft;
       block.style.width = baseWidth;
       block.style.height = height + "px";
+      block.style.maxHeight = "";
+      block.style.overflowY = "";
       timeEl.style.display = "";
-      subEl.style.display = subLines > 0 ? "-webkit-box" : "none";
       applyClamp();
     }
 
@@ -579,15 +605,22 @@
       });
       if (wasExpanded) {
         collapse();
-      } else {
-        block.classList.add("expanded");
-        timeEl.style.display = "block";
-        subEl.style.display = "-webkit-box";
-        titleEl.style.webkitLineClamp = "unset";
-        titleEl.style.overflow = "visible";
-        subEl.style.webkitLineClamp = "unset";
-        subEl.style.overflow = "visible";
+        return;
       }
+      block.classList.add("expanded");
+      timeEl.style.display = "block";
+      subEl.style.display = "-webkit-box";
+      titleEl.style.webkitLineClamp = "unset";
+      titleEl.style.overflow = "visible";
+      subEl.style.webkitLineClamp = "unset";
+      subEl.style.overflow = "visible";
+
+      // Limita a altura pra não passar do fundo do calendário.
+      const roomBelow = totalHeight - top;
+      block.style.maxHeight = roomBelow + "px";
+      requestAnimationFrame(() => {
+        if (block.scrollHeight > roomBelow) block.style.overflowY = "auto";
+      });
     });
     block._collapse = collapse;
 
@@ -648,11 +681,12 @@
       col.className = "day-col";
       col.style.height = totalHeight + "px";
       buildHourTicks(col, totalHeight, px);
+      agendaInner.appendChild(col);
 
       const dayEvents = visibleEvents.filter((ev) => ev.day === day);
       const positioned = layoutOverlaps(dayEvents);
       positioned.forEach(({ ev, col: c, colCount }) => {
-        col.appendChild(renderEventBlock(ev, c, colCount, px));
+        renderEventBlock(ev, c, colCount, px, col, totalHeight);
       });
 
       if (day === todayKey) {
@@ -672,8 +706,6 @@
         empty.textContent = "Sem eventos com os filtros atuais.";
         col.appendChild(empty);
       }
-
-      agendaInner.appendChild(col);
     });
 
     updateScrollHint();
