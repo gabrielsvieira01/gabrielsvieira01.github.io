@@ -365,7 +365,11 @@
     if (ev.category === "CI_MARC_PALESTRA" && ev.subtype === "CI MARC") {
       const clusters = MARC_SPLIT_DAYS[ev.day];
       const pref = state.marcSlot && state.marcSlot[ev.day];
-      if (clusters && (pref === "before" || pref === "after")) {
+      // só aplica a preferência salva se o grupo ATUAL realmente tem
+      // escolha nesse dia; se não tem (ex: trocou pra um grupo com
+      // conflito), ignora — senão o único horário que sobra pra esse
+      // grupo também seria escondido por uma preferência de outro grupo.
+      if (clusters && (pref === "before" || pref === "after") && isEligibleForMarcChoice(ev.day, state)) {
         if (clusters[pref].indexOf(ev) === -1) return false;
       }
     }
