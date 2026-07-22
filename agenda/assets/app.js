@@ -47,6 +47,96 @@
   function fmtRange(a, b) {
     return a + "–" + b;
   }
+  function timesOverlap(aStart, aEnd, bStart, bEnd) {
+    return toMinutes(aStart) < toMinutes(bEnd) && toMinutes(bStart) < toMinutes(aEnd);
+  }
+
+  // Chave estável de um evento, usada pra persistir a marcação manual de
+  // semana 1/2 (ver CATEGORY_DEPENDENCIES mais abaixo pro outro uso de
+  // colisão de horário). Não usa o "id" sequencial do events.js porque
+  // esse id muda toda vez que a planilha é reextraída — dia+horário+grupo
+  // já identificam a prática de forma estável entre reextrações.
+  function weekKey(ev) {
+    return [ev.category, ev.day, ev.start, ev.end, ev.group].join("|");
+  }
+
+  // ---------------------------------------------------------------------
+  // Dependência entre categorias: um evento de "dependentCategory" (e,
+  // opcionalmente, "dependentSubtype") fica oculto se colidir no horário
+  // (mesmo dia) com algum evento de "sourceCategory" do grupo atualmente
+  // selecionado nessa categoria de origem. Não há grupos/horários
+  // hardcoded aqui — a colisão é sempre calculada contra os dados reais,
+  // então sobrevive a mudanças de horário/grupo na planilha.
+  //
+  // Regra atual (pedida pelo usuário): quem tem prática de CI Prática na
+  // sexta à tarde não consegue ir no MARC das 15h, então esse bloco de
+  // MARC some pra quem tiver esse conflito — sem tocar na Palestra nem
+  // nos demais grupos.
+  // ---------------------------------------------------------------------
+  const CATEGORY_DEPENDENCIES = [
+    {
+      dependentCategory: "CI_MARC_PALESTRA",
+      dependentSubtype: "CI MARC",
+      sourceCategory: "CI_PRATICA",
+    },
+  ];
+
+  function isHiddenByDependency(ev, state) {
+    return CATEGORY_DEPENDENCIES.some((dep) => {
+      if (ev.category !== dep.dependentCategory) return false;
+      if (dep.dependentSubtype && ev.subtype !== dep.dependentSubtype) return false;
+      const group = state.group[dep.sourceCategory];
+      if (!group) return false;
+      return DATA.events.some(
+        (other) =>
+          other.category === dep.sourceCategory &&
+          other.day === ev.day &&
+          other.group === group &&
+          timesOverlap(ev.start, ev.end, other.start, other.end)
+      );
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // Escolha de horário do MARC (pra quem NÃO tem conflito de CI Prática):
+  // em dias onde os eventos de "CI MARC" se dividem em dois blocos — um
+  // antes da Palestra do dia e outro depois — o aluno pode escolher qual
+  // dos dois quer ver, em vez de ver os dois juntos. Calculado uma vez a
+  // partir dos dados (sem hardcodar dia/horário: hoje só a sexta tem essa
+  // divisão, mas se a planilha criar outro dia assim, funciona sozinho).
+  // ---------------------------------------------------------------------
+  const MARC_SPLIT_DAYS = (function () {
+    const result = {};
+    DAY_ORDER.forEach((day) => {
+      const palestra = DATA.events.find(
+        (ev) => ev.category === "CI_MARC_PALESTRA" && ev.subtype === "CI Palestra" && ev.day === day
+      );
+      if (!palestra) return;
+      const marcs = DATA.events.filter(
+        (ev) => ev.category === "CI_MARC_PALESTRA" && ev.subtype === "CI MARC" && ev.day === day
+      );
+      const before = marcs.filter((ev) => toMinutes(ev.start) < toMinutes(palestra.start));
+      const after = marcs.filter((ev) => toMinutes(ev.start) >= toMinutes(palestra.start));
+      if (before.length && after.length) {
+        result[day] = { before, after };
+      }
+    });
+    return result;
+  })();
+
+  // Um grupo só pode ESCOLHER o horário se nenhum dos dois blocos colidir
+  // com a própria prática dele (se colidisse, o bloco "antes" já estaria
+  // oculto por isHiddenByDependency, e não haveria escolha real).
+  function isEligibleForMarcChoice(day, state) {
+    const clusters = MARC_SPLIT_DAYS[day];
+    if (!clusters) return false;
+    return !clusters.before.some((ev) => isHiddenByDependency(ev, state));
+  }
+
+  function marcTimeRangeLabel(events) {
+    const sorted = events.slice().sort((a, b) => toMinutes(a.start) - toMinutes(b.start));
+    return fmtRange(sorted[0].start, sorted[sorted.length - 1].end);
+  }
 
   // ---------------------------------------------------------------------
   // Título / subtítulo de exibição por evento
@@ -91,6 +181,8 @@
     const state = {
       enabled: {},
       group: Object.assign({}, DATA.default_filters),
+      weekAssignment: {},
+      marcSlot: {},
     };
     CATEGORY_ORDER.forEach((cat) => {
       state.enabled[cat] = true;
@@ -98,6 +190,8 @@
     if (saved) {
       if (saved.enabled) Object.assign(state.enabled, saved.enabled);
       if (saved.group) Object.assign(state.group, saved.group);
+      if (saved.weekAssignment) Object.assign(state.weekAssignment, saved.weekAssignment);
+      if (saved.marcSlot) Object.assign(state.marcSlot, saved.marcSlot);
     }
     return state;
   }
@@ -149,42 +243,112 @@
   // silenciosamente), e NUNCA persiste em localStorage — é só pra essa
   // visualização compartilhada, sem sobrescrever as preferências salvas
   // de quem está abrindo o link.
+  // Formato compacto do link compartilhável (item 5): em vez do estado
+  // inteiro, manda só o que difere do padrão — e usa chaves de 1 letra.
+  //   e: lista de categorias DESLIGADAS (a maioria fica ligada = default)
+  //   g: { categoria: grupo } só onde o grupo difere de default_filters
+  //   w: { "DIA|HORA_INICIO": "1"|"2" } só das práticas do grupo de CI
+  //      Prática atualmente selecionado (dia+hora já bastam pra
+  //      identificar univocamente dentro de um grupo — não precisa
+  //      repetir "CI_PRATICA" nem o grupo em cada chave)
+  //   t: "dark" só quando o tema não é o padrão (light)
   function applyUrlState(urlState) {
     if (!urlState || typeof urlState !== "object") return false;
     let applied = false;
 
-    if (urlState.enabled && typeof urlState.enabled === "object") {
-      Object.keys(urlState.enabled).forEach((cat) => {
+    if (Array.isArray(urlState.e)) {
+      urlState.e.forEach((cat) => {
         if (Object.prototype.hasOwnProperty.call(filterState.enabled, cat)) {
-          filterState.enabled[cat] = !!urlState.enabled[cat];
+          filterState.enabled[cat] = false;
           applied = true;
         }
       });
     }
 
-    if (urlState.group && typeof urlState.group === "object") {
-      Object.keys(urlState.group).forEach((cat) => {
+    if (urlState.g && typeof urlState.g === "object") {
+      Object.keys(urlState.g).forEach((cat) => {
         const options = DATA.group_options[cat];
-        if (options && options.indexOf(urlState.group[cat]) !== -1) {
-          filterState.group[cat] = urlState.group[cat];
+        if (options && options.indexOf(urlState.g[cat]) !== -1) {
+          filterState.group[cat] = urlState.g[cat];
           applied = true;
         }
       });
     }
 
-    if (urlState.theme === "dark" || urlState.theme === "light") {
+    if (urlState.t === "dark" || urlState.t === "light") {
       applied = true;
+    }
+
+    if (urlState.w && typeof urlState.w === "object") {
+      // resolvido DEPOIS do "g" acima, pra já usar o grupo de CI Prática
+      // vindo do próprio link (não o salvo localmente de quem abriu)
+      const ciGroup = filterState.group["CI_PRATICA"];
+      const byDayStart = {};
+      DATA.events
+        .filter((ev) => ev.category === "CI_PRATICA" && ev.group === ciGroup)
+        .forEach((ev) => {
+          byDayStart[ev.day + "|" + ev.start] = ev;
+        });
+      Object.keys(urlState.w).forEach((shortKey) => {
+        const w = urlState.w[shortKey];
+        const ev = byDayStart[shortKey];
+        if (ev && (w === "1" || w === "2")) {
+          filterState.weekAssignment[weekKey(ev)] = w;
+          applied = true;
+        }
+      });
+    }
+
+    if (urlState.m && typeof urlState.m === "object") {
+      Object.keys(urlState.m).forEach((day) => {
+        const v = urlState.m[day];
+        if (MARC_SPLIT_DAYS[day] && (v === "before" || v === "after")) {
+          filterState.marcSlot[day] = v;
+          applied = true;
+        }
+      });
     }
 
     return applied;
   }
 
   function currentShareState() {
-    return {
-      enabled: Object.assign({}, filterState.enabled),
-      group: Object.assign({}, filterState.group),
-      theme: document.documentElement.getAttribute("data-theme") || "light",
-    };
+    const compact = {};
+
+    const disabledCats = CATEGORY_ORDER.filter((cat) => !filterState.enabled[cat]);
+    if (disabledCats.length) compact.e = disabledCats;
+
+    const groupDiffs = {};
+    Object.keys(filterState.group).forEach((cat) => {
+      if (filterState.group[cat] !== DATA.default_filters[cat]) {
+        groupDiffs[cat] = filterState.group[cat];
+      }
+    });
+    if (Object.keys(groupDiffs).length) compact.g = groupDiffs;
+
+    const ciGroup = filterState.group["CI_PRATICA"];
+    const w = {};
+    Object.keys(filterState.weekAssignment).forEach((key) => {
+      const parts = key.split("|"); // [category, day, start, end, group]
+      if (parts[0] === "CI_PRATICA" && parts[4] === ciGroup) {
+        w[parts[1] + "|" + parts[2]] = filterState.weekAssignment[key];
+      }
+    });
+    if (Object.keys(w).length) compact.w = w;
+
+    const m = {};
+    Object.keys(filterState.marcSlot).forEach((day) => {
+      const v = filterState.marcSlot[day];
+      if (MARC_SPLIT_DAYS[day] && (v === "before" || v === "after")) {
+        m[day] = v;
+      }
+    });
+    if (Object.keys(m).length) compact.m = m;
+
+    const theme = document.documentElement.getAttribute("data-theme") || "light";
+    if (theme === "dark") compact.t = "dark";
+
+    return compact;
   }
 
   function buildShareUrl() {
@@ -196,6 +360,16 @@
 
   function isEventVisible(ev, state) {
     if (!state.enabled[ev.category]) return false;
+    if (isHiddenByDependency(ev, state)) return false;
+
+    if (ev.category === "CI_MARC_PALESTRA" && ev.subtype === "CI MARC") {
+      const clusters = MARC_SPLIT_DAYS[ev.day];
+      const pref = state.marcSlot && state.marcSlot[ev.day];
+      if (clusters && (pref === "before" || pref === "after")) {
+        if (clusters[pref].indexOf(ev) === -1) return false;
+      }
+    }
+
     const meta = CATEGORY_META[ev.category];
     if (!meta.filterable) return true; // CI MARC/Palestra: só checkbox
     if (!ev.group || ev.group === "TODOS") return true; // comum a todos (ex: HAM Palestra, IESC Palestra)
@@ -299,6 +473,15 @@
     }
   }
 
+  // Classe CSS de semana (week-1/week-2) pra um evento de CI Prática, com
+  // base no que o aluno marcou manualmente no painel "Semanas". Retorna
+  // null se não for CI Prática ou se ainda não foi marcado.
+  function weekClassFor(ev) {
+    if (ev.category !== "CI_PRATICA") return null;
+    const w = filterState.weekAssignment[weekKey(ev)];
+    return w === "1" || w === "2" ? "week-" + w : null;
+  }
+
   function renderEventBlock(ev, col, colCount, px) {
     const s = toMinutes(ev.start) - BOUNDS.startHour * 60;
     const e = toMinutes(ev.end) - BOUNDS.startHour * 60;
@@ -308,6 +491,9 @@
     const block = document.createElement("div");
     block.className = "event-block cat-" + ev.category;
     if (height < 40) block.classList.add("compact");
+    else if (height < 58) block.classList.add("brief");
+    const wc = weekClassFor(ev);
+    if (wc) block.classList.add(wc);
 
     const widthPct = 100 / colCount;
     const leftPct = col * widthPct;
@@ -321,7 +507,9 @@
       '<div class="ev-time">' + fmtRange(ev.start, ev.end) + "</div>" +
       '<div class="ev-title">' + escapeHtml(titleFor(ev)) + "</div>" +
       '<div class="ev-sub">' + escapeHtml(subtitleFor(ev)) + "</div>";
-    block.title = titleFor(ev) + "\n" + fmtRange(ev.start, ev.end) + "\n" + subtitleFor(ev);
+    block.title =
+      titleFor(ev) + "\n" + fmtRange(ev.start, ev.end) + "\n" + subtitleFor(ev) +
+      (wc ? "\n" + (wc === "week-1" ? "Semana 1" : "Semana 2") : "");
     return block;
   }
 
@@ -480,12 +668,180 @@
           filterState.group[cat] = select.value;
           saveFilterState(filterState);
           renderGrid();
+          if (cat === "CI_PRATICA") {
+            renderWeekPanel();
+            updateMarcButtonVisibility();
+            const marcPanel = document.getElementById("marc-panel");
+            if (!marcPanel.hidden) renderMarcPanel();
+          }
         });
         chip.appendChild(select);
       }
 
       bar.appendChild(chip);
     });
+  }
+
+  // ---------------------------------------------------------------------
+  // Painel "Semanas" — marcação manual de semana 1/2 das práticas de CI
+  // Prática do grupo atualmente selecionado. Não há como derivar isso da
+  // planilha (ela é só um template de semana padrão), então quem marca é
+  // o próprio aluno; a marcação fica salva em localStorage por dia+
+  // horário+grupo (ver weekKey), sobrevivendo a reextrações da planilha.
+  // ---------------------------------------------------------------------
+  function renderWeekPanel() {
+    const panel = document.getElementById("week-panel");
+    panel.innerHTML = "";
+
+    const group = filterState.group["CI_PRATICA"];
+    const events = DATA.events
+      .filter((ev) => ev.category === "CI_PRATICA" && ev.group === group)
+      .slice()
+      .sort((a, b) => {
+        const dayDiff = DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day);
+        return dayDiff !== 0 ? dayDiff : toMinutes(a.start) - toMinutes(b.start);
+      });
+
+    const hint = document.createElement("p");
+    hint.className = "week-panel-hint";
+    hint.textContent = group
+      ? "Marque quais dessas práticas do grupo " + group + " são da semana 1 e quais são da semana 2."
+      : "Selecione um grupo de CI Prática nos filtros pra marcar as semanas.";
+    panel.appendChild(hint);
+
+    events.forEach((ev) => {
+      const row = document.createElement("div");
+      row.className = "week-panel-row";
+
+      const label = document.createElement("div");
+      label.className = "wp-label";
+      label.innerHTML =
+        escapeHtml(ev.day_label + " " + fmtRange(ev.start, ev.end)) +
+        '<span class="wp-sub">' + escapeHtml(ev.type_label_raw || "") + "</span>";
+      row.appendChild(label);
+
+      const toggle = document.createElement("div");
+      toggle.className = "wp-toggle";
+      ["1", "2"].forEach((w) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.dataset.week = w;
+        b.textContent = "Semana " + w;
+        const current = filterState.weekAssignment[weekKey(ev)];
+        if (current === w) b.classList.add("active");
+        b.addEventListener("click", () => {
+          const key = weekKey(ev);
+          filterState.weekAssignment[key] =
+            filterState.weekAssignment[key] === w ? null : w;
+          if (!filterState.weekAssignment[key]) delete filterState.weekAssignment[key];
+          saveFilterState(filterState);
+          renderWeekPanel();
+          renderGrid();
+        });
+        toggle.appendChild(b);
+      });
+      row.appendChild(toggle);
+      panel.appendChild(row);
+    });
+
+    const legend = document.createElement("div");
+    legend.className = "week-legend";
+    legend.innerHTML =
+      '<span class="wl-item"><span class="wl-swatch"></span>Semana 1</span>' +
+      '<span class="wl-item"><span class="wl-swatch wl-2"></span>Semana 2</span>';
+    panel.appendChild(legend);
+  }
+
+  function setupWeekPanelButton() {
+    const btn = document.getElementById("week-config-btn");
+    const panel = document.getElementById("week-panel");
+    btn.addEventListener("click", () => {
+      panel.hidden = !panel.hidden;
+      if (!panel.hidden) renderWeekPanel();
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // Painel "Horário do MARC" — só aparece pra grupos de CI Prática que NÃO
+  // têm conflito com o horário de MARC mais cedo (ver MARC_SPLIT_DAYS /
+  // isEligibleForMarcChoice). Deixa o aluno escolher entre os dois blocos
+  // em vez de ver os dois juntos; "Ambos" volta pro comportamento padrão.
+  // ---------------------------------------------------------------------
+  function eligibleMarcDays() {
+    return Object.keys(MARC_SPLIT_DAYS).filter((day) => isEligibleForMarcChoice(day, filterState));
+  }
+
+  function renderMarcPanel() {
+    const panel = document.getElementById("marc-panel");
+    panel.innerHTML = "";
+
+    const days = eligibleMarcDays();
+
+    const hint = document.createElement("p");
+    hint.className = "week-panel-hint";
+    hint.textContent = "Escolha qual horário de MARC você costuma ir (ou deixe em \"Ambos\" pra ver os dois).";
+    panel.appendChild(hint);
+
+    days.forEach((day) => {
+      const clusters = MARC_SPLIT_DAYS[day];
+      const row = document.createElement("div");
+      row.className = "week-panel-row";
+
+      const label = document.createElement("div");
+      label.className = "wp-label";
+      const dayLabel = (clusters.before[0] && clusters.before[0].day_label) || day;
+      label.innerHTML = escapeHtml(dayLabel) + '<span class="wp-sub">Clínica Integrada – CI MARC</span>';
+      row.appendChild(label);
+
+      const toggle = document.createElement("div");
+      toggle.className = "wp-toggle";
+      const options = [
+        { slot: null, text: "Ambos" },
+        { slot: "before", text: marcTimeRangeLabel(clusters.before) },
+        { slot: "after", text: marcTimeRangeLabel(clusters.after) },
+      ];
+      options.forEach((opt) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        if (opt.slot) b.dataset.slot = opt.slot;
+        b.textContent = opt.text;
+        const current = filterState.marcSlot[day] || null;
+        if (current === opt.slot) b.classList.add("active");
+        b.addEventListener("click", () => {
+          if (opt.slot) {
+            filterState.marcSlot[day] = opt.slot;
+          } else {
+            delete filterState.marcSlot[day];
+          }
+          saveFilterState(filterState);
+          renderMarcPanel();
+          renderGrid();
+        });
+        toggle.appendChild(b);
+      });
+      row.appendChild(toggle);
+      panel.appendChild(row);
+    });
+  }
+
+  // Mostra/esconde o botão "Horário do MARC" conforme o grupo de CI
+  // Prática selecionado tenha ou não escolha real de horário.
+  function updateMarcButtonVisibility() {
+    const btn = document.getElementById("marc-config-btn");
+    const panel = document.getElementById("marc-panel");
+    const hasChoice = eligibleMarcDays().length > 0;
+    btn.hidden = !hasChoice;
+    if (!hasChoice) panel.hidden = true;
+  }
+
+  function setupMarcPanelButton() {
+    const btn = document.getElementById("marc-config-btn");
+    const panel = document.getElementById("marc-panel");
+    btn.addEventListener("click", () => {
+      panel.hidden = !panel.hidden;
+      if (!panel.hidden) renderMarcPanel();
+    });
+    updateMarcButtonVisibility();
   }
 
   // ---------------------------------------------------------------------
@@ -525,23 +881,57 @@
   }
 
   // ---------------------------------------------------------------------
-  // Link compartilhável — botão + toast
+  // Barra de ações: "Semanas" + "Horário do MARC" (esquerda) e "Copiar
+  // link" (direita) — fica entre a barra de filtros e os painéis.
   // ---------------------------------------------------------------------
   function setupShareButton() {
-    const shareBar = document.createElement("div");
-    shareBar.className = "share-bar";
+    const actionBar = document.createElement("div");
+    actionBar.className = "share-bar";
 
-    const btn = document.createElement("button");
-    btn.className = "icon-btn";
-    btn.type = "button";
-    btn.id = "share-link-btn";
-    btn.innerHTML =
+    const left = document.createElement("div");
+    left.className = "action-bar-left";
+
+    const weekBtn = document.createElement("button");
+    weekBtn.className = "icon-btn";
+    weekBtn.type = "button";
+    weekBtn.id = "week-config-btn";
+    weekBtn.title = "Marcar semana 1 / semana 2 das práticas de CI";
+    weekBtn.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>' +
+      "<span>Semanas</span>";
+    left.appendChild(weekBtn);
+
+    const marcBtn = document.createElement("button");
+    marcBtn.className = "icon-btn";
+    marcBtn.type = "button";
+    marcBtn.id = "marc-config-btn";
+    marcBtn.title = "Escolher horário do MARC";
+    marcBtn.hidden = true; // updateMarcButtonVisibility() decide se mostra
+    marcBtn.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>' +
+      "<span>Horário do MARC</span>";
+    left.appendChild(marcBtn);
+
+    actionBar.appendChild(left);
+
+    const right = document.createElement("div");
+    right.className = "action-bar-right";
+    const shareBtn = document.createElement("button");
+    shareBtn.className = "icon-btn";
+    shareBtn.type = "button";
+    shareBtn.id = "share-link-btn";
+    shareBtn.innerHTML =
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"></line><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"></line></svg>' +
       "<span>Copiar link desta visualização</span>";
-    btn.addEventListener("click", () => copyShareLink());
+    shareBtn.addEventListener("click", () => copyShareLink());
+    right.appendChild(shareBtn);
+    actionBar.appendChild(right);
 
-    shareBar.appendChild(btn);
-    scrollWrap.parentNode.insertBefore(shareBar, scrollWrap);
+    const weekPanel = document.getElementById("week-panel");
+    weekPanel.parentNode.insertBefore(actionBar, weekPanel);
+
+    setupWeekPanelButton();
+    setupMarcPanelButton();
   }
 
   async function copyShareLink() {
@@ -593,7 +983,9 @@
   // Modo foto (nova aba)
   // ---------------------------------------------------------------------
   function openPhotoMode() {
-    const visibleEvents = DATA.events.filter((ev) => isEventVisible(ev, filterState));
+    const visibleEvents = DATA.events
+      .filter((ev) => isEventVisible(ev, filterState))
+      .map((ev) => Object.assign({}, ev, { weekClass: weekClassFor(ev) }));
     const theme = document.documentElement.getAttribute("data-theme") || "light";
     const payload = {
       bounds: BOUNDS,
@@ -768,6 +1160,8 @@
         const block = document.createElement("div");
         block.className = "event-block cat-" + ev.category;
         if (height < 40) block.classList.add("compact");
+        else if (height < 58) block.classList.add("brief");
+        if (ev.weekClass) block.classList.add(ev.weekClass);
         const widthPct = 100/colCount;
         const leftPct = c*widthPct;
         block.style.top = top+"px";
@@ -930,7 +1324,7 @@
     const urlState = readStateFromUrl();
     const isSharedView = urlState ? applyUrlState(urlState) : false;
 
-    initTheme(isSharedView ? urlState.theme : null);
+    initTheme(isSharedView ? (urlState.t === "dark" ? "dark" : "light") : null);
     renderFilters();
     renderGrid();
     setupShareButton();
