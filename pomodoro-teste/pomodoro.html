@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pomodoro — Mundo Vivo</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="hud" aria-label="Controles do visual">
+      <div class="brand">
+        <span class="brand-kicker">Sprint 1</span>
+        <h1>Pomodoro Mundo Vivo</h1>
+        <p>Mockup visual interativo</p>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Temas">
+        <button class="tab is-active" data-theme="reef" role="tab" aria-selected="true">Recife</button>
+        <button class="tab" data-theme="park" role="tab" aria-selected="false">Parque</button>
+        <button class="tab" data-theme="camp" role="tab" aria-selected="false">Acampamento</button>
+        <button class="tab" data-theme="garden" role="tab" aria-selected="false">Jardim</button>
+      </div>
+
+      <div class="modes" aria-label="Estados visuais">
+        <button class="mode is-active" data-mode="focus">Foco</button>
+        <button class="mode" data-mode="pause">Pausa</button>
+        <button class="mode" data-mode="long">Pausa Longa</button>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="focusComplete">+ Foco concluído</button>
+        <button class="ghost" id="rareEvent">✦ Evento raro</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="label">Horas focadas</span>
+          <strong id="focusCount">0</strong>
+        </div>
+        <div class="stat">
+          <span class="label">Zoom</span>
+          <strong id="zoomLabel">1.00×</strong>
+        </div>
+        <div class="stat">
+          <span class="label">Tema</span>
+          <strong id="themeLabel">Recife</strong>
+        </div>
+        <div class="stat">
+          <span class="label">Estado</span>
+          <strong id="modeLabel">Foco</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage" aria-label="Cena principal">
+      <div id="sceneViewport" class="scene-viewport">
+        <canvas id="bgCanvas"></canvas>
+        <svg id="svgLayer" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <defs>
+            <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="rgba(0,0,0,0.18)"></feDropShadow>
+            </filter>
+            <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="10" result="blur"></feGaussianBlur>
+              <feMerge>
+                <feMergeNode in="blur"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+              </feMerge>
+            </filter>
+            <linearGradient id="shineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+            </linearGradient>
+          </defs>
+          <g id="svgContent"></g>
+        </svg>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
