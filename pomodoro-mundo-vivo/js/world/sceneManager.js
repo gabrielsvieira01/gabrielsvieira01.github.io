@@ -20,7 +20,7 @@
 
       svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
 
-      if (theme.onResize) theme.onResize(width, height);
+      if (theme.onResize) theme.onResize(width, height, svg);
     }
 
     window.addEventListener('resize', resize);

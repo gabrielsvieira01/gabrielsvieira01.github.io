@@ -39,6 +39,23 @@
     { xf: 0.635, yf: 0.688, rxf: 0.030, ryf: 0.022 }
   ];
 
+  // Altura (yf) da superfície da areia num x qualquer (xf, 0-1) —
+  // interpolação suave entre os pontos autorais da duna. Usada pela
+  // Etapa 2 pra encaixar coral/anêmona/alga na altura certa do
+  // terreno, sem precisar redesenhar a curva do zero.
+  function sandSurfaceYf(xf) {
+    const pts = SAND_POINTS;
+    const clamped = Math.max(pts[0].xf, Math.min(pts[pts.length - 1].xf, xf));
+
+    for (let i = 0; i < pts.length - 1; i++) {
+      if (clamped >= pts[i].xf && clamped <= pts[i + 1].xf) {
+        const t = (clamped - pts[i].xf) / (pts[i + 1].xf - pts[i].xf);
+        return pts[i].yf + (pts[i + 1].yf - pts[i].yf) * smoothstep(t);
+      }
+    }
+    return pts[pts.length - 1].yf;
+  }
+
   // Fator de 0 (dia pleno) a 1 (noite plena), com transições
   // suaves no amanhecer e no entardecer — baseado no relógio real.
   function computeNightFactor(date) {
@@ -133,4 +150,6 @@
   PMV.Themes = PMV.Themes || {};
   PMV.Themes.Recife = PMV.Themes.Recife || {};
   PMV.Themes.Recife.drawBackground = drawBackground;
+  PMV.Themes.Recife.sandSurfaceYf = sandSurfaceYf;
+  PMV.Themes.Recife.computeNightFactor = computeNightFactor;
 })(window.PMV = window.PMV || {});
