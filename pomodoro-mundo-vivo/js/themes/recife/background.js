@@ -39,21 +39,20 @@
     { xf: 0.635, yf: 0.688, rxf: 0.030, ryf: 0.022 }
   ];
 
-  // Altura (yf) da superfície da areia num x qualquer (xf, 0-1) —
-  // interpolação suave entre os pontos autorais da duna. Usada pela
-  // Etapa 2 pra encaixar coral/anêmona/alga na altura certa do
-  // terreno, sem precisar redesenhar a curva do zero.
-  function sandSurfaceYf(xf) {
-    const pts = SAND_POINTS;
-    const clamped = Math.max(pts[0].xf, Math.min(pts[pts.length - 1].xf, xf));
+  // Segmentos da curva real da duna (em espaço de fração 0-1),
+  // pré-calculados uma vez — a mesma curva que o Canvas desenha,
+  // só que consultável por X em vez de só "desenhável".
+  const SAND_SEGMENTS = PMV.Engine.CanvasUtils.buildSmoothSegments(
+    SAND_POINTS.map((p) => ({ x: p.xf, y: p.yf }))
+  );
 
-    for (let i = 0; i < pts.length - 1; i++) {
-      if (clamped >= pts[i].xf && clamped <= pts[i + 1].xf) {
-        const t = (clamped - pts[i].xf) / (pts[i + 1].xf - pts[i].xf);
-        return pts[i].yf + (pts[i + 1].yf - pts[i].yf) * smoothstep(t);
-      }
-    }
-    return pts[pts.length - 1].yf;
+  // Altura (yf) da superfície da areia num x qualquer (xf, 0-1) —
+  // ponto exato da curva desenhada pelo Canvas (não uma
+  // aproximação pelos pontos autorais, que NÃO ficam sobre a curva
+  // final — eles só controlam a curvatura). Usada pela Etapa 2 pra
+  // encaixar coral/anêmona/alga exatamente sobre a areia.
+  function sandSurfaceYf(xf) {
+    return PMV.Engine.CanvasUtils.sampleSmoothPathY(SAND_SEGMENTS, xf);
   }
 
   // Fator de 0 (dia pleno) a 1 (noite plena), com transições
