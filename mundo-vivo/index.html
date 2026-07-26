@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pomodoro Mundo Vivo — Recife</title>
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div id="stage">
+  <canvas id="scene-canvas"></canvas>
+  <svg id="scene-svg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"></svg>
+
+  <!-- UI só da vitrine de demonstração — não é o app final. -->
+  <div id="demo-ui">
+    <div id="demo-header">
+      <div id="demo-title-block">
+        <div id="demo-title">Direção a · Recife</div>
+        <div id="demo-subtitle">O recife cresce enquanto você se concentra.</div>
+      </div>
+      <div id="demo-mode-badge">
+        <span id="demo-mode-label">Foco</span>
+      </div>
+    </div>
+    <div id="demo-footer">
+      <div id="demo-clock-block">
+        <div id="demo-clock">00:45</div>
+        <div id="demo-clock-label">Foco</div>
+      </div>
+      <div id="demo-dots">
+        <span class="demo-dot"></span>
+        <span class="demo-dot"></span>
+        <span class="demo-dot"></span>
+        <span class="demo-dot"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Ordem importa: cada script depende dos que vêm antes dele. -->
+<script src="js/engine/canvasUtils.js"></script>
+<script src="js/engine/svgUtils.js"></script>
+<script src="js/engine/svgShapes.js"></script>
+<script src="js/engine/loop.js"></script>
+<script src="js/world/sceneManager.js"></script>
+<script src="js/camera/camera.js"></script>
+<script src="js/components/coral.js"></script>
+<script src="js/components/anemone.js"></script>
+<script src="js/components/algae.js"></script>
+<script src="js/components/fish.js"></script>
+<script src="js/components/manta.js"></script>
+<script src="js/themes/recife/background.js"></script>
+<script src="js/themes/recife/reefComposition.js"></script>
+<script src="js/themes/recife/fauna.js"></script>
+<script src="js/themes/recife/index.js"></script>
+<script src="js/demo/demoHarness.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
