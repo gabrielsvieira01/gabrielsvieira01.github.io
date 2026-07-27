@@ -185,8 +185,8 @@
       "category_label": "Clínica Integrada – CI Prática",
       "subtype": "POLIMEG",
       "type_label_raw": "CI PRATICA - POLIMEG",
-      "start": "07:30",
-      "end": "12:05",
+      "start": "07:50",
+      "end": "12:00",
       "group": "7/8",
       "preceptor": "Ivina",
       "raw_detail": "Ivina - Grupos 7/8",
@@ -393,21 +393,6 @@
       "day_label": "Quinta-feira",
       "category": "CI_PRATICA",
       "category_label": "Clínica Integrada – CI Prática",
-      "subtype": "CLÍNICA ACADÊMICA",
-      "type_label_raw": "CI PRATICA - CLÍNICA ACADÊMICA",
-      "start": "07:50",
-      "end": "12:00",
-      "group": "3/4",
-      "preceptor": "Luane Costa",
-      "raw_detail": "Luane Costa - 3/4",
-      "cell": "G7/H7"
-    },
-    {
-      "id": "ev025",
-      "day": "QUINTA",
-      "day_label": "Quinta-feira",
-      "category": "CI_PRATICA",
-      "category_label": "Clínica Integrada – CI Prática",
       "subtype": "POLICLÍNICA REGIONAL",
       "type_label_raw": "CI PRATICA - POLICLÍNICA REGIONAL",
       "start": "07:50",
@@ -415,10 +400,10 @@
       "group": "7/8",
       "preceptor": "Alexandre Filipov",
       "raw_detail": "Alexandre Filipov - 7/8",
-      "cell": "G9/H9"
+      "cell": "G7/H7"
     },
     {
-      "id": "ev026",
+      "id": "ev025",
       "day": "QUINTA",
       "day_label": "Quinta-feira",
       "category": "CI_PRATICA",
@@ -430,6 +415,21 @@
       "group": "7/8",
       "preceptor": "Daniela Leão",
       "raw_detail": "Daniela Leão - 8/7",
+      "cell": "G9/H9"
+    },
+    {
+      "id": "ev026",
+      "day": "QUINTA",
+      "day_label": "Quinta-feira",
+      "category": "PIEPE",
+      "category_label": "PIEPE",
+      "subtype": null,
+      "type_label_raw": "PIEPE",
+      "start": "08:00",
+      "end": "08:50",
+      "group": "3",
+      "preceptor": "Profa. Kênia",
+      "raw_detail": "Grupo 03 - Profa. Kênia",
       "cell": "G11/H11"
     },
     {
@@ -442,28 +442,13 @@
       "type_label_raw": "PIEPE",
       "start": "08:00",
       "end": "08:50",
-      "group": "3",
-      "preceptor": "Profa. Kênia",
-      "raw_detail": "Grupo 03 - Profa. Kênia",
+      "group": "4",
+      "preceptor": "Prof. Lucas Amaral",
+      "raw_detail": "Grupo 04 - Prof. Lucas Amaral",
       "cell": "G13/H13"
     },
     {
       "id": "ev028",
-      "day": "QUINTA",
-      "day_label": "Quinta-feira",
-      "category": "PIEPE",
-      "category_label": "PIEPE",
-      "subtype": null,
-      "type_label_raw": "PIEPE",
-      "start": "08:00",
-      "end": "08:50",
-      "group": "4",
-      "preceptor": "Prof. Lucas Amaral",
-      "raw_detail": "Grupo 04 - Prof. Lucas Amaral",
-      "cell": "G14/H14"
-    },
-    {
-      "id": "ev029",
       "day": "QUINTA",
       "day_label": "Quinta-feira",
       "category": "CI_PRATICA",
@@ -478,6 +463,21 @@
       "cell": "G17/H17"
     },
     {
+      "id": "ev029",
+      "day": "QUINTA",
+      "day_label": "Quinta-feira",
+      "category": "CI_PRATICA",
+      "category_label": "Clínica Integrada – CI Prática",
+      "subtype": "CLÍNICA ACADÊMICA",
+      "type_label_raw": "CI PRATICA - CLÍNICA ACADÊMICA",
+      "start": "13:50",
+      "end": "18:00",
+      "group": "3/4",
+      "preceptor": "Luane Costa",
+      "raw_detail": "Luane Costa - 3/4",
+      "cell": "G19/H19"
+    },
+    {
       "id": "ev030",
       "day": "QUINTA",
       "day_label": "Quinta-feira",
@@ -490,7 +490,7 @@
       "group": "1",
       "preceptor": "Profa. Agnis de Jesus",
       "raw_detail": "Grupo 01 - Profa. Agnis de Jesus",
-      "cell": "G19/H19"
+      "cell": "G22/H22"
     },
     {
       "id": "ev031",
@@ -505,7 +505,7 @@
       "group": "2",
       "preceptor": "Profa. Agnis de Jesus",
       "raw_detail": "Grupo 02 - Profa. Agnis de Jesus",
-      "cell": "G22/H22"
+      "cell": "G26/H26"
     },
     {
       "id": "ev032",
@@ -520,7 +520,7 @@
       "group": "3",
       "preceptor": "Profa. Agnis de Jesus",
       "raw_detail": "Grupo 03 - Profa. Agnis de Jesus",
-      "cell": "G26/H26"
+      "cell": "G27/H27"
     },
     {
       "id": "ev033",
@@ -575,8 +575,8 @@
       "category_label": "Clínica Integrada – CI Prática",
       "subtype": "POLIMEG",
       "type_label_raw": "CI PRATICA - POLIMEG",
-      "start": "07:30",
-      "end": "12:05",
+      "start": "07:50",
+      "end": "12:00",
       "group": "9/10",
       "preceptor": "Ivina",
       "raw_detail": "Ivina - Grupos 9/10",
@@ -695,9 +695,7 @@
       "Terça-feira - \"Clínica Integrada – CI Prática\" (CI PRATICA - CLÍNICA ACADÊMICA): 07:50-12:00 [grupo 3/4, Isnaya Araujo] == 07:50-12:00 [grupo 1/2, Daniela Matiolli]  (mesmo local/horario, preceptores diferentes - provavel grupos paralelos)",
       "Terça-feira - \"Clínica Integrada – CI Prática\" (CI PRATICA - CLÍNICA ACADÊMICA): 07:50-12:00 [grupo 5/6, Roberta Mota] == 07:50-12:00 [grupo 1/2, Daniela Matiolli]  (mesmo local/horario, preceptores diferentes - provavel grupos paralelos)",
       "Quarta-feira - \"Clínica Integrada – CI Prática\" (CI PRATICA - CLÍNICA ACADÊMICA): 13:50-18:00 [grupo 9/10, Priscila Monteiro] sobrepoe 14:00-18:10 [grupo 5/6, Isnaya Araujo]",
-      "Quinta-feira - \"Clínica Integrada – CI Prática\" (CI PRATICA - CLÍNICA ACADÊMICA): 07:50-12:00 [grupo 1/2, Priscila Monteiro] == 07:50-12:00 [grupo 3/4, Luane Costa]  (mesmo local/horario, preceptores diferentes - provavel grupos paralelos)",
       "Quinta-feira - \"Clínica Integrada – CI Prática\" (CI PRATICA - CLÍNICA ACADÊMICA): 07:50-12:00 [grupo 1/2, Priscila Monteiro] == 07:50-12:00 [grupo 7/8, Daniela Leão]  (mesmo local/horario, preceptores diferentes - provavel grupos paralelos)",
-      "Quinta-feira - \"Clínica Integrada – CI Prática\" (CI PRATICA - CLÍNICA ACADÊMICA): 07:50-12:00 [grupo 3/4, Luane Costa] == 07:50-12:00 [grupo 7/8, Daniela Leão]  (mesmo local/horario, preceptores diferentes - provavel grupos paralelos)",
       "Quinta-feira - \"PIEPE\" (PIEPE): 08:00-08:50 [grupo 3, Profa. Kênia] == 08:00-08:50 [grupo 4, Prof. Lucas Amaral]  (mesmo local/horario, preceptores diferentes - provavel grupos paralelos)"
     ],
     "horarios_fora_do_padrao": [
