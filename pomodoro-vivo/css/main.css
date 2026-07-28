@@ -51,7 +51,9 @@ html, body {
   opacity: 1;
 }
 
-/* Painel da vitrine (demo harness) */
+/* Vitrine (demo harness) - pastilha compacta no canto inferior direito;
+   nunca ocupa o centro da tela, então o cenário fica sempre visível.
+   Tocar na pastilha expande um cartão pequeno ancorado no mesmo canto. */
 #pmv-demo-root {
   position: fixed;
   top: 0;
@@ -60,33 +62,80 @@ html, body {
   height: 100%;
   pointer-events: none;
   display: flex;
+  flex-direction: column;
   align-items: flex-end;
-  justify-content: center;
-  padding: 24px;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px;
 }
 
-.pmv-demo-panel {
+.pmv-demo-pill {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: var(--pmv-ink);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(9, 34, 54, 0.3);
+  cursor: pointer;
+}
+
+.pmv-demo-pill.pmv-active {
+  background: linear-gradient(135deg, var(--pmv-accent), var(--pmv-accent-2));
+  color: var(--pmv-ink);
+}
+
+.pmv-demo-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pmv-accent), var(--pmv-accent-2));
+  flex-shrink: 0;
+}
+
+.pmv-demo-pill.pmv-active .pmv-demo-pill-dot {
+  background: var(--pmv-ink);
+}
+
+.pmv-demo-card {
+  display: none;
+  position: relative;
   pointer-events: auto;
   background: var(--pmv-panel-bg);
   backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 18px 22px;
-  width: min(360px, 90vw);
+  border-radius: 18px;
+  padding: 34px 18px 16px;
+  width: min(240px, 78vw);
   box-shadow: 0 12px 30px rgba(9, 34, 54, 0.25);
   color: var(--pmv-ink);
 }
 
-.pmv-demo-title {
-  font-weight: 600;
+.pmv-demo-card.pmv-open {
+  display: block;
+}
+
+.pmv-demo-card-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(18, 48, 71, 0.08);
+  color: var(--pmv-ink);
   font-size: 15px;
-  letter-spacing: 0.02em;
-  margin-bottom: 8px;
-  opacity: 0.7;
-  text-transform: uppercase;
+  line-height: 1;
+  cursor: pointer;
 }
 
 .pmv-demo-progress-label {
-  font-size: 14px;
+  font-size: 13px;
   margin-bottom: 8px;
 }
 
