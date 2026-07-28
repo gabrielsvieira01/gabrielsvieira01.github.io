@@ -44,6 +44,9 @@
       harness.mount(document.getElementById('pmv-demo-root'));
 
       scene.start();
+
+      // Gancho de depuração (console do navegador / testes) - não afeta produção.
+      PMV.debug = { scene: scene, theme: theme };
     })();
   </script>
 </body>

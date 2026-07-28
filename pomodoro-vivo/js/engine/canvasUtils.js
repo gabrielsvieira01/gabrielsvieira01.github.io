@@ -100,5 +100,55 @@
     return g;
   };
 
+  // Escala um hex color mantendo o matiz (multiplica RGB por um fator) -
+  // usado pra derivar camadas "mais escuras ao fundo" a partir de UMA
+  // paleta autoral, em vez de matizes diferentes por camada.
+  CanvasUtils.scaleHexColor = function (hex, factor) {
+    hex = hex.replace('#', '');
+    var r = parseInt(hex.substring(0, 2), 16);
+    var g = parseInt(hex.substring(2, 4), 16);
+    var b = parseInt(hex.substring(4, 6), 16);
+    r = CanvasUtils.clamp(Math.round(r * factor), 0, 255);
+    g = CanvasUtils.clamp(Math.round(g * factor), 0, 255);
+    b = CanvasUtils.clamp(Math.round(b * factor), 0, 255);
+    function h(n) { var s = n.toString(16); return s.length === 1 ? '0' + s : s; }
+    return '#' + h(r) + h(g) + h(b);
+  };
+
+  CanvasUtils.scaleStops = function (stops, factor) {
+    return stops.map(function (s) {
+      return [s[0], CanvasUtils.scaleHexColor(s[1], factor)];
+    });
+  };
+
+  // ---- Blob orgânico (pedrinhas, formas irregulares arredondadas) ----
+  // radii: array de multiplicadores de raio por amostra angular (ex.: 7-9
+  // valores em torno de 1.0) - dá o contorno irregular sem virar polígono
+  // anguloso; a suavização por ponto-médio arredonda os "vértices".
+  CanvasUtils.buildBlobPoints = function (cx, cy, baseR, radii, rotation) {
+    var n = radii.length;
+    var pts = [];
+    for (var i = 0; i < n; i++) {
+      var angle = (i / n) * Math.PI * 2 + (rotation || 0);
+      var r = baseR * radii[i];
+      pts.push({ x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r });
+    }
+    return pts;
+  };
+
+  CanvasUtils.tracePointsSmooth = function (ctx, pts) {
+    var n = pts.length;
+    if (n < 3) return;
+    ctx.moveTo((pts[0].x + pts[n - 1].x) / 2, (pts[0].y + pts[n - 1].y) / 2);
+    for (var i = 0; i < n; i++) {
+      var curr = pts[i];
+      var next = pts[(i + 1) % n];
+      var midX = (curr.x + next.x) / 2;
+      var midY = (curr.y + next.y) / 2;
+      ctx.quadraticCurveTo(curr.x, curr.y, midX, midY);
+    }
+    ctx.closePath();
+  };
+
   PMV.Engine.CanvasUtils = CanvasUtils;
 })(window.PMV = window.PMV || {});

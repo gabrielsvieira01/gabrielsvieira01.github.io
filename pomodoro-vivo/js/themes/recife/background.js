@@ -10,7 +10,7 @@
     this._layout = null;        // gerado 1x por sessão (ver _generateLayout)
     this._duneSegments = null;  // {back, mid, front} -> segmentos da curva suave
     this._rockPolys = null;
-    this._pebblesPx = null;
+    this._pebblesPx = null;     // {back:[...], mid:[...], front:[...]}
     this._particles = [];
     this._time = 0;
     this._width = 0;
@@ -19,67 +19,81 @@
   }
 
   // ---- Envelopes autorais (direção de arte) ----
-  // O PRNG seedado só escolhe valores DENTRO destas faixas - nunca substitui
-  // a direção (bandas de altura, contagem de âncoras, paletas por camada).
+  // Amplitudes/tamanhos são fração de refUnit = min(largura, altura), não
+  // da altura crua - assim a cena não "espicha" quando o celular vira
+  // pra retrato (altura grande, largura estreita). Só a paleta de cor tem
+  // UMA fonte (SAND_STOPS/PEBBLE_VARIANTS) - as camadas de trás só escurecem
+  // essa mesma paleta via CanvasUtils.scaleStops/scaleHexColor.
+
+  var SAND_STOPS = [[0, '#e8cf9c'], [0.35, '#d3b579'], [1, '#a3844f']];
+  var PEBBLE_VARIANTS = [
+    { top: '#d8c193', bottom: '#8f7248' },
+    { top: '#aab3b8', bottom: '#5f686d' },
+    { top: '#8f8070', bottom: '#463d33' }
+  ];
+
   var DUNE_LAYER_DEFS = {
     back: {
       depth: 0.20,
-      yBandF: [0.58, 0.68],
+      baseYf: 0.63,
+      amplitudeUnitRange: [0.020, 0.040],
       anchorCountRange: [5, 7],
       xJitterF: 0.035,
-      colorStops: [[0, '#6f9aab'], [0.4, '#588396'], [1, '#3f6577']],
-      rimColor: 'rgba(220,240,245,0.18)'
+      shadeFactor: 0.58,
+      rimColor: 'rgba(255,238,210,0.14)'
     },
     mid: {
       depth: 0.55,
-      yBandF: [0.70, 0.80],
+      baseYf: 0.75,
+      amplitudeUnitRange: [0.028, 0.050],
       anchorCountRange: [6, 8],
       xJitterF: 0.04,
-      colorStops: [[0, '#c3ac81'], [0.4, '#ac9367'], [1, '#8a7350']],
+      shadeFactor: 0.80,
       rimColor: 'rgba(255,244,214,0.22)'
     },
     front: {
       depth: 0.95,
-      yBandF: [0.80, 0.92],
+      baseYf: 0.86,
+      amplitudeUnitRange: [0.035, 0.060],
       anchorCountRange: [6, 9],
       xJitterF: 0.045,
-      colorStops: [[0, '#e8cf9c'], [0.35, '#d3b579'], [1, '#a3844f']],
+      shadeFactor: 1.0,
       rimColor: 'rgba(255,244,214,0.35)'
     }
   };
+  var DUNE_LAYER_ORDER = ['back', 'mid', 'front'];
 
   var ROCK_WALL_DEF = {
     countRange: [3, 6],
     xRange: [-0.05, 1.05],
-    widthFracRange: [0.09, 0.20],
-    heightFracRange: [0.16, 0.30],
+    widthUnitRange: [0.11, 0.22],
+    heightUnitRange: [0.13, 0.24],
     jaggedPointsRange: [6, 10],
-    baseYBandF: [0.56, 0.66] // nasce perto/atrás da crista da duna de fundo
+    burialUnitRange: [0.012, 0.03] // afunda a base pra ficar sempre atrás da duna
   };
 
-  var PEBBLE_DEF = {
-    countRange: [16, 26],
-    sizeFracRange: [0.006, 0.016],
-    colorVariants: [
-      { top: '#d8c193', bottom: '#8f7248' },
-      { top: '#aab3b8', bottom: '#5f686d' },
-      { top: '#8f8070', bottom: '#463d33' }
-    ]
+  var PEBBLE_LAYER_DEFS = {
+    back: { countRange: [5, 9], sizeUnitRange: [0.0035, 0.0075], shadeFactor: 0.6 },
+    mid: { countRange: [7, 12], sizeUnitRange: [0.005, 0.010], shadeFactor: 0.82 },
+    front: { countRange: [10, 16], sizeUnitRange: [0.007, 0.015], shadeFactor: 1.0 }
   };
+  var PEBBLE_BLOB_POINTS_RANGE = [7, 9];
+  var PEBBLE_BLOB_JITTER_RANGE = [0.72, 1.22]; // multiplicador de raio por vértice - dá a irregularidade
 
   // ---- Geração (consome rng - roda 1x por sessão) ----
   function generateDuneAnchors(rng, def) {
     var count = Math.round(CanvasUtils.randRange(rng, def.anchorCountRange[0], def.anchorCountRange[1]));
+    var amplitudeUnit = CanvasUtils.randRange(rng, def.amplitudeUnitRange[0], def.amplitudeUnitRange[1]);
     var anchors = [];
     var xStart = -0.15, xSpan = 1.30;
     for (var i = 0; i < count; i++) {
       var baseXf = xStart + (xSpan * i) / (count - 1);
       var jitterXf = CanvasUtils.randRange(rng, -def.xJitterF, def.xJitterF);
-      var yf = CanvasUtils.randRange(rng, def.yBandF[0], def.yBandF[1]);
-      anchors.push({ xf: baseXf + jitterXf, yf: yf });
+      var yOffsetUnits = CanvasUtils.randRange(rng, -amplitudeUnit, amplitudeUnit);
+      anchors.push({ xf: baseXf + jitterXf, yOffsetUnits: yOffsetUnits });
     }
     anchors.sort(function (a, b) { return a.xf - b.xf; });
-    return anchors;
+    return { baseYf: def.baseYf, anchors: anchors };
   }
 
   function generateRockWalls(rng) {
@@ -96,9 +110,9 @@
       }
       walls.push({
         xf: CanvasUtils.randRange(rng, ROCK_WALL_DEF.xRange[0], ROCK_WALL_DEF.xRange[1]),
-        widthFrac: CanvasUtils.randRange(rng, ROCK_WALL_DEF.widthFracRange[0], ROCK_WALL_DEF.widthFracRange[1]),
-        heightFrac: CanvasUtils.randRange(rng, ROCK_WALL_DEF.heightFracRange[0], ROCK_WALL_DEF.heightFracRange[1]),
-        baseYf: CanvasUtils.randRange(rng, ROCK_WALL_DEF.baseYBandF[0], ROCK_WALL_DEF.baseYBandF[1]),
+        widthFrac: CanvasUtils.randRange(rng, ROCK_WALL_DEF.widthUnitRange[0], ROCK_WALL_DEF.widthUnitRange[1]),
+        heightFrac: CanvasUtils.randRange(rng, ROCK_WALL_DEF.heightUnitRange[0], ROCK_WALL_DEF.heightUnitRange[1]),
+        burialFrac: CanvasUtils.randRange(rng, ROCK_WALL_DEF.burialUnitRange[0], ROCK_WALL_DEF.burialUnitRange[1]),
         topProfile: topProfile
       });
     }
@@ -106,30 +120,44 @@
     return walls;
   }
 
-  function generatePebbles(rng) {
-    var count = Math.round(CanvasUtils.randRange(rng, PEBBLE_DEF.countRange[0], PEBBLE_DEF.countRange[1]));
+  function generatePebbleBlob(rng) {
+    var n = Math.round(CanvasUtils.randRange(rng, PEBBLE_BLOB_POINTS_RANGE[0], PEBBLE_BLOB_POINTS_RANGE[1]));
+    var radii = [];
+    for (var i = 0; i < n; i++) {
+      radii.push(CanvasUtils.randRange(rng, PEBBLE_BLOB_JITTER_RANGE[0], PEBBLE_BLOB_JITTER_RANGE[1]));
+    }
+    return radii;
+  }
+
+  function generatePebblesForLayer(rng, def) {
+    var count = Math.round(CanvasUtils.randRange(rng, def.countRange[0], def.countRange[1]));
     var pebbles = [];
     for (var i = 0; i < count; i++) {
       pebbles.push({
         xf: rng(),
-        sizeFrac: CanvasUtils.randRange(rng, PEBBLE_DEF.sizeFracRange[0], PEBBLE_DEF.sizeFracRange[1]),
-        aspect: CanvasUtils.randRange(rng, 0.6, 1.0),
-        rotationDeg: CanvasUtils.randRange(rng, 0, 360),
-        colorVariant: Math.floor(rng() * PEBBLE_DEF.colorVariants.length)
+        sizeFrac: CanvasUtils.randRange(rng, def.sizeUnitRange[0], def.sizeUnitRange[1]),
+        aspect: CanvasUtils.randRange(rng, 0.72, 0.96),
+        rotationRad: rng() * Math.PI * 2,
+        colorVariant: Math.floor(rng() * PEBBLE_VARIANTS.length),
+        radii: generatePebbleBlob(rng)
       });
     }
     return pebbles;
   }
 
   Background.prototype._generateLayout = function (rng) {
+    var duneAnchors = {};
+    DUNE_LAYER_ORDER.forEach(function (key) {
+      duneAnchors[key] = generateDuneAnchors(rng, DUNE_LAYER_DEFS[key]);
+    });
+    var pebbles = {};
+    DUNE_LAYER_ORDER.forEach(function (key) {
+      pebbles[key] = generatePebblesForLayer(rng, PEBBLE_LAYER_DEFS[key]);
+    });
     return {
-      duneAnchors: {
-        back: generateDuneAnchors(rng, DUNE_LAYER_DEFS.back),
-        mid: generateDuneAnchors(rng, DUNE_LAYER_DEFS.mid),
-        front: generateDuneAnchors(rng, DUNE_LAYER_DEFS.front)
-      },
+      duneAnchors: duneAnchors,
       rockWalls: generateRockWalls(rng),
-      pebbles: generatePebbles(rng)
+      pebbles: pebbles
     };
   };
 
@@ -137,20 +165,35 @@
   Background.prototype._rebuildGeometry = function (width, height) {
     var layout = this._layout;
     var self = this;
+    var refUnit = Math.min(width, height);
 
     this._duneSegments = {};
-    ['back', 'mid', 'front'].forEach(function (key) {
-      var pts = layout.duneAnchors[key].map(function (a) {
-        return { x: a.xf * width, y: a.yf * height };
+    DUNE_LAYER_ORDER.forEach(function (key) {
+      var lane = layout.duneAnchors[key];
+      var pts = lane.anchors.map(function (a) {
+        return { x: a.xf * width, y: lane.baseYf * height + a.yOffsetUnits * refUnit };
       });
       self._duneSegments[key] = CanvasUtils.buildSmoothSegments(pts);
     });
 
+    // Paredões: a base é ancorada na curva REAL da duna de fundo + um
+    // afundamento extra, então a duna desenhada por cima sempre esconde
+    // a base reta - só o topo irregular fica visível, "emergindo" da areia.
+    var backSegments = this._duneSegments.back;
     this._rockPolys = layout.rockWalls.map(function (wall) {
       var baseX = wall.xf * width;
-      var baseY = wall.baseYf * height;
-      var wPx = wall.widthFrac * width;
-      var hPx = wall.heightFrac * height;
+      var wPx = wall.widthFrac * refUnit;
+      var hPx = wall.heightFrac * refUnit;
+      // Amostra a curva real nas duas bordas + centro do rochedo (não só no
+      // centro) e usa a mais baixa (maior Y) - garante que a base fica
+      // enterrada na areia em TODA a largura, não só no meio.
+      var ySamples = [
+        CanvasUtils.sampleSmoothPathY(backSegments, baseX - wPx / 2),
+        CanvasUtils.sampleSmoothPathY(backSegments, baseX),
+        CanvasUtils.sampleSmoothPathY(backSegments, baseX + wPx / 2)
+      ];
+      var localSurfaceY = Math.max(ySamples[0], ySamples[1], ySamples[2]);
+      var baseY = localSurfaceY + wall.burialFrac * refUnit;
       var points = [{ x: baseX - wPx / 2, y: baseY }];
       wall.topProfile.forEach(function (p) {
         points.push({ x: baseX - wPx / 2 + p.u * wPx, y: baseY - p.v * hPx });
@@ -159,13 +202,20 @@
       return points;
     });
 
-    this._pebblesPx = layout.pebbles.map(function (p) {
-      var x = p.xf * width;
-      var y = CanvasUtils.sampleSmoothPathY(self._duneSegments.front, x);
-      return {
-        x: x, y: y, r: p.sizeFrac * width,
-        aspect: p.aspect, rotationDeg: p.rotationDeg, colorVariant: p.colorVariant
-      };
+    // Pedrinhas: uma lista por camada, cada uma grudada na curva real
+    // daquela camada (nunca flutuando/afundando).
+    this._pebblesPx = {};
+    DUNE_LAYER_ORDER.forEach(function (key) {
+      var segments = self._duneSegments[key];
+      self._pebblesPx[key] = layout.pebbles[key].map(function (p) {
+        var x = p.xf * width;
+        var y = CanvasUtils.sampleSmoothPathY(segments, x);
+        return {
+          x: x, y: y, r: p.sizeFrac * refUnit,
+          aspect: p.aspect, rotationRad: p.rotationRad,
+          colorVariant: p.colorVariant, radii: p.radii
+        };
+      });
     });
   };
 
@@ -186,7 +236,9 @@
   };
 
   // O layout (dunas/rochas/pedrinhas) é gerado 1x por sessão - resize só
-  // reescala pro novo viewport, nunca sorteia um padrão novo no meio da sessão.
+  // reescala pro novo viewport, nunca sorteia um padrão novo no meio da
+  // sessão. Amplitudes usam refUnit (min largura/altura), então girar o
+  // celular não faz a cena "esticar" nem ficar mais espiculada.
   Background.prototype.resize = function (width, height, rng) {
     this._width = width;
     this._height = height;
@@ -200,7 +252,7 @@
   };
 
   // Expõe o Y real da superfície da areia (camada da frente, onde os
-  // componentes se fixam) pra um X (espaço do mundo).
+  // componentes se fixam por enquanto) pra um X (espaço do mundo).
   Background.prototype.sandSurfaceYf = function (x) {
     if (!this._duneSegments || !this._duneSegments.front) return this._height * 0.86;
     return CanvasUtils.sampleSmoothPathY(this._duneSegments.front, x);
@@ -238,12 +290,18 @@
 
     this._drawGodRays(ctx, width, height, camera);
     this._drawRockWalls(ctx, camera);
+
     this._drawDuneLayer(ctx, width, height, camera, 'back');
+    this._drawPebbleLayer(ctx, camera, 'back');
     this._drawCaustics(ctx, width, height);
+
     this._drawDuneLayer(ctx, width, height, camera, 'mid');
+    this._drawPebbleLayer(ctx, camera, 'mid');
     this._drawParticles(ctx);
+
     this._drawDuneLayer(ctx, width, height, camera, 'front');
-    this._drawPebbles(ctx, camera);
+    this._drawPebbleLayer(ctx, camera, 'front');
+
     this._drawDepthFog(ctx, width, height);
   };
 
@@ -273,8 +331,8 @@
   };
 
   // Paredões rochosos escuros ao fundo - silhueta irregular (jagged),
-  // gradiente escuro pra dar volume, parcialmente "enterrados" pela duna
-  // de fundo (desenhada por cima, ver ordem em draw()).
+  // base sempre afundada na curva real da duna de trás (ver _rebuildGeometry),
+  // então a duna desenhada por cima esconde a base reta por completo.
   Background.prototype._drawRockWalls = function (ctx, camera) {
     if (!this._rockPolys) return;
     ctx.save();
@@ -336,19 +394,21 @@
     ctx.restore();
   };
 
-  // Camada única de duna (back|mid|front) - mesma técnica de curva suave,
-  // paleta/profundidade/parallax variam por camada (ver DUNE_LAYER_DEFS).
+  // Camada única de duna (back|mid|front) - mesma técnica de curva suave;
+  // todas usam a MESMA paleta de areia (SAND_STOPS), só escurecida por
+  // shadeFactor conforme a profundidade (nunca muda de matiz pra azul).
   Background.prototype._drawDuneLayer = function (ctx, width, height, camera, key) {
     var segments = this._duneSegments && this._duneSegments[key];
     if (!segments) return;
     var def = DUNE_LAYER_DEFS[key];
+    var colorStops = CanvasUtils.scaleStops(SAND_STOPS, def.shadeFactor);
 
     ctx.save();
     var parallax = camera ? camera.parallaxFor(def.depth) : { x: 0, y: 0 };
     ctx.translate(parallax.x, parallax.y * 0.3);
 
     var pts = CanvasUtils.traceSmoothPath(segments, -40, width + 40, 64);
-    var sandGrad = CanvasUtils.makeVerticalGradient(ctx, 0, height * 0.5, 0, height, def.colorStops);
+    var sandGrad = CanvasUtils.makeVerticalGradient(ctx, 0, height * 0.5, 0, height, colorStops);
     ctx.fillStyle = sandGrad;
     ctx.beginPath();
     ctx.moveTo(pts[0].x, pts[0].y);
@@ -373,16 +433,24 @@
     ctx.restore();
   };
 
-  // Pedrinhas soltas sobre a areia da camada da frente - sempre no Y real
-  // da curva (sampleSmoothPathY), nunca flutuando/afundando.
-  Background.prototype._drawPebbles = function (ctx, camera) {
-    if (!this._pebblesPx) return;
+  // Pedrinhas de uma camada - blob orgânico irregular (não circular/oval
+  // perfeito), sempre no Y real da curva daquela camada, com sombra de
+  // contato pra dar peso. Cor derivada da mesma paleta, escurecida por
+  // camada (mesma lógica das dunas).
+  Background.prototype._drawPebbleLayer = function (ctx, camera, key) {
+    var pebbles = this._pebblesPx && this._pebblesPx[key];
+    if (!pebbles || pebbles.length === 0) return;
+    var def = DUNE_LAYER_DEFS[key];
+    var shadeFactor = PEBBLE_LAYER_DEFS[key].shadeFactor;
+
     ctx.save();
-    var parallax = camera ? camera.parallaxFor(DUNE_LAYER_DEFS.front.depth) : { x: 0, y: 0 };
+    var parallax = camera ? camera.parallaxFor(def.depth) : { x: 0, y: 0 };
     ctx.translate(parallax.x, parallax.y * 0.3);
 
-    this._pebblesPx.forEach(function (p) {
-      var variant = PEBBLE_DEF.colorVariants[p.colorVariant] || PEBBLE_DEF.colorVariants[0];
+    pebbles.forEach(function (p) {
+      var variant = PEBBLE_VARIANTS[p.colorVariant] || PEBBLE_VARIANTS[0];
+      var topColor = CanvasUtils.scaleHexColor(variant.top, shadeFactor);
+      var bottomColor = CanvasUtils.scaleHexColor(variant.bottom, shadeFactor);
 
       // sombra de contato - ancora a pedra visualmente na areia
       ctx.save();
@@ -399,14 +467,14 @@
 
       ctx.save();
       ctx.translate(p.x, p.y);
-      ctx.rotate(p.rotationDeg * Math.PI / 180);
       ctx.scale(1, p.aspect);
+      var blobPts = CanvasUtils.buildBlobPoints(0, 0, p.r, p.radii, p.rotationRad);
       var grad = ctx.createLinearGradient(0, -p.r, 0, p.r);
-      grad.addColorStop(0, variant.top);
-      grad.addColorStop(1, variant.bottom);
+      grad.addColorStop(0, topColor);
+      grad.addColorStop(1, bottomColor);
       ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+      CanvasUtils.tracePointsSmooth(ctx, blobPts);
       ctx.fill();
       ctx.restore();
     });
