@@ -1,0 +1,143 @@
+:root {
+  --pmv-accent: #ff9a76;
+  --pmv-accent-2: #ffd166;
+  --pmv-ink: #123047;
+  --pmv-panel-bg: rgba(255, 255, 255, 0.88);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: #0c3a5e;
+}
+
+#pmv-canvas,
+#pmv-svg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+
+#pmv-svg {
+  pointer-events: none;
+}
+
+/* Transição de crescimento (ver placeAtPivot/growNow em js/engine/svgUtils.js).
+   transform-box: view-box ancora a escala na origem local (0,0) do próprio
+   componente - o mesmo ponto que o atributo transform usa pra posicionar
+   no mundo - garantindo que o crescimento pivote sempre no ponto de
+   fixação na areia, nunca no canto da tela. */
+.pmv-growable {
+  scale: 0;
+  opacity: 0;
+  transform-box: view-box;
+  transform-origin: 0px 0px;
+  transition: scale 900ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 700ms ease-out;
+}
+
+.pmv-growable.pmv-grow {
+  scale: var(--pmv-target-scale, 1);
+  opacity: 1;
+}
+
+/* Painel da vitrine (demo harness) */
+#pmv-demo-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 24px;
+}
+
+.pmv-demo-panel {
+  pointer-events: auto;
+  background: var(--pmv-panel-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 18px 22px;
+  width: min(360px, 90vw);
+  box-shadow: 0 12px 30px rgba(9, 34, 54, 0.25);
+  color: var(--pmv-ink);
+}
+
+.pmv-demo-title {
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.pmv-demo-progress-label {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.pmv-demo-bar-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(18, 48, 71, 0.12);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.pmv-demo-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pmv-accent), var(--pmv-accent-2));
+  transition: width 500ms ease-out;
+}
+
+.pmv-demo-btn {
+  display: block;
+  width: 100%;
+  border: none;
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  cursor: pointer;
+  background: var(--pmv-ink);
+  color: white;
+  transition: transform 150ms ease, opacity 150ms ease;
+}
+
+.pmv-demo-btn:hover {
+  opacity: 0.9;
+}
+
+.pmv-demo-btn:active {
+  transform: scale(0.97);
+}
+
+.pmv-demo-btn-ghost {
+  background: transparent;
+  color: var(--pmv-ink);
+  border: 1px solid rgba(18, 48, 71, 0.2);
+}
+
+.pmv-demo-note {
+  font-size: 12px;
+  opacity: 0.6;
+  line-height: 1.4;
+  margin-top: 4px;
+}

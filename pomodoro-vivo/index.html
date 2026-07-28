@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pomodoro Vivo — Recife</title>
+<link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <canvas id="pmv-canvas"></canvas>
+  <svg id="pmv-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div id="pmv-demo-root"></div>
+
+  <script src="js/engine/canvasUtils.js"></script>
+  <script src="js/engine/svgUtils.js"></script>
+  <script src="js/engine/loop.js"></script>
+  <script src="js/camera/camera.js"></script>
+  <script src="js/world/sceneManager.js"></script>
+  <script src="js/components/index.js"></script>
+  <script src="js/themes/recife/background.js"></script>
+  <script src="js/themes/recife/composition.js"></script>
+  <script src="js/themes/recife/fauna.js"></script>
+  <script src="js/themes/recife/index.js"></script>
+  <script src="js/demo/harness.js"></script>
+  <script>
+    (function () {
+      var canvas = document.getElementById('pmv-canvas');
+      var svg = document.getElementById('pmv-svg');
+
+      var scene = new PMV.World.SceneManager();
+      scene.init({ canvas: canvas, svg: svg, seed: 1337, fps: 30, initialProgress: 0 });
+
+      var theme = new PMV.Themes.Recife.ThemeModule();
+      scene.setTheme(theme);
+
+      var harness = new PMV.Demo.Harness(scene);
+      var initial = harness.loadProgress();
+      if (initial > 0) scene.onFocusComplete(initial);
+      harness.mount(document.getElementById('pmv-demo-root'));
+
+      scene.start();
+    })();
+  </script>
+</body>
+</html>
