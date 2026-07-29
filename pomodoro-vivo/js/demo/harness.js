@@ -63,6 +63,38 @@
     resetBtn.textContent = 'Zerar demo (nova cena)';
     card.appendChild(resetBtn);
 
+    var timeLabel = document.createElement('div');
+    timeLabel.className = 'pmv-demo-subtitle';
+    timeLabel.textContent = 'Horário (prévia)';
+    card.appendChild(timeLabel);
+
+    var timeRow = document.createElement('div');
+    timeRow.className = 'pmv-demo-time-row';
+    var TIME_OPTIONS = [
+      { label: 'Auto', hour: null },
+      { label: 'Manhã', hour: 8 },
+      { label: 'Meio-dia', hour: 13 },
+      { label: 'Pôr do sol', hour: 19 },
+      { label: 'Noite', hour: 22 }
+    ];
+    var timeButtons = [];
+    TIME_OPTIONS.forEach(function (opt) {
+      var btn = document.createElement('button');
+      btn.className = 'pmv-demo-time-btn';
+      btn.type = 'button';
+      btn.textContent = opt.label;
+      btn.addEventListener('click', function () {
+        if (self.scene.theme && typeof self.scene.theme.setTimeOverrideHour === 'function') {
+          self.scene.theme.setTimeOverrideHour(opt.hour);
+        }
+        timeButtons.forEach(function (b) { b.classList.toggle('pmv-active', b === btn); });
+      });
+      timeRow.appendChild(btn);
+      timeButtons.push(btn);
+    });
+    timeButtons[0].classList.add('pmv-active'); // "Auto" começa selecionado
+    card.appendChild(timeRow);
+
     var note = document.createElement('div');
     note.className = 'pmv-demo-note';
     note.textContent = 'Vitrine de desenvolvimento. Fauna e flora aparecem quando os componentes SVG do Gemini forem integrados.';

@@ -98,5 +98,10 @@
     this.background.draw(ctx, camera, width, height);
   };
 
+  // Prévia de horário do dia (vitrine/testes) - null volta ao horário real.
+  RecifeTheme.prototype.setTimeOverrideHour = function (hour) {
+    this.background.setTimeOverrideHour(hour);
+  };
+
   PMV.Themes.Recife.ThemeModule = RecifeTheme;
 })(window.PMV = window.PMV || {});

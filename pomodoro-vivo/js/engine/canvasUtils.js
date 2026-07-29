@@ -121,6 +121,29 @@
     });
   };
 
+  // Interpola linearmente entre 2 hex colors (t=0 -> hexA, t=1 -> hexB) -
+  // usado pra transição suave entre horários do dia e pra neblina de
+  // profundidade (mistura a cor original com a cor da neblina).
+  CanvasUtils.lerpHexColor = function (hexA, hexB, t) {
+    hexA = hexA.replace('#', '');
+    hexB = hexB.replace('#', '');
+    var ar = parseInt(hexA.substring(0, 2), 16), ag = parseInt(hexA.substring(2, 4), 16), ab = parseInt(hexA.substring(4, 6), 16);
+    var br = parseInt(hexB.substring(0, 2), 16), bg = parseInt(hexB.substring(2, 4), 16), bb = parseInt(hexB.substring(4, 6), 16);
+    var r = Math.round(CanvasUtils.lerp(ar, br, t));
+    var g = Math.round(CanvasUtils.lerp(ag, bg, t));
+    var b = Math.round(CanvasUtils.lerp(ab, bb, t));
+    function h(n) { n = CanvasUtils.clamp(n, 0, 255); var s = n.toString(16); return s.length === 1 ? '0' + s : s; }
+    return '#' + h(r) + h(g) + h(b);
+  };
+
+  CanvasUtils.hexToRgba = function (hex, alpha) {
+    hex = hex.replace('#', '');
+    var r = parseInt(hex.substring(0, 2), 16);
+    var g = parseInt(hex.substring(2, 4), 16);
+    var b = parseInt(hex.substring(4, 6), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+  };
+
   // ---- Blob orgânico (pedrinhas, formas irregulares arredondadas) ----
   // radii: array de multiplicadores de raio por amostra angular (ex.: 7-9
   // valores em torno de 1.0) - dá o contorno irregular sem virar polígono

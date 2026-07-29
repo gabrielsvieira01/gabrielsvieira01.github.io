@@ -139,6 +139,38 @@ html, body {
   margin-bottom: 8px;
 }
 
+.pmv-demo-subtitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin: 12px 0 6px;
+}
+
+.pmv-demo-time-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pmv-demo-time-btn {
+  border: 1px solid rgba(18, 48, 71, 0.15);
+  background: transparent;
+  color: var(--pmv-ink);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pmv-demo-time-btn.pmv-active {
+  background: var(--pmv-ink);
+  color: white;
+  border-color: var(--pmv-ink);
+}
+
 .pmv-demo-bar-track {
   width: 100%;
   height: 8px;

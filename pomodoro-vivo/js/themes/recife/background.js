@@ -19,6 +19,7 @@
     this._width = 0;
     this._height = 0;
     this._rng = null;
+    this._timeOverrideHour = null;
   }
 
   // ---- Envelopes autorais (direção de arte) ----
@@ -37,6 +38,64 @@
     { top: '#aab3b8', bottom: '#5f686d' },
     { top: '#8f8070', bottom: '#463d33' }
   ];
+
+  // ---- Horário do dia ----
+  // Paletas-chave por hora (0-24h), interpoladas linearmente entre as duas
+  // mais próximas. Cada uma define: gradiente da água, cor/intensidade dos
+  // raios de sol, e a cor "ambiente" usada pela neblina de profundidade
+  // (mistura tudo que está mais ao fundo em direção a essa cor).
+  var TIME_KEYFRAMES = [
+    { hour: 0, water: [[0, '#2a3a52'], [0.18, '#1c2c44'], [0.42, '#142033'], [0.68, '#0c1624'], [1, '#050a14']], ray: '#aac9ff', rayOpacityMul: 0.30, fog: '#0a1420' },
+    { hour: 5, water: [[0, '#8aa3c2'], [0.18, '#6a87ab'], [0.42, '#4a6482'], [0.68, '#2f4258'], [1, '#182636']], ray: '#ffd9c2', rayOpacityMul: 0.55, fog: '#33465c' },
+    { hour: 8, water: [[0, '#c8ecec'], [0.18, '#8fd8d0'], [0.42, '#4aa8ae'], [0.68, '#256e88'], [1, '#0e3c5c']], ray: '#fff3d6', rayOpacityMul: 0.85, fog: '#5f96a3' },
+    { hour: 13, water: [[0, '#bdeef0'], [0.18, '#7fd3d6'], [0.42, '#3f9fb0'], [0.68, '#1f6a8c'], [1, '#0c3a5e']], ray: '#ffffff', rayOpacityMul: 1.0, fog: '#6fa6ae' },
+    { hour: 17, water: [[0, '#e6dfa8'], [0.18, '#a9d2b6'], [0.42, '#4f9aa0'], [0.68, '#255f7c'], [1, '#0c3552']], ray: '#ffe2ad', rayOpacityMul: 0.9, fog: '#7a8a92' },
+    { hour: 19, water: [[0, '#f2a56b'], [0.18, '#d97e88'], [0.42, '#79598f'], [0.68, '#3c3f6e'], [1, '#181c3a']], ray: '#ffb27a', rayOpacityMul: 0.65, fog: '#4a4a5c' },
+    { hour: 21, water: [[0, '#5f6690'], [0.18, '#454b78'], [0.42, '#2e3358'], [0.68, '#1a1e38'], [1, '#0a0c1e']], ray: '#c9b8ff', rayOpacityMul: 0.40, fog: '#1c2438' },
+    { hour: 24, water: [[0, '#2a3a52'], [0.18, '#1c2c44'], [0.42, '#142033'], [0.68, '#0c1624'], [1, '#050a14']], ray: '#aac9ff', rayOpacityMul: 0.30, fog: '#0a1420' }
+  ];
+
+  function getTimePalette(hourFraction) {
+    hourFraction = ((hourFraction % 24) + 24) % 24;
+    var a = TIME_KEYFRAMES[0], b = TIME_KEYFRAMES[TIME_KEYFRAMES.length - 1];
+    for (var i = 0; i < TIME_KEYFRAMES.length - 1; i++) {
+      if (hourFraction >= TIME_KEYFRAMES[i].hour && hourFraction <= TIME_KEYFRAMES[i + 1].hour) {
+        a = TIME_KEYFRAMES[i]; b = TIME_KEYFRAMES[i + 1];
+        break;
+      }
+    }
+    var span = (b.hour - a.hour) || 1;
+    var t = CanvasUtils.clamp((hourFraction - a.hour) / span, 0, 1);
+    return {
+      waterStops: a.water.map(function (stop, idx) {
+        return [stop[0], CanvasUtils.lerpHexColor(stop[1], b.water[idx][1], t)];
+      }),
+      rayColor: CanvasUtils.lerpHexColor(a.ray, b.ray, t),
+      rayOpacityMul: CanvasUtils.lerp(a.rayOpacityMul, b.rayOpacityMul, t),
+      fogColor: CanvasUtils.lerpHexColor(a.fog, b.fog, t)
+    };
+  }
+
+  // ---- Neblina de profundidade ----
+  // Quanto mais ao fundo (depth menor), mais a cor original se mistura com
+  // a cor "ambiente" do horário atual - fica mais escuro E com menos
+  // contraste/visibilidade, como luz se espalhando na água. FOG_STRENGTH
+  // é o quanto isso pesa no total.
+  var FOG_STRENGTH = 0.58;
+
+  function fogAmountForDepth(depth) {
+    return CanvasUtils.clamp((1 - depth) * FOG_STRENGTH, 0, 0.85);
+  }
+
+  function applyFog(hexColor, fogColorHex, depth) {
+    return CanvasUtils.lerpHexColor(hexColor, fogColorHex, fogAmountForDepth(depth));
+  }
+
+  function applyFogToStops(stops, fogColorHex, depth) {
+    var amount = fogAmountForDepth(depth);
+    if (amount <= 0) return stops;
+    return stops.map(function (s) { return [s[0], CanvasUtils.lerpHexColor(s[1], fogColorHex, amount)]; });
+  }
 
   function pickSeed(rng) {
     return Math.floor(rng() * 2147483647) || 1;
@@ -109,7 +168,8 @@
     widthUnitRange: [0.005, 0.014],
     lengthFracRange: [0.52, 0.82],
     opacityRange: [0.09, 0.20],
-    tiltDegRange: [-9, 9],
+    baseTiltDegRange: [-8, 8],  // direção geral da luz nessa sessão - todos os raios seguem ela
+    tiltJitterDeg: 1.6,          // variação pequena por raio, nunca inverte o sentido
     swaySpeedRange: [0.09, 0.17]
   };
 
@@ -142,7 +202,7 @@
       rocks: { density: CanvasUtils.randRange(rng, ROCK_WALL_DEF.densityRange[0], ROCK_WALL_DEF.densityRange[1]), seed: pickSeed(rng) },
       pebbles: pebbleLayout,
       sandTexture: textureLayout,
-      godRays: { density: CanvasUtils.randRange(rng, GOD_RAY_DEF.densityRange[0], GOD_RAY_DEF.densityRange[1]), seed: pickSeed(rng) }
+      godRays: { density: CanvasUtils.randRange(rng, GOD_RAY_DEF.densityRange[0], GOD_RAY_DEF.densityRange[1]), seed: pickSeed(rng), baseTiltDeg: CanvasUtils.randRange(rng, GOD_RAY_DEF.baseTiltDegRange[0], GOD_RAY_DEF.baseTiltDegRange[1]) }
     };
   };
 
@@ -260,7 +320,7 @@
         widthUnit: CanvasUtils.randRange(localRng, GOD_RAY_DEF.widthUnitRange[0], GOD_RAY_DEF.widthUnitRange[1]),
         lengthFrac: CanvasUtils.randRange(localRng, GOD_RAY_DEF.lengthFracRange[0], GOD_RAY_DEF.lengthFracRange[1]),
         opacity: CanvasUtils.randRange(localRng, GOD_RAY_DEF.opacityRange[0], GOD_RAY_DEF.opacityRange[1]),
-        tiltDeg: CanvasUtils.randRange(localRng, GOD_RAY_DEF.tiltDegRange[0], GOD_RAY_DEF.tiltDegRange[1]),
+        tiltDeg: godRayLayout.baseTiltDeg + CanvasUtils.randRange(localRng, -GOD_RAY_DEF.tiltJitterDeg, GOD_RAY_DEF.tiltJitterDeg),
         swaySpeed: CanvasUtils.randRange(localRng, GOD_RAY_DEF.swaySpeedRange[0], GOD_RAY_DEF.swaySpeedRange[1]),
         phase: localRng() * Math.PI * 2
       });
@@ -336,6 +396,20 @@
     return CanvasUtils.sampleSmoothPathY(this._duneSegments.front, x);
   };
 
+  // Força um horário específico (0-24, fracionário) pra pré-visualização;
+  // null/undefined volta a usar o horário real do aparelho.
+  Background.prototype.setTimeOverrideHour = function (hour) {
+    this._timeOverrideHour = (hour === null || hour === undefined) ? null : hour;
+  };
+
+  Background.prototype._resolveHourFraction = function () {
+    if (this._timeOverrideHour !== null && this._timeOverrideHour !== undefined) {
+      return this._timeOverrideHour;
+    }
+    var now = new Date();
+    return now.getHours() + now.getMinutes() / 60;
+  };
+
   Background.prototype.update = function (dt) {
     this._time += dt;
     var h = this._height;
@@ -356,39 +430,37 @@
     this._width = width;
     this._height = height;
 
-    var waterGrad = CanvasUtils.makeVerticalGradient(ctx, 0, 0, 0, height, [
-      [0, '#bdeef0'],
-      [0.18, '#7fd3d6'],
-      [0.42, '#3f9fb0'],
-      [0.68, '#1f6a8c'],
-      [1, '#0c3a5e']
-    ]);
+    var palette = getTimePalette(this._resolveHourFraction());
+    this._currentPalette = palette;
+
+    var waterGrad = CanvasUtils.makeVerticalGradient(ctx, 0, 0, 0, height, palette.waterStops);
     ctx.fillStyle = waterGrad;
     ctx.fillRect(0, 0, width, height);
 
-    this._drawGodRays(ctx, width, height, camera);
-    this._drawRockWalls(ctx, camera);
+    this._drawGodRays(ctx, width, height, camera, palette);
+    this._drawRockWalls(ctx, camera, palette);
 
-    this._drawDuneLayer(ctx, width, height, camera, 'back');
-    this._drawSandTexture(ctx, camera, 'back');
-    this._drawPebbleLayer(ctx, camera, 'back');
+    this._drawDuneLayer(ctx, width, height, camera, 'back', palette);
+    this._drawSandTexture(ctx, camera, 'back', palette);
+    this._drawPebbleLayer(ctx, camera, 'back', palette);
     this._drawCaustics(ctx, width, height);
 
-    this._drawDuneLayer(ctx, width, height, camera, 'mid');
-    this._drawSandTexture(ctx, camera, 'mid');
-    this._drawPebbleLayer(ctx, camera, 'mid');
+    this._drawDuneLayer(ctx, width, height, camera, 'mid', palette);
+    this._drawSandTexture(ctx, camera, 'mid', palette);
+    this._drawPebbleLayer(ctx, camera, 'mid', palette);
     this._drawParticles(ctx);
 
-    this._drawDuneLayer(ctx, width, height, camera, 'front');
-    this._drawSandTexture(ctx, camera, 'front');
-    this._drawPebbleLayer(ctx, camera, 'front');
+    this._drawDuneLayer(ctx, width, height, camera, 'front', palette);
+    this._drawSandTexture(ctx, camera, 'front', palette);
+    this._drawPebbleLayer(ctx, camera, 'front', palette);
 
-    this._drawDepthFog(ctx, width, height);
+    this._drawDepthFog(ctx, width, height, palette);
   };
 
-  // Feixes de luz finos e nítidos (não trapézios largos), com leve
-  // desfoque via ctx.filter pra um brilho suave em vez de borda dura.
-  Background.prototype._drawGodRays = function (ctx, width, height, camera) {
+  // Feixes de luz finos e nítidos (não trapézios largos), todos na mesma
+  // direção geral (baseTiltDeg da sessão + jitter pequeno - nunca cruzam),
+  // com leve desfoque via ctx.filter e cor/intensidade do horário atual.
+  Background.prototype._drawGodRays = function (ctx, width, height, camera, palette) {
     if (!this._godRays) return;
     var refUnit = Math.min(width, height);
     ctx.save();
@@ -403,11 +475,12 @@
       var tiltPx = Math.tan(ray.tiltDeg * Math.PI / 180) * rayLen;
       var bottomX = topX + tiltPx;
       var rayW = Math.max(1.2, ray.widthUnit * refUnit);
+      var opacity = ray.opacity * palette.rayOpacityMul;
 
       var grad = ctx.createLinearGradient(topX, 0, bottomX, rayLen);
-      grad.addColorStop(0, 'rgba(255,255,255,' + ray.opacity + ')');
-      grad.addColorStop(0.6, 'rgba(255,255,255,' + (ray.opacity * 0.35).toFixed(3) + ')');
-      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      grad.addColorStop(0, CanvasUtils.hexToRgba(palette.rayColor, opacity));
+      grad.addColorStop(0.6, CanvasUtils.hexToRgba(palette.rayColor, opacity * 0.35));
+      grad.addColorStop(1, CanvasUtils.hexToRgba(palette.rayColor, 0));
       ctx.fillStyle = grad;
       ctx.beginPath();
       ctx.moveTo(topX - rayW / 2, 0);
@@ -423,21 +496,24 @@
   };
 
   // Paredões rochosos - boulders arredondados e largos (parede contínua ao
-  // fundo), base sempre afundada na curva real da duna de trás.
-  Background.prototype._drawRockWalls = function (ctx, camera) {
+  // fundo), base sempre afundada na curva real da duna de trás. Cor
+  // misturada com a neblina de profundidade (ficam mais hazy/escuros).
+  Background.prototype._drawRockWalls = function (ctx, camera, palette) {
     if (!this._rockPolys) return;
     ctx.save();
     var parallax = camera ? camera.parallaxFor(0.25) : { x: 0, y: 0 };
     ctx.translate(parallax.x * 0.4, parallax.y * 0.15);
 
+    var rockStops = applyFogToStops([
+      [0, '#3d5b6e'],
+      [0.55, '#223742'],
+      [1, '#0f1c24']
+    ], palette.fogColor, 0.25);
+
     this._rockPolys.forEach(function (points) {
       var top = points.reduce(function (m, p) { return Math.min(m, p.y); }, Infinity);
       var bottom = points[0].y;
-      var grad = CanvasUtils.makeVerticalGradient(ctx, 0, top, 0, bottom, [
-        [0, '#3d5b6e'],
-        [0.55, '#223742'],
-        [1, '#0f1c24']
-      ]);
+      var grad = CanvasUtils.makeVerticalGradient(ctx, 0, top, 0, bottom, rockStops);
       ctx.fillStyle = grad;
       ctx.beginPath();
       ctx.moveTo(points[0].x, points[0].y);
@@ -498,12 +574,13 @@
   };
 
   // Camada única de duna (back|mid|front) - mesma paleta de areia
-  // (SAND_STOPS), só escurecida por shadeFactor conforme a profundidade.
-  Background.prototype._drawDuneLayer = function (ctx, width, height, camera, key) {
+  // (SAND_STOPS), escurecida por shadeFactor e misturada com a neblina de
+  // profundidade (mais forte quanto mais ao fundo).
+  Background.prototype._drawDuneLayer = function (ctx, width, height, camera, key, palette) {
     var pts = this._duneTracePts && this._duneTracePts[key];
     if (!pts) return;
     var def = DUNE_LAYER_DEFS[key];
-    var colorStops = CanvasUtils.scaleStops(SAND_STOPS, def.shadeFactor);
+    var colorStops = applyFogToStops(CanvasUtils.scaleStops(SAND_STOPS, def.shadeFactor), palette.fogColor, def.depth);
 
     ctx.save();
     var parallax = camera ? camera.parallaxFor(def.depth) : { x: 0, y: 0 };
@@ -536,15 +613,16 @@
 
   // Textura da areia: linhas de contorno "eco" (ondulações) seguindo a
   // mesma curva em profundidades crescentes, mais grão fino (speckles).
-  Background.prototype._drawSandTexture = function (ctx, camera, key) {
+  // Cores também passam pela neblina de profundidade.
+  Background.prototype._drawSandTexture = function (ctx, camera, key, palette) {
     var pts = this._duneTracePts && this._duneTracePts[key];
     var speckles = this._sandSpecklesPx && this._sandSpecklesPx[key];
     if (!pts) return;
     var def = DUNE_LAYER_DEFS[key];
     var texDef = SAND_TEXTURE_DEFS[key];
     var refUnit = Math.min(this._width, this._height);
-    var darkLine = CanvasUtils.scaleHexColor(SAND_STOPS[2][1], def.shadeFactor * 0.75);
-    var lightLine = CanvasUtils.scaleHexColor(SAND_STOPS[0][1], Math.min(1, def.shadeFactor * 1.15));
+    var darkLine = applyFog(CanvasUtils.scaleHexColor(SAND_STOPS[2][1], def.shadeFactor * 0.75), palette.fogColor, def.depth);
+    var lightLine = applyFog(CanvasUtils.scaleHexColor(SAND_STOPS[0][1], Math.min(1, def.shadeFactor * 1.15)), palette.fogColor, def.depth);
 
     ctx.save();
     var parallax = camera ? camera.parallaxFor(def.depth) : { x: 0, y: 0 };
@@ -565,7 +643,7 @@
     if (speckles) {
       speckles.forEach(function (s) {
         ctx.beginPath();
-        ctx.fillStyle = CanvasUtils.scaleHexColor(SAND_STOPS[1][1], def.shadeFactor * s.tone);
+        ctx.fillStyle = applyFog(CanvasUtils.scaleHexColor(SAND_STOPS[1][1], def.shadeFactor * s.tone), palette.fogColor, def.depth);
         ctx.globalAlpha = s.opacity;
         ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
         ctx.fill();
@@ -577,8 +655,9 @@
   };
 
   // Pedrinhas de uma camada - blob orgânico irregular, sempre no Y real
-  // da curva daquela camada, com sombra de contato.
-  Background.prototype._drawPebbleLayer = function (ctx, camera, key) {
+  // da curva daquela camada, com sombra de contato. Cor passa pela
+  // neblina de profundidade também.
+  Background.prototype._drawPebbleLayer = function (ctx, camera, key, palette) {
     var pebbles = this._pebblesPx && this._pebblesPx[key];
     if (!pebbles || pebbles.length === 0) return;
     var def = DUNE_LAYER_DEFS[key];
@@ -590,8 +669,8 @@
 
     pebbles.forEach(function (p) {
       var variant = PEBBLE_VARIANTS[p.colorVariant] || PEBBLE_VARIANTS[0];
-      var topColor = CanvasUtils.scaleHexColor(variant.top, shadeFactor);
-      var bottomColor = CanvasUtils.scaleHexColor(variant.bottom, shadeFactor);
+      var topColor = applyFog(CanvasUtils.scaleHexColor(variant.top, shadeFactor), palette.fogColor, def.depth);
+      var bottomColor = applyFog(CanvasUtils.scaleHexColor(variant.bottom, shadeFactor), palette.fogColor, def.depth);
 
       ctx.save();
       ctx.translate(p.x, p.y + p.r * 0.35);
@@ -622,10 +701,15 @@
     ctx.restore();
   };
 
-  Background.prototype._drawDepthFog = function (ctx, width, height) {
+  // Neblina do fundo do poço d'água (parte de baixo da tela) - usa a
+  // mesma cor "ambiente" do horário atual, então à noite fica bem mais
+  // escura/azulada e ao entardecer ganha um tom quente.
+  Background.prototype._drawDepthFog = function (ctx, width, height, palette) {
+    var fogColor = palette.fogColor;
+    var darkFog = CanvasUtils.scaleHexColor(fogColor, 0.35);
     var grad = CanvasUtils.makeVerticalGradient(ctx, 0, height * 0.55, 0, height, [
-      [0, 'rgba(6,34,54,0)'],
-      [1, 'rgba(4,22,38,0.35)']
+      [0, CanvasUtils.hexToRgba(darkFog, 0)],
+      [1, CanvasUtils.hexToRgba(darkFog, 0.40)]
     ]);
     ctx.fillStyle = grad;
     ctx.fillRect(0, height * 0.55, width, height * 0.45);
