@@ -11,7 +11,7 @@
     this._duneSegments = null;  // {back, mid, front} -> segmentos da curva suave
     this._duneTracePts = null;  // {back, mid, front} -> pontos amostrados (p/ textura)
     this._rockPolys = null;
-    this._farSilhouettes = null; // silhuetas bem distantes (nova camada de profundidade)
+    this._farRidgeTracePts = null; // cordilheira contínua bem ao fundo (nova camada de profundidade)
     this._pebblesPx = null;     // {back:[...], mid:[...], front:[...]}
     this._sandSpecklesPx = null; // {back:[...], mid:[...], front:[...]}
     this._sandPatchesPx = null;  // {back:[...], mid:[...], front:[...]} - manchas amplas
@@ -157,20 +157,20 @@
     tiltDegRange: [-7, 7]
   };
 
-  // Silhuetas bem distantes (tipo uma cordilheira/parede de recife vista
-  // através de muita água) - camada extra de profundidade, mais ao fundo
-  // que os paredões. Preenche a água aberta com formas grandes, suaves e
-  // bem desbotadas (quase fundidas com a neblina) - nunca chama atenção,
-  // só dá escala e sensação de "o oceano continua além da tela".
-  var FAR_SILHOUETTE_DEF = {
-    depth: 0.08,
-    densityRange: [2.6, 4.2],
-    minCount: 3, maxCount: 6,
-    xRange: [-0.18, 1.18],
-    widthUnitRange: [0.36, 0.66],
-    heightUnitRange: [0.10, 0.20],
-    baseYfRange: [0.40, 0.53],
-    pointsRange: [6, 9]
+  // Cordilheira bem distante - reaproveita EXATAMENTE a técnica de curva
+  // suave das dunas (generateDuneLayout/buildDuneAnchorPoints), só que
+  // preenche até o FUNDO do canvas (como as dunas de areia) em vez de
+  // parar numa base própria - isso garante que a base nunca fica exposta
+  // (paredões/duna desenhados por cima sempre escondem a parte de baixo)
+  // e que é uma faixa CONTÍNUA cobrindo toda a largura, sem espaço entre
+  // um "pico" e outro. Fica bem ao fundo, mais desbotada que os paredões.
+  var FAR_RIDGE_DEF = {
+    depth: 0.07,
+    baseYf: 0.47,
+    amplitudeUnitRange: [0.05, 0.09],
+    wavelengthUnitRange: [0.20, 0.32],
+    minAnchors: 7, maxAnchors: 14,
+    xJitterF: 0.035
   };
 
   var PEBBLE_LAYER_DEFS = {
@@ -239,7 +239,7 @@
     return {
       dune: duneLayout,
       rocks: { density: CanvasUtils.randRange(rng, ROCK_WALL_DEF.densityRange[0], ROCK_WALL_DEF.densityRange[1]), seed: pickSeed(rng) },
-      farSilhouettes: { density: CanvasUtils.randRange(rng, FAR_SILHOUETTE_DEF.densityRange[0], FAR_SILHOUETTE_DEF.densityRange[1]), seed: pickSeed(rng) },
+      farRidge: generateDuneLayout(rng, FAR_RIDGE_DEF),
       pebbles: pebbleLayout,
       sandTexture: textureLayout,
       godRays: { density: CanvasUtils.randRange(rng, GOD_RAY_DEF.densityRange[0], GOD_RAY_DEF.densityRange[1]), seed: pickSeed(rng), baseTiltDeg: CanvasUtils.randRange(rng, GOD_RAY_DEF.baseTiltDegRange[0], GOD_RAY_DEF.baseTiltDegRange[1]) }
@@ -326,36 +326,6 @@
     }
     polys.sort(function (a, b) { return a[0].x - b[0].x; });
     return polys;
-  }
-
-  // Silhuetas distantes (cordilheira/parede de recife bem ao fundo) - não
-  // se apoiam na duna, flutuam numa faixa de altura própria, bem mais
-  // enevoadas/desbotadas que os paredões normais.
-  function buildFarSilhouettes(layout, width, height, refUnit) {
-    var localRng = CanvasUtils.mulberry32(layout.seed);
-    var count = densityCount(layout.density, width, refUnit, FAR_SILHOUETTE_DEF.minCount, FAR_SILHOUETTE_DEF.maxCount);
-    var shapes = [];
-    for (var i = 0; i < count; i++) {
-      var baseX = CanvasUtils.randRange(localRng, FAR_SILHOUETTE_DEF.xRange[0], FAR_SILHOUETTE_DEF.xRange[1]) * width;
-      var wPx = CanvasUtils.randRange(localRng, FAR_SILHOUETTE_DEF.widthUnitRange[0], FAR_SILHOUETTE_DEF.widthUnitRange[1]) * refUnit;
-      var hPx = CanvasUtils.randRange(localRng, FAR_SILHOUETTE_DEF.heightUnitRange[0], FAR_SILHOUETTE_DEF.heightUnitRange[1]) * refUnit;
-      var baseY = CanvasUtils.randRange(localRng, FAR_SILHOUETTE_DEF.baseYfRange[0], FAR_SILHOUETTE_DEF.baseYfRange[1]) * height;
-      var pointCount = Math.round(CanvasUtils.randRange(localRng, FAR_SILHOUETTE_DEF.pointsRange[0], FAR_SILHOUETTE_DEF.pointsRange[1]));
-
-      var profilePts = [{ x: baseX - wPx / 2, y: baseY }];
-      for (var j = 0; j <= pointCount; j++) {
-        var u = j / pointCount;
-        var envelope = Math.sin(u * Math.PI);
-        var jag = CanvasUtils.randRange(localRng, 0.6, 1.0);
-        profilePts.push({ x: baseX - wPx / 2 + u * wPx, y: baseY - envelope * jag * hPx });
-      }
-      profilePts.push({ x: baseX + wPx / 2, y: baseY });
-
-      var segs = CanvasUtils.buildSmoothSegments(profilePts);
-      var smoothPts = CanvasUtils.traceSmoothPath(segs, profilePts[0].x, profilePts[profilePts.length - 1].x, 22);
-      shapes.push(smoothPts);
-    }
-    return shapes;
   }
 
   function generatePebbleBlob(rng) {
@@ -458,7 +428,10 @@
     });
 
     this._rockPolys = buildRockPolys(layout.rocks, this._duneSegments.back, width, height, refUnit);
-    this._farSilhouettes = buildFarSilhouettes(layout.farSilhouettes, width, height, refUnit);
+
+    var farRidgePts = buildDuneAnchorPoints(layout.farRidge, FAR_RIDGE_DEF, width, height, refUnit);
+    var farRidgeSegs = CanvasUtils.buildSmoothSegments(farRidgePts);
+    this._farRidgeTracePts = CanvasUtils.traceSmoothPath(farRidgeSegs, -40, width + 40, 64);
 
     this._pebblesPx = {};
     this._sandSpecklesPx = {};
@@ -572,7 +545,7 @@
     ctx.fillRect(0, 0, width, height);
 
     this._drawSurfaceGlow(ctx, width, height, palette);
-    this._drawFarSilhouettes(ctx, camera, palette);
+    this._drawFarRidge(ctx, width, height, camera, palette);
     this._drawGodRays(ctx, width, height, camera, palette);
     this._drawParticleTier(ctx, 'back');
     this._drawRockWalls(ctx, camera, palette);
@@ -618,27 +591,29 @@
     ctx.restore();
   };
 
-  // Silhuetas bem distantes (cordilheira enevoada) - preenchem a água
-  // aberta sem chamar atenção; cor quase totalmente fundida com a
-  // neblina, bem desfocada.
-  Background.prototype._drawFarSilhouettes = function (ctx, camera, palette) {
-    if (!this._farSilhouettes) return;
-    var refUnit = Math.min(this._width, this._height);
+  // Cordilheira bem distante - preenche até o FUNDO do canvas (como uma
+  // duna), então nunca tem base reta exposta: os paredões e a duna de trás
+  // desenhados por cima sempre cobrem a parte de baixo. É uma faixa
+  // contínua (mesma curva suave, sem gaps entre "picos"), bem enevoada e
+  // desfocada, quase fundida com a cor de neblina do horário atual.
+  Background.prototype._drawFarRidge = function (ctx, width, height, camera, palette) {
+    var pts = this._farRidgeTracePts;
+    if (!pts) return;
+    var refUnit = Math.min(width, height);
     ctx.save();
-    var parallax = camera ? camera.parallaxFor(FAR_SILHOUETTE_DEF.depth) : { x: 0, y: 0 };
+    var parallax = camera ? camera.parallaxFor(FAR_RIDGE_DEF.depth) : { x: 0, y: 0 };
     ctx.translate(parallax.x * 0.5, parallax.y * 0.1);
-    if ('filter' in ctx) ctx.filter = 'blur(' + Math.max(2, refUnit * 0.018) + 'px)';
+    if ('filter' in ctx) ctx.filter = 'blur(' + Math.max(2, refUnit * 0.014) + 'px)';
 
-    var baseColor = applyFog('#3a5468', palette.fogColor, FAR_SILHOUETTE_DEF.depth);
-    var fillStyle = CanvasUtils.hexToRgba(baseColor, 0.55);
-    this._farSilhouettes.forEach(function (points) {
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
-      for (var i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
-      ctx.closePath();
-      ctx.fillStyle = fillStyle;
-      ctx.fill();
-    });
+    var baseColor = applyFog('#3a5468', palette.fogColor, FAR_RIDGE_DEF.depth);
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+    ctx.lineTo(width + 40, height + 40);
+    ctx.lineTo(-40, height + 40);
+    ctx.closePath();
+    ctx.fillStyle = CanvasUtils.hexToRgba(baseColor, 0.6);
+    ctx.fill();
 
     if ('filter' in ctx) ctx.filter = 'none';
     ctx.restore();
