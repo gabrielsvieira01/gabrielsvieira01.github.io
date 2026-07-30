@@ -11,10 +11,12 @@
     this._duneSegments = null;  // {back, mid, front} -> segmentos da curva suave
     this._duneTracePts = null;  // {back, mid, front} -> pontos amostrados (p/ textura)
     this._rockPolys = null;
+    this._farSilhouettes = null; // silhuetas bem distantes (nova camada de profundidade)
     this._pebblesPx = null;     // {back:[...], mid:[...], front:[...]}
     this._sandSpecklesPx = null; // {back:[...], mid:[...], front:[...]}
+    this._sandPatchesPx = null;  // {back:[...], mid:[...], front:[...]} - manchas amplas
     this._godRays = null;
-    this._particles = [];
+    this._particleTiers = null;  // {back:[...], mid:[...], front:[...]}
     this._time = 0;
     this._width = 0;
     this._height = 0;
@@ -137,15 +139,38 @@
   var DUNE_LAYER_ORDER = ['back', 'mid', 'front'];
 
   // Paredões arredondados (boulder), bem mais largos que altos - leem como
-  // parede rochosa contínua ao fundo, não picos finos isolados.
+  // parede rochosa contínua ao fundo, não picos finos isolados. Nascem
+  // em pequenos agrupamentos (não espalhados uniformemente) e cada um tem
+  // uma leve inclinação própria - a base nunca é afetada pela inclinação
+  // (ela permanece ancorada na duna; só a silhueta acima dela se inclina).
   var ROCK_WALL_DEF = {
     densityRange: [4.6, 7.2],
     minCount: 5, maxCount: 16,
-    widthUnitRange: [0.24, 0.46],
-    heightUnitRange: [0.19, 0.34],
+    widthUnitRange: [0.28, 0.52],
+    heightUnitRange: [0.22, 0.40],
     pointsRange: [8, 13],
     burialUnitRange: [0.014, 0.032],
-    xRange: [-0.08, 1.08]
+    xRange: [-0.10, 1.10],
+    clusterCountRange: [2, 4],
+    clusterSpreadF: 0.055,
+    lonerChance: 0.16,
+    tiltDegRange: [-7, 7]
+  };
+
+  // Silhuetas bem distantes (tipo uma cordilheira/parede de recife vista
+  // através de muita água) - camada extra de profundidade, mais ao fundo
+  // que os paredões. Preenche a água aberta com formas grandes, suaves e
+  // bem desbotadas (quase fundidas com a neblina) - nunca chama atenção,
+  // só dá escala e sensação de "o oceano continua além da tela".
+  var FAR_SILHOUETTE_DEF = {
+    depth: 0.08,
+    densityRange: [2.6, 4.2],
+    minCount: 3, maxCount: 6,
+    xRange: [-0.18, 1.18],
+    widthUnitRange: [0.36, 0.66],
+    heightUnitRange: [0.10, 0.20],
+    baseYfRange: [0.40, 0.53],
+    pointsRange: [6, 9]
   };
 
   var PEBBLE_LAYER_DEFS = {
@@ -157,23 +182,37 @@
   var PEBBLE_BLOB_JITTER_RANGE = [0.70, 1.24];
 
   var SAND_TEXTURE_DEFS = {
-    back: { rippleOffsetsUnit: [0.012, 0.026], speckleDensityRange: [9, 16], speckleSizeUnitRange: [0.0018, 0.0042], speckleDepthUnit: 0.05 },
-    mid: { rippleOffsetsUnit: [0.014, 0.030, 0.048], speckleDensityRange: [13, 22], speckleSizeUnitRange: [0.0022, 0.0052], speckleDepthUnit: 0.065 },
-    front: { rippleOffsetsUnit: [0.016, 0.034, 0.055], speckleDensityRange: [17, 28], speckleSizeUnitRange: [0.0026, 0.0068], speckleDepthUnit: 0.08 }
+    back: { rippleOffsetsUnit: [0.012, 0.026], speckleDensityRange: [9, 16], speckleSizeUnitRange: [0.0018, 0.0042], speckleDepthUnit: 0.05, patchDensityRange: [1, 2], patchSizeUnitRange: [0.05, 0.09] },
+    mid: { rippleOffsetsUnit: [0.014, 0.030, 0.048], speckleDensityRange: [13, 22], speckleSizeUnitRange: [0.0022, 0.0052], speckleDepthUnit: 0.065, patchDensityRange: [2, 3], patchSizeUnitRange: [0.05, 0.10] },
+    front: { rippleOffsetsUnit: [0.016, 0.034, 0.055], speckleDensityRange: [17, 28], speckleSizeUnitRange: [0.0026, 0.0068], speckleDepthUnit: 0.08, patchDensityRange: [2, 4], patchSizeUnitRange: [0.06, 0.12] }
   };
 
+  // Feixes de luz com bem mais variação (largura, intensidade, comprimento)
+  // pra não formar padrão repetitivo - alguns finos e intensos, outros
+  // largos e fracos, alguns curtos (somem rápido), outros longos.
   var GOD_RAY_DEF = {
-    densityRange: [4.5, 7.0],
-    minCount: 4, maxCount: 11,
-    widthUnitRange: [0.005, 0.014],
-    lengthFracRange: [0.52, 0.82],
-    opacityRange: [0.09, 0.20],
+    densityRange: [4.5, 7.5],
+    minCount: 4, maxCount: 12,
+    widthUnitRange: [0.003, 0.020],
+    lengthFracRange: [0.38, 0.88],
+    opacityRange: [0.05, 0.24],
+    blurUnitRange: [0.004, 0.011],
     baseTiltDegRange: [-8, 8],  // direção geral da luz nessa sessão - todos os raios seguem ela
     tiltJitterDeg: 1.6,          // variação pequena por raio, nunca inverte o sentido
-    swaySpeedRange: [0.09, 0.17]
+    swaySpeedRange: [0.06, 0.19]
   };
 
-  // ---- Geração de parâmetros (consome rng - roda 1x por sessão) ----
+  // Partículas em suspensão, em 3 camadas de profundidade - nunca chamam
+  // atenção, só reforçam a sensação de profundidade. Fundo: minúsculas e
+  // quase transparentes, andam bem devagar. Meio: discretas, poucas,
+  // velocidade intermediária. Frente: um pouco maiores, poucas, levemente
+  // desfocadas (mais perto = fora de foco), movimento lento.
+  var PARTICLE_TIER_DEFS = {
+    back: { depth: 0.15, countDivisor: 34000, sizeRange: [0.3, 0.8], speedRange: [1.5, 4], driftRange: [-2, 2], opacityRange: [0.04, 0.10], blurPx: 0 },
+    mid: { depth: 0.5, countDivisor: 46000, sizeRange: [0.6, 1.5], speedRange: [4, 9], driftRange: [-5, 5], opacityRange: [0.10, 0.22], blurPx: 0 },
+    front: { depth: 0.9, countDivisor: 62000, sizeRange: [1.3, 2.6], speedRange: [3, 7], driftRange: [-4, 4], opacityRange: [0.10, 0.20], blurPx: 1.1 }
+  };
+  var PARTICLE_TIER_ORDER = ['back', 'mid', 'front'];
   function generateDuneLayout(rng, def) {
     return {
       baseYf: def.baseYf,
@@ -195,11 +234,12 @@
     var textureLayout = {};
     DUNE_LAYER_ORDER.forEach(function (key) {
       var def = SAND_TEXTURE_DEFS[key];
-      textureLayout[key] = { density: CanvasUtils.randRange(rng, def.speckleDensityRange[0], def.speckleDensityRange[1]), seed: pickSeed(rng) };
+      textureLayout[key] = { density: CanvasUtils.randRange(rng, def.speckleDensityRange[0], def.speckleDensityRange[1]), seed: pickSeed(rng), patchSeed: pickSeed(rng) };
     });
     return {
       dune: duneLayout,
       rocks: { density: CanvasUtils.randRange(rng, ROCK_WALL_DEF.densityRange[0], ROCK_WALL_DEF.densityRange[1]), seed: pickSeed(rng) },
+      farSilhouettes: { density: CanvasUtils.randRange(rng, FAR_SILHOUETTE_DEF.densityRange[0], FAR_SILHOUETTE_DEF.densityRange[1]), seed: pickSeed(rng) },
       pebbles: pebbleLayout,
       sandTexture: textureLayout,
       godRays: { density: CanvasUtils.randRange(rng, GOD_RAY_DEF.densityRange[0], GOD_RAY_DEF.densityRange[1]), seed: pickSeed(rng), baseTiltDeg: CanvasUtils.randRange(rng, GOD_RAY_DEF.baseTiltDegRange[0], GOD_RAY_DEF.baseTiltDegRange[1]) }
@@ -228,14 +268,31 @@
   function buildRockPolys(rockLayout, backSegments, width, height, refUnit) {
     var localRng = CanvasUtils.mulberry32(rockLayout.seed);
     var count = densityCount(rockLayout.density, width, refUnit, ROCK_WALL_DEF.minCount, ROCK_WALL_DEF.maxCount);
+
+    // Agrupamento orgânico: a maioria dos rochedos nasce perto de um dos
+    // poucos "centros de cluster" da sessão; uma fração pequena vira
+    // rochedo solitário. Evita distribuição uniforme/artificial.
+    var clusterCount = Math.round(CanvasUtils.randRange(localRng, ROCK_WALL_DEF.clusterCountRange[0], ROCK_WALL_DEF.clusterCountRange[1]));
+    var clusterCenters = [];
+    for (var c = 0; c < clusterCount; c++) {
+      clusterCenters.push(CanvasUtils.randRange(localRng, ROCK_WALL_DEF.xRange[0], ROCK_WALL_DEF.xRange[1]));
+    }
+
     var polys = [];
     for (var i = 0; i < count; i++) {
-      var xf = CanvasUtils.randRange(localRng, ROCK_WALL_DEF.xRange[0], ROCK_WALL_DEF.xRange[1]);
+      var xf;
+      if (clusterCenters.length && localRng() > ROCK_WALL_DEF.lonerChance) {
+        var center = clusterCenters[Math.floor(localRng() * clusterCenters.length)];
+        xf = CanvasUtils.clamp(center + CanvasUtils.randRange(localRng, -ROCK_WALL_DEF.clusterSpreadF, ROCK_WALL_DEF.clusterSpreadF), ROCK_WALL_DEF.xRange[0], ROCK_WALL_DEF.xRange[1]);
+      } else {
+        xf = CanvasUtils.randRange(localRng, ROCK_WALL_DEF.xRange[0], ROCK_WALL_DEF.xRange[1]);
+      }
       var baseX = xf * width;
       var wPx = CanvasUtils.randRange(localRng, ROCK_WALL_DEF.widthUnitRange[0], ROCK_WALL_DEF.widthUnitRange[1]) * refUnit;
       var hPx = CanvasUtils.randRange(localRng, ROCK_WALL_DEF.heightUnitRange[0], ROCK_WALL_DEF.heightUnitRange[1]) * refUnit;
       var burialPx = CanvasUtils.randRange(localRng, ROCK_WALL_DEF.burialUnitRange[0], ROCK_WALL_DEF.burialUnitRange[1]) * refUnit;
       var pointCount = Math.round(CanvasUtils.randRange(localRng, ROCK_WALL_DEF.pointsRange[0], ROCK_WALL_DEF.pointsRange[1]));
+      var tiltRad = CanvasUtils.randRange(localRng, ROCK_WALL_DEF.tiltDegRange[0], ROCK_WALL_DEF.tiltDegRange[1]) * Math.PI / 180;
 
       // Base ancorada na curva REAL da duna de trás (3 amostras, a mais
       // baixa) + afundamento extra - a duna desenhada por cima sempre
@@ -252,7 +309,12 @@
         var u = j / pointCount;
         var envelope = Math.sin(u * Math.PI);
         var jag = CanvasUtils.randRange(localRng, 0.55, 1.0);
-        profilePts.push({ x: baseX - wPx / 2 + u * wPx, y: baseY - envelope * jag * hPx });
+        var rawX = baseX - wPx / 2 + u * wPx;
+        var rawY = baseY - envelope * jag * hPx;
+        // Inclina só a parte acima da base (shear proporcional à altura) -
+        // a base em si (envelope=0 nas pontas) nunca se move.
+        var shearedX = rawX + (baseY - rawY) * Math.tan(tiltRad);
+        profilePts.push({ x: shearedX, y: rawY });
       }
       profilePts.push({ x: baseX + wPx / 2, y: baseY });
 
@@ -264,6 +326,36 @@
     }
     polys.sort(function (a, b) { return a[0].x - b[0].x; });
     return polys;
+  }
+
+  // Silhuetas distantes (cordilheira/parede de recife bem ao fundo) - não
+  // se apoiam na duna, flutuam numa faixa de altura própria, bem mais
+  // enevoadas/desbotadas que os paredões normais.
+  function buildFarSilhouettes(layout, width, height, refUnit) {
+    var localRng = CanvasUtils.mulberry32(layout.seed);
+    var count = densityCount(layout.density, width, refUnit, FAR_SILHOUETTE_DEF.minCount, FAR_SILHOUETTE_DEF.maxCount);
+    var shapes = [];
+    for (var i = 0; i < count; i++) {
+      var baseX = CanvasUtils.randRange(localRng, FAR_SILHOUETTE_DEF.xRange[0], FAR_SILHOUETTE_DEF.xRange[1]) * width;
+      var wPx = CanvasUtils.randRange(localRng, FAR_SILHOUETTE_DEF.widthUnitRange[0], FAR_SILHOUETTE_DEF.widthUnitRange[1]) * refUnit;
+      var hPx = CanvasUtils.randRange(localRng, FAR_SILHOUETTE_DEF.heightUnitRange[0], FAR_SILHOUETTE_DEF.heightUnitRange[1]) * refUnit;
+      var baseY = CanvasUtils.randRange(localRng, FAR_SILHOUETTE_DEF.baseYfRange[0], FAR_SILHOUETTE_DEF.baseYfRange[1]) * height;
+      var pointCount = Math.round(CanvasUtils.randRange(localRng, FAR_SILHOUETTE_DEF.pointsRange[0], FAR_SILHOUETTE_DEF.pointsRange[1]));
+
+      var profilePts = [{ x: baseX - wPx / 2, y: baseY }];
+      for (var j = 0; j <= pointCount; j++) {
+        var u = j / pointCount;
+        var envelope = Math.sin(u * Math.PI);
+        var jag = CanvasUtils.randRange(localRng, 0.6, 1.0);
+        profilePts.push({ x: baseX - wPx / 2 + u * wPx, y: baseY - envelope * jag * hPx });
+      }
+      profilePts.push({ x: baseX + wPx / 2, y: baseY });
+
+      var segs = CanvasUtils.buildSmoothSegments(profilePts);
+      var smoothPts = CanvasUtils.traceSmoothPath(segs, profilePts[0].x, profilePts[profilePts.length - 1].x, 22);
+      shapes.push(smoothPts);
+    }
+    return shapes;
   }
 
   function generatePebbleBlob(rng) {
@@ -310,16 +402,39 @@
     return speckles;
   }
 
+  // Manchas amplas e suaves na areia (regiões levemente mais claras/
+  // escuras, como marcas deixadas por correntes) - bem maiores e mais
+  // sutis que os speckles de grão fino, com seed própria (não reaproveita
+  // a sequência dos speckles).
+  function buildSandPatches(textureLayout, def, segments, width, height, refUnit) {
+    var localRng = CanvasUtils.mulberry32(textureLayout.patchSeed);
+    var count = Math.round(CanvasUtils.randRange(localRng, def.patchDensityRange[0], def.patchDensityRange[1]));
+    var patches = [];
+    for (var i = 0; i < count; i++) {
+      var x = localRng() * width;
+      var surfaceY = CanvasUtils.sampleSmoothPathY(segments, x);
+      var depthPx = CanvasUtils.randRange(localRng, 0.015, def.speckleDepthUnit * 1.4) * refUnit;
+      patches.push({
+        x: x, y: surfaceY + depthPx,
+        r: CanvasUtils.randRange(localRng, def.patchSizeUnitRange[0], def.patchSizeUnitRange[1]) * refUnit,
+        lighter: localRng() < 0.5,
+        opacity: CanvasUtils.randRange(localRng, 0.05, 0.12)
+      });
+    }
+    return patches;
+  }
+
   function buildGodRays(godRayLayout, width, height, refUnit) {
     var localRng = CanvasUtils.mulberry32(godRayLayout.seed);
     var count = densityCount(godRayLayout.density, width, refUnit, GOD_RAY_DEF.minCount, GOD_RAY_DEF.maxCount);
     var rays = [];
     for (var i = 0; i < count; i++) {
       rays.push({
-        xf: CanvasUtils.randRange(localRng, 0.04, 0.96),
+        xf: CanvasUtils.randRange(localRng, 0.02, 0.98),
         widthUnit: CanvasUtils.randRange(localRng, GOD_RAY_DEF.widthUnitRange[0], GOD_RAY_DEF.widthUnitRange[1]),
         lengthFrac: CanvasUtils.randRange(localRng, GOD_RAY_DEF.lengthFracRange[0], GOD_RAY_DEF.lengthFracRange[1]),
         opacity: CanvasUtils.randRange(localRng, GOD_RAY_DEF.opacityRange[0], GOD_RAY_DEF.opacityRange[1]),
+        blurUnit: CanvasUtils.randRange(localRng, GOD_RAY_DEF.blurUnitRange[0], GOD_RAY_DEF.blurUnitRange[1]),
         tiltDeg: godRayLayout.baseTiltDeg + CanvasUtils.randRange(localRng, -GOD_RAY_DEF.tiltJitterDeg, GOD_RAY_DEF.tiltJitterDeg),
         swaySpeed: CanvasUtils.randRange(localRng, GOD_RAY_DEF.swaySpeedRange[0], GOD_RAY_DEF.swaySpeedRange[1]),
         phase: localRng() * Math.PI * 2
@@ -343,32 +458,41 @@
     });
 
     this._rockPolys = buildRockPolys(layout.rocks, this._duneSegments.back, width, height, refUnit);
+    this._farSilhouettes = buildFarSilhouettes(layout.farSilhouettes, width, height, refUnit);
 
     this._pebblesPx = {};
     this._sandSpecklesPx = {};
+    this._sandPatchesPx = {};
     DUNE_LAYER_ORDER.forEach(function (key) {
       var segments = self._duneSegments[key];
       self._pebblesPx[key] = buildPebbles(layout.pebbles[key], PEBBLE_LAYER_DEFS[key], segments, width, refUnit);
       self._sandSpecklesPx[key] = buildSandSpeckles(layout.sandTexture[key], SAND_TEXTURE_DEFS[key], segments, width, height, refUnit);
+      self._sandPatchesPx[key] = buildSandPatches(layout.sandTexture[key], SAND_TEXTURE_DEFS[key], segments, width, height, refUnit);
     });
 
     this._godRays = buildGodRays(layout.godRays, width, height, refUnit);
   };
 
   Background.prototype._seedParticles = function (rng, width, height) {
-    this._particles = [];
-    var count = Math.round((width * height) / 26000);
-    for (var i = 0; i < count; i++) {
-      this._particles.push({
-        x: rng() * width,
-        y: rng() * height,
-        r: CanvasUtils.randRange(rng, 0.6, 2.2),
-        speed: CanvasUtils.randRange(rng, 4, 12),
-        drift: CanvasUtils.randRange(rng, -6, 6),
-        phase: rng() * Math.PI * 2,
-        opacity: CanvasUtils.randRange(rng, 0.15, 0.5)
-      });
-    }
+    var self = this;
+    this._particleTiers = {};
+    PARTICLE_TIER_ORDER.forEach(function (key) {
+      var def = PARTICLE_TIER_DEFS[key];
+      var count = Math.max(3, Math.round((width * height) / def.countDivisor));
+      var list = [];
+      for (var i = 0; i < count; i++) {
+        list.push({
+          x: rng() * width,
+          y: rng() * height,
+          r: CanvasUtils.randRange(rng, def.sizeRange[0], def.sizeRange[1]),
+          speed: CanvasUtils.randRange(rng, def.speedRange[0], def.speedRange[1]),
+          drift: CanvasUtils.randRange(rng, def.driftRange[0], def.driftRange[1]),
+          phase: rng() * Math.PI * 2,
+          opacity: CanvasUtils.randRange(rng, def.opacityRange[0], def.opacityRange[1])
+        });
+      }
+      self._particleTiers[key] = list;
+    });
   };
 
   // Os PARÂMETROS (amplitude, comprimento de onda, densidades, seeds) são
@@ -415,15 +539,19 @@
     var h = this._height;
     var w = this._width;
     var rng = this._rng;
-    for (var i = 0; i < this._particles.length; i++) {
-      var p = this._particles[i];
-      p.y -= p.speed * dt;
-      p.x += Math.sin(this._time * 0.5 + p.phase) * p.drift * dt;
-      if (p.y < -10) {
-        p.y = h + 10;
-        if (rng) p.x = rng() * w;
-      }
-    }
+    var self = this;
+    PARTICLE_TIER_ORDER.forEach(function (key) {
+      var list = self._particleTiers && self._particleTiers[key];
+      if (!list) return;
+      list.forEach(function (p) {
+        p.y -= p.speed * dt;
+        p.x += Math.sin(self._time * 0.5 + p.phase) * p.drift * dt;
+        if (p.y < -10) {
+          p.y = h + 10;
+          if (rng) p.x = rng() * w;
+        }
+      });
+    });
   };
 
   Background.prototype.draw = function (ctx, camera, width, height) {
@@ -433,11 +561,20 @@
     var palette = getTimePalette(this._resolveHourFraction());
     this._currentPalette = palette;
 
-    var waterGrad = CanvasUtils.makeVerticalGradient(ctx, 0, 0, 0, height, palette.waterStops);
+    // "Respiração" da água: modulação de brilho extremamente sutil e lenta
+    // (±1.5%, ciclo de ~2min) - nada perceptível conscientemente, só tira
+    // a sensação de imagem estática.
+    var breathe = 1 + Math.sin(this._time * 0.05) * 0.015;
+    var waterStops = CanvasUtils.scaleStops(palette.waterStops, breathe);
+
+    var waterGrad = CanvasUtils.makeVerticalGradient(ctx, 0, 0, 0, height, waterStops);
     ctx.fillStyle = waterGrad;
     ctx.fillRect(0, 0, width, height);
 
+    this._drawSurfaceGlow(ctx, width, height, palette);
+    this._drawFarSilhouettes(ctx, camera, palette);
     this._drawGodRays(ctx, width, height, camera, palette);
+    this._drawParticleTier(ctx, 'back');
     this._drawRockWalls(ctx, camera, palette);
 
     this._drawDuneLayer(ctx, width, height, camera, 'back', palette);
@@ -448,38 +585,106 @@
     this._drawDuneLayer(ctx, width, height, camera, 'mid', palette);
     this._drawSandTexture(ctx, camera, 'mid', palette);
     this._drawPebbleLayer(ctx, camera, 'mid', palette);
-    this._drawParticles(ctx);
+    this._drawParticleTier(ctx, 'mid');
 
     this._drawDuneLayer(ctx, width, height, camera, 'front', palette);
     this._drawSandTexture(ctx, camera, 'front', palette);
     this._drawPebbleLayer(ctx, camera, 'front', palette);
+    this._drawParticleTier(ctx, 'front');
 
     this._drawDepthFog(ctx, width, height, palette);
+    this._drawVignette(ctx, width, height, palette);
   };
 
-  // Feixes de luz finos e nítidos (não trapézios largos), todos na mesma
-  // direção geral (baseTiltDeg da sessão + jitter pequeno - nunca cruzam),
-  // com leve desfoque via ctx.filter e cor/intensidade do horário atual.
+  // Glow suave e largo bem no topo (luz entrando pela superfície) - a
+  // "linha" ondula devagar e de forma irregular, nunca marcada/oceânica.
+  Background.prototype._drawSurfaceGlow = function (ctx, width, height, palette) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    for (var x = 0; x <= width; x += 32) {
+      var y = Math.sin(x * 0.006 + this._time * 0.035) * height * 0.012
+             + Math.sin(x * 0.0021 - this._time * 0.018) * height * 0.018;
+      ctx.lineTo(x, Math.max(0, y));
+    }
+    ctx.lineTo(width, height * 0.12);
+    ctx.lineTo(0, height * 0.12);
+    ctx.closePath();
+    var grad = ctx.createLinearGradient(0, 0, 0, height * 0.12);
+    grad.addColorStop(0, CanvasUtils.hexToRgba(palette.rayColor, 0.12 * palette.rayOpacityMul));
+    grad.addColorStop(1, CanvasUtils.hexToRgba(palette.rayColor, 0));
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.restore();
+  };
+
+  // Silhuetas bem distantes (cordilheira enevoada) - preenchem a água
+  // aberta sem chamar atenção; cor quase totalmente fundida com a
+  // neblina, bem desfocada.
+  Background.prototype._drawFarSilhouettes = function (ctx, camera, palette) {
+    if (!this._farSilhouettes) return;
+    var refUnit = Math.min(this._width, this._height);
+    ctx.save();
+    var parallax = camera ? camera.parallaxFor(FAR_SILHOUETTE_DEF.depth) : { x: 0, y: 0 };
+    ctx.translate(parallax.x * 0.5, parallax.y * 0.1);
+    if ('filter' in ctx) ctx.filter = 'blur(' + Math.max(2, refUnit * 0.018) + 'px)';
+
+    var baseColor = applyFog('#3a5468', palette.fogColor, FAR_SILHOUETTE_DEF.depth);
+    var fillStyle = CanvasUtils.hexToRgba(baseColor, 0.55);
+    this._farSilhouettes.forEach(function (points) {
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (var i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+      ctx.closePath();
+      ctx.fillStyle = fillStyle;
+      ctx.fill();
+    });
+
+    if ('filter' in ctx) ctx.filter = 'none';
+    ctx.restore();
+  };
+
+  // Vinheta extremamente sutil - escurece as bordas com um tom azulado,
+  // reforça profundidade sem nunca ser percebida conscientemente.
+  Background.prototype._drawVignette = function (ctx, width, height, palette) {
+    var cx = width / 2, cy = height * 0.42;
+    var maxR = Math.sqrt(width * width + height * height) * 0.62;
+    var grad = ctx.createRadialGradient(cx, cy, maxR * 0.52, cx, cy, maxR);
+    var vColor = CanvasUtils.scaleHexColor(palette.fogColor, 0.45);
+    grad.addColorStop(0, CanvasUtils.hexToRgba(vColor, 0));
+    grad.addColorStop(1, CanvasUtils.hexToRgba(vColor, 0.28));
+    ctx.save();
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
+  };
+
+  // Feixes de luz finos, com largura/intensidade/comprimento variados por
+  // raio (nunca padrão repetitivo), todos na mesma direção geral
+  // (baseTiltDeg da sessão + jitter pequeno - nunca cruzam), com desfoque
+  // próprio por raio e cor/intensidade do horário atual.
   Background.prototype._drawGodRays = function (ctx, width, height, camera, palette) {
     if (!this._godRays) return;
     var refUnit = Math.min(width, height);
+    var self = this;
     ctx.save();
     var parallax = camera ? camera.parallaxFor(0.08) : { x: 0, y: 0 };
     ctx.translate(parallax.x * 0.25, 0);
-    if ('filter' in ctx) ctx.filter = 'blur(' + Math.max(1, refUnit * 0.006) + 'px)';
 
     this._godRays.forEach(function (ray) {
-      var sway = Math.sin(this._time * ray.swaySpeed + ray.phase) * refUnit * 0.018;
+      var sway = Math.sin(self._time * ray.swaySpeed + ray.phase) * refUnit * 0.018;
       var topX = ray.xf * width + sway;
       var rayLen = height * ray.lengthFrac;
       var tiltPx = Math.tan(ray.tiltDeg * Math.PI / 180) * rayLen;
       var bottomX = topX + tiltPx;
-      var rayW = Math.max(1.2, ray.widthUnit * refUnit);
+      var rayW = Math.max(1, ray.widthUnit * refUnit);
       var opacity = ray.opacity * palette.rayOpacityMul;
+
+      if ('filter' in ctx) ctx.filter = 'blur(' + Math.max(1, ray.blurUnit * refUnit) + 'px)';
 
       var grad = ctx.createLinearGradient(topX, 0, bottomX, rayLen);
       grad.addColorStop(0, CanvasUtils.hexToRgba(palette.rayColor, opacity));
-      grad.addColorStop(0.6, CanvasUtils.hexToRgba(palette.rayColor, opacity * 0.35));
+      grad.addColorStop(0.45, CanvasUtils.hexToRgba(palette.rayColor, opacity * 0.45));
       grad.addColorStop(1, CanvasUtils.hexToRgba(palette.rayColor, 0));
       ctx.fillStyle = grad;
       ctx.beginPath();
@@ -561,15 +766,20 @@
     ctx.restore();
   };
 
-  Background.prototype._drawParticles = function (ctx) {
+  Background.prototype._drawParticleTier = function (ctx, key) {
+    var list = this._particleTiers && this._particleTiers[key];
+    if (!list) return;
+    var def = PARTICLE_TIER_DEFS[key];
     ctx.save();
-    for (var i = 0; i < this._particles.length; i++) {
-      var p = this._particles[i];
+    if (def.blurPx && 'filter' in ctx) ctx.filter = 'blur(' + def.blurPx + 'px)';
+    for (var i = 0; i < list.length; i++) {
+      var p = list[i];
       ctx.beginPath();
       ctx.fillStyle = 'rgba(255,255,255,' + p.opacity + ')';
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       ctx.fill();
     }
+    if (def.blurPx && 'filter' in ctx) ctx.filter = 'none';
     ctx.restore();
   };
 
@@ -617,6 +827,7 @@
   Background.prototype._drawSandTexture = function (ctx, camera, key, palette) {
     var pts = this._duneTracePts && this._duneTracePts[key];
     var speckles = this._sandSpecklesPx && this._sandSpecklesPx[key];
+    var patches = this._sandPatchesPx && this._sandPatchesPx[key];
     if (!pts) return;
     var def = DUNE_LAYER_DEFS[key];
     var texDef = SAND_TEXTURE_DEFS[key];
@@ -627,6 +838,19 @@
     ctx.save();
     var parallax = camera ? camera.parallaxFor(def.depth) : { x: 0, y: 0 };
     ctx.translate(parallax.x, parallax.y * 0.3);
+
+    if (patches) {
+      patches.forEach(function (patch) {
+        var tone = patch.lighter ? lightLine : darkLine;
+        var grad = ctx.createRadialGradient(patch.x, patch.y, 0, patch.x, patch.y, patch.r);
+        grad.addColorStop(0, CanvasUtils.hexToRgba(tone, patch.opacity));
+        grad.addColorStop(1, CanvasUtils.hexToRgba(tone, 0));
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(patch.x, patch.y, patch.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
 
     texDef.rippleOffsetsUnit.forEach(function (offUnit, idx) {
       var offset = offUnit * refUnit;
