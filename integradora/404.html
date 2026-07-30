@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Página não encontrada</title>
+<link rel="stylesheet" href="/assets/css/styles.css">
+<script>
+  // Redireciona para a página de login na raiz do site (funciona tanto em
+  // usuario.github.io/repositorio/ quanto em domínio próprio).
+  (function () {
+    var base = "/";
+    var host = location.hostname;
+    if (host.endsWith("github.io")) {
+      var seg = location.pathname.split("/").filter(Boolean)[0];
+      if (seg) base = "/" + seg + "/";
+    }
+    location.replace(base + "index.html");
+  })();
+</script>
+</head>
+<body>
+  <div class="app" style="text-align:center">
+    <p>Redirecionando para o login… <a href="/index.html">clique aqui</a> se não for automático.</p>
+  </div>
+</body>
+</html>
