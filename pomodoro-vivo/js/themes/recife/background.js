@@ -34,7 +34,7 @@
   // à toa num resize de mesmo tamanho (mesma seed + mesma largura = mesmo
   // resultado, sempre).
 
-  var SAND_STOPS = [[0, '#e8cf9c'], [0.35, '#d3b579'], [1, '#a3844f']];
+  var SAND_STOPS = [[0, '#edd5a4'], [0.28, '#d9bc82'], [0.62, '#c4a068'], [1, '#96754a']];
   var PEBBLE_VARIANTS = [
     { top: '#d8c193', bottom: '#8f7248' },
     { top: '#aab3b8', bottom: '#5f686d' },
@@ -544,29 +544,47 @@
     ctx.fillStyle = waterGrad;
     ctx.fillRect(0, 0, width, height);
 
+    this._drawSunPool(ctx, width, height, palette);
     this._drawSurfaceGlow(ctx, width, height, palette);
     this._drawFarRidge(ctx, width, height, camera, palette);
     this._drawGodRays(ctx, width, height, camera, palette);
-    this._drawParticleTier(ctx, 'back');
+    this._drawCaustics(ctx, width, height, palette, { zone: 'upper' });
+    this._drawParticleTier(ctx, 'back', palette);
     this._drawRockWalls(ctx, camera, palette);
 
     this._drawDuneLayer(ctx, width, height, camera, 'back', palette);
     this._drawSandTexture(ctx, camera, 'back', palette);
     this._drawPebbleLayer(ctx, camera, 'back', palette);
-    this._drawCaustics(ctx, width, height);
 
     this._drawDuneLayer(ctx, width, height, camera, 'mid', palette);
     this._drawSandTexture(ctx, camera, 'mid', palette);
     this._drawPebbleLayer(ctx, camera, 'mid', palette);
-    this._drawParticleTier(ctx, 'mid');
+    this._drawCaustics(ctx, width, height, palette, { zone: 'mid', opacityMul: 0.55 });
+    this._drawParticleTier(ctx, 'mid', palette);
 
     this._drawDuneLayer(ctx, width, height, camera, 'front', palette);
     this._drawSandTexture(ctx, camera, 'front', palette);
     this._drawPebbleLayer(ctx, camera, 'front', palette);
-    this._drawParticleTier(ctx, 'front');
+    this._drawCaustics(ctx, width, height, palette, { zone: 'lower', opacityMul: 0.35 });
+    this._drawParticleTier(ctx, 'front', palette);
 
     this._drawDepthFog(ctx, width, height, palette);
     this._drawVignette(ctx, width, height, palette);
+  };
+
+  // Disco solar difuso no topo - reforça a sensação de luz vinda da superfície.
+  Background.prototype._drawSunPool = function (ctx, width, height, palette) {
+    var cx = width * 0.5 + Math.sin(this._time * 0.03) * width * 0.025;
+    var cy = height * 0.04;
+    var r = Math.max(width, height) * 0.38;
+    ctx.save();
+    var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grad.addColorStop(0, CanvasUtils.hexToRgba(palette.rayColor, 0.22 * palette.rayOpacityMul));
+    grad.addColorStop(0.35, CanvasUtils.hexToRgba(palette.rayColor, 0.08 * palette.rayOpacityMul));
+    grad.addColorStop(1, CanvasUtils.hexToRgba(palette.rayColor, 0));
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height * 0.55);
+    ctx.restore();
   };
 
   // Glow suave e largo bem no topo (luz entrando pela superfície) - a
@@ -584,10 +602,25 @@
     ctx.lineTo(0, height * 0.12);
     ctx.closePath();
     var grad = ctx.createLinearGradient(0, 0, 0, height * 0.12);
-    grad.addColorStop(0, CanvasUtils.hexToRgba(palette.rayColor, 0.12 * palette.rayOpacityMul));
+    grad.addColorStop(0, CanvasUtils.hexToRgba(palette.rayColor, 0.16 * palette.rayOpacityMul));
     grad.addColorStop(1, CanvasUtils.hexToRgba(palette.rayColor, 0));
     ctx.fillStyle = grad;
     ctx.fill();
+
+    // Ondulações finas de refração na superfície.
+    ctx.globalCompositeOperation = 'screen';
+    for (var s = 0; s < 5; s++) {
+      var sy = height * (0.018 + s * 0.014);
+      ctx.beginPath();
+      ctx.moveTo(0, sy);
+      for (x = 0; x <= width; x += 18) {
+        ctx.lineTo(x, sy + Math.sin(x * 0.018 + this._time * 0.45 + s * 1.4) * 2.5
+                      + Math.sin(x * 0.007 - this._time * 0.22 + s) * 1.8);
+      }
+      ctx.strokeStyle = CanvasUtils.hexToRgba(palette.rayColor, 0.22 * palette.rayOpacityMul);
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    }
     ctx.restore();
   };
 
@@ -608,14 +641,28 @@
     if ('filter' in ctx) ctx.filter = 'blur(' + CanvasUtils.clamp(refUnit * 0.014, 2, 8) + 'px)';
 
     var baseColor = applyFog('#3a5468', palette.fogColor, FAR_RIDGE_DEF.depth);
+    var highlightColor = applyFog('#4d7088', palette.fogColor, FAR_RIDGE_DEF.depth * 0.8);
     ctx.beginPath();
     ctx.moveTo(pts[0].x, pts[0].y);
     for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
     ctx.lineTo(width + 40, height + 40);
     ctx.lineTo(-40, height + 40);
     ctx.closePath();
-    ctx.fillStyle = CanvasUtils.hexToRgba(baseColor, 0.6);
+    ctx.fillStyle = CanvasUtils.hexToRgba(baseColor, 0.65);
     ctx.fill();
+
+    // Realce no crista distante - separa a silhueta do céu aquático.
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+    var ridgeRim = CanvasUtils.makeVerticalGradient(ctx, 0, pts[0].y - 6, 0, pts[0].y + 14, [
+      [0, CanvasUtils.hexToRgba(highlightColor, 0)],
+      [0.45, CanvasUtils.hexToRgba(highlightColor, 0.28)],
+      [1, CanvasUtils.hexToRgba(highlightColor, 0)]
+    ]);
+    ctx.strokeStyle = ridgeRim;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
 
     if ('filter' in ctx) ctx.filter = 'none';
     ctx.restore();
@@ -648,6 +695,15 @@
     var parallax = camera ? camera.parallaxFor(0.08) : { x: 0, y: 0 };
     ctx.translate(parallax.x * 0.25, 0);
 
+    // Coluna central difusa - ancora os raios num ponto de luz coerente.
+    var colCx = width * 0.5 + Math.sin(this._time * 0.04) * width * 0.02;
+    var colGrad = ctx.createLinearGradient(colCx, 0, colCx, height * 0.7);
+    colGrad.addColorStop(0, CanvasUtils.hexToRgba(palette.rayColor, 0.16 * palette.rayOpacityMul));
+    colGrad.addColorStop(0.45, CanvasUtils.hexToRgba(palette.rayColor, 0.05 * palette.rayOpacityMul));
+    colGrad.addColorStop(1, CanvasUtils.hexToRgba(palette.rayColor, 0));
+    ctx.fillStyle = colGrad;
+    ctx.fillRect(colCx - width * 0.2, 0, width * 0.4, height * 0.7);
+
     this._godRays.forEach(function (ray) {
       var sway = Math.sin(self._time * ray.swaySpeed + ray.phase) * refUnit * 0.018;
       var topX = ray.xf * width + sway;
@@ -661,7 +717,8 @@
 
       var grad = ctx.createLinearGradient(topX, 0, bottomX, rayLen);
       grad.addColorStop(0, CanvasUtils.hexToRgba(palette.rayColor, opacity));
-      grad.addColorStop(0.45, CanvasUtils.hexToRgba(palette.rayColor, opacity * 0.45));
+      grad.addColorStop(0.3, CanvasUtils.hexToRgba(palette.rayColor, opacity * 0.65));
+      grad.addColorStop(0.55, CanvasUtils.hexToRgba(palette.rayColor, opacity * 0.28));
       grad.addColorStop(1, CanvasUtils.hexToRgba(palette.rayColor, 0));
       ctx.fillStyle = grad;
       ctx.beginPath();
@@ -695,7 +752,8 @@
     this._rockPolys.forEach(function (points) {
       var top = points.reduce(function (m, p) { return Math.min(m, p.y); }, Infinity);
       var bottom = points[0].y;
-      var grad = CanvasUtils.makeVerticalGradient(ctx, 0, top, 0, bottom, rockStops);
+      var centerX = points.reduce(function (s, p) { return s + p.x; }, 0) / points.length;
+      var grad = CanvasUtils.makeVerticalGradient(ctx, centerX, top, centerX, bottom, rockStops);
       ctx.fillStyle = grad;
       ctx.beginPath();
       ctx.moveTo(points[0].x, points[0].y);
@@ -703,9 +761,19 @@
       ctx.closePath();
       ctx.fill();
 
+      // Variação de face - clareia o topo, escurece a base interna.
+      var faceGrad = CanvasUtils.makeVerticalGradient(ctx, centerX, top, centerX, bottom, [
+        [0, 'rgba(180,210,220,0.10)'],
+        [0.25, 'rgba(0,0,0,0)'],
+        [0.65, 'rgba(0,0,0,0.06)'],
+        [1, 'rgba(0,0,0,0.18)']
+      ]);
+      ctx.fillStyle = faceGrad;
+      ctx.fill();
+
       // realce sutil no contorno superior - dá volume, sem contorno preto
       var rimGrad = CanvasUtils.makeVerticalGradient(ctx, 0, top - 4, 0, top + 10, [
-        [0, 'rgba(150,190,205,0.22)'],
+        [0, 'rgba(170,205,220,0.30)'],
         [1, 'rgba(150,190,205,0)']
       ]);
       ctx.strokeStyle = rimGrad;
@@ -718,32 +786,57 @@
     ctx.restore();
   };
 
-  Background.prototype._drawCaustics = function (ctx, width, height) {
+  // Cáusticas orgânicas - células de luz deformadas que se movem lentamente,
+  // simulando refração na superfície. Três zonas (upper|mid|lower) com
+  // intensidade decrescente conforme a profundidade.
+  Background.prototype._drawCaustics = function (ctx, width, height, palette, opts) {
+    opts = opts || {};
+    var zone = opts.zone || 'upper';
+    var opacityMul = opts.opacityMul === undefined ? 1 : opts.opacityMul;
+    var zoneDef = {
+      upper: { yStart: 0.04, ySpan: 0.38, layers: 3, cellDiv: 72, peak: 0.20 },
+      mid:   { yStart: 0.22, ySpan: 0.38, layers: 2, cellDiv: 88, peak: 0.14 },
+      lower: { yStart: 0.48, ySpan: 0.30, layers: 2, cellDiv: 96, peak: 0.10 }
+    }[zone];
+    if (!zoneDef) return;
+
+    var refUnit = Math.min(width, height);
+    var t = this._time;
     ctx.save();
-    ctx.globalCompositeOperation = 'overlay';
-    var bands = 4;
-    for (var i = 0; i < bands; i++) {
-      var yBase = height * (0.15 + i * 0.16);
-      var grad = ctx.createLinearGradient(0, yBase - 18, 0, yBase + 18);
-      grad.addColorStop(0, 'rgba(255,255,255,0)');
-      grad.addColorStop(0.5, 'rgba(255,255,255,0.10)');
-      grad.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.moveTo(0, yBase);
-      for (var x = 0; x <= width; x += 24) {
-        var y = yBase + Math.sin(x * 0.02 + this._time * 0.6 + i) * 10;
-        ctx.lineTo(x, y);
+    ctx.globalCompositeOperation = zone === 'upper' ? 'soft-light' : 'overlay';
+
+    for (var layer = 0; layer < zoneDef.layers; layer++) {
+      var cellCount = Math.max(3, Math.round(width / zoneDef.cellDiv));
+      var layerPhase = t * (0.22 + layer * 0.11);
+      var yBase = height * (zoneDef.yStart + layer * zoneDef.ySpan * 0.22);
+
+      for (var i = 0; i < cellCount; i++) {
+        var baseX = (i + 0.5) / cellCount * width;
+        var cx = baseX
+          + Math.sin(layerPhase + i * 1.9) * refUnit * 0.028
+          + Math.sin(layerPhase * 0.6 + i * 0.7) * refUnit * 0.016;
+        var cy = yBase
+          + Math.sin(layerPhase * 0.45 + i * 2.3) * height * zoneDef.ySpan * 0.18
+          + Math.cos(layerPhase * 0.35 + i * 1.1) * refUnit * 0.012;
+        var rx = refUnit * (0.034 + Math.sin(layerPhase + i * 0.8) * 0.012);
+        var ry = refUnit * (0.022 + Math.cos(layerPhase * 0.7 + i) * 0.008);
+        var rot = Math.sin(layerPhase * 0.5 + i * 1.4) * 0.35;
+        var peak = zoneDef.peak * opacityMul * palette.rayOpacityMul;
+
+        var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(rx, ry));
+        grad.addColorStop(0, CanvasUtils.hexToRgba(palette.rayColor, peak));
+        grad.addColorStop(0.45, CanvasUtils.hexToRgba(palette.rayColor, peak * 0.35));
+        grad.addColorStop(1, CanvasUtils.hexToRgba(palette.rayColor, 0));
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, rot, 0, Math.PI * 2);
+        ctx.fill();
       }
-      ctx.lineTo(width, yBase + 40);
-      ctx.lineTo(0, yBase + 40);
-      ctx.closePath();
-      ctx.fill();
     }
     ctx.restore();
   };
 
-  Background.prototype._drawParticleTier = function (ctx, key) {
+  Background.prototype._drawParticleTier = function (ctx, key, palette) {
     var list = this._particleTiers && this._particleTiers[key];
     if (!list) return;
     var def = PARTICLE_TIER_DEFS[key];
@@ -751,8 +844,11 @@
     if (def.blurPx && 'filter' in ctx) ctx.filter = 'blur(' + def.blurPx + 'px)';
     for (var i = 0; i < list.length; i++) {
       var p = list[i];
+      var tint = palette
+        ? CanvasUtils.lerpHexColor('#ffffff', palette.rayColor, def.depth * 0.35)
+        : '#ffffff';
       ctx.beginPath();
-      ctx.fillStyle = 'rgba(255,255,255,' + p.opacity + ')';
+      ctx.fillStyle = CanvasUtils.hexToRgba(tint, p.opacity);
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       ctx.fill();
     }
@@ -783,17 +879,45 @@
     ctx.closePath();
     ctx.fill();
 
+    // Sombra de contato sob a crista - dá volume à duna.
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+    var aoDepth = key === 'front' ? 16 : key === 'mid' ? 12 : 8;
+    var aoGrad = ctx.createLinearGradient(0, pts[0].y - 4, 0, pts[0].y + aoDepth);
+    aoGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    aoGrad.addColorStop(0.4, 'rgba(0,0,0,' + (key === 'front' ? 0.10 : 0.07) + ')');
+    aoGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.strokeStyle = aoGrad;
+    ctx.lineWidth = aoDepth;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
     var rimGrad = CanvasUtils.makeVerticalGradient(ctx, 0, pts[0].y - 6, 0, pts[0].y + 6, [
       [0, 'rgba(255,255,255,0)'],
       [0.5, def.rimColor],
       [1, 'rgba(255,255,255,0)']
     ]);
     ctx.strokeStyle = rimGrad;
-    ctx.lineWidth = key === 'front' ? 3 : 2;
+    ctx.lineWidth = key === 'front' ? 3.5 : 2;
     ctx.beginPath();
     ctx.moveTo(pts[0].x, pts[0].y);
     for (i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
     ctx.stroke();
+
+    // Brilho especular na crista da duna da frente.
+    if (key === 'front') {
+      var specGrad = CanvasUtils.makeVerticalGradient(ctx, 0, pts[0].y - 3, 0, pts[0].y + 2, [
+        [0, 'rgba(255,250,235,0.45)'],
+        [1, 'rgba(255,250,235,0)']
+      ]);
+      ctx.strokeStyle = specGrad;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+      ctx.stroke();
+    }
 
     ctx.restore();
   };
@@ -835,8 +959,8 @@
       ctx.moveTo(pts[0].x, pts[0].y + offset);
       for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y + offset);
       ctx.strokeStyle = idx % 2 === 0 ? darkLine : lightLine;
-      ctx.globalAlpha = 0.10;
-      ctx.lineWidth = 1.2;
+      ctx.globalAlpha = key === 'front' ? 0.14 : key === 'mid' ? 0.11 : 0.09;
+      ctx.lineWidth = key === 'front' ? 1.4 : 1.2;
       ctx.stroke();
     });
     ctx.globalAlpha = 1;
@@ -907,13 +1031,26 @@
   // escura/azulada e ao entardecer ganha um tom quente.
   Background.prototype._drawDepthFog = function (ctx, width, height, palette) {
     var fogColor = palette.fogColor;
+    var midFog = CanvasUtils.scaleHexColor(fogColor, 0.55);
     var darkFog = CanvasUtils.scaleHexColor(fogColor, 0.35);
-    var grad = CanvasUtils.makeVerticalGradient(ctx, 0, height * 0.55, 0, height, [
-      [0, CanvasUtils.hexToRgba(darkFog, 0)],
-      [1, CanvasUtils.hexToRgba(darkFog, 0.40)]
+
+    // Neblina intermediária - suaviza a transição água → areia.
+    var midGrad = CanvasUtils.makeVerticalGradient(ctx, 0, height * 0.32, 0, height * 0.62, [
+      [0, CanvasUtils.hexToRgba(midFog, 0)],
+      [0.55, CanvasUtils.hexToRgba(midFog, 0.10)],
+      [1, CanvasUtils.hexToRgba(midFog, 0)]
     ]);
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, height * 0.55, width, height * 0.45);
+    ctx.fillStyle = midGrad;
+    ctx.fillRect(0, height * 0.32, width, height * 0.30);
+
+    // Neblina do fundo do poço - mais densa na base.
+    var bottomGrad = CanvasUtils.makeVerticalGradient(ctx, 0, height * 0.52, 0, height, [
+      [0, CanvasUtils.hexToRgba(darkFog, 0)],
+      [0.45, CanvasUtils.hexToRgba(darkFog, 0.18)],
+      [1, CanvasUtils.hexToRgba(darkFog, 0.48)]
+    ]);
+    ctx.fillStyle = bottomGrad;
+    ctx.fillRect(0, height * 0.52, width, height * 0.48);
   };
 
   PMV.Themes.Recife.Background = Background;
