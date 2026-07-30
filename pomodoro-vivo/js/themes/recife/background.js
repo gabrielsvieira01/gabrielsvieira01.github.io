@@ -603,7 +603,9 @@
     ctx.save();
     var parallax = camera ? camera.parallaxFor(FAR_RIDGE_DEF.depth) : { x: 0, y: 0 };
     ctx.translate(parallax.x * 0.5, parallax.y * 0.1);
-    if ('filter' in ctx) ctx.filter = 'blur(' + Math.max(2, refUnit * 0.014) + 'px)';
+    // Blur com teto fixo - em telas grandes, refUnit*fator sozinho passava
+    // de 20px e dissolvia a silhueta inteira numa mancha sem forma.
+    if ('filter' in ctx) ctx.filter = 'blur(' + CanvasUtils.clamp(refUnit * 0.014, 2, 8) + 'px)';
 
     var baseColor = applyFog('#3a5468', palette.fogColor, FAR_RIDGE_DEF.depth);
     ctx.beginPath();
@@ -655,7 +657,7 @@
       var rayW = Math.max(1, ray.widthUnit * refUnit);
       var opacity = ray.opacity * palette.rayOpacityMul;
 
-      if ('filter' in ctx) ctx.filter = 'blur(' + Math.max(1, ray.blurUnit * refUnit) + 'px)';
+      if ('filter' in ctx) ctx.filter = 'blur(' + CanvasUtils.clamp(ray.blurUnit * refUnit, 1, 6) + 'px)';
 
       var grad = ctx.createLinearGradient(topX, 0, bottomX, rayLen);
       grad.addColorStop(0, CanvasUtils.hexToRgba(palette.rayColor, opacity));
