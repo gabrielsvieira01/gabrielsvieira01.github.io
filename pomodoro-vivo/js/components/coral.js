@@ -19,10 +19,16 @@
   // essa arte aprovada (rotação leve, espelho, matiz) - nunca substitui a
   // estrutura por sorteio.
 
+  // Paleta retocada: a arte original (validada isolada, contra fundo
+  // branco) usava tons muito saturados/claros (#ff874a, #ffd5b3) que
+  // destoam da água azulada do cenário real. Base aqui já nasce mais
+  // terrosa/dessaturada (menos "laranja neon"); o blend de neblina de
+  // profundidade abaixo ainda mistura por cima com a cor ambiente real
+  // do horário atual, igual ao terreno.
   var LAYERS = [
     {
       key: 'back',
-      stops: [[0, '#7a2412'], [0.35, '#ad3c1a'], [0.70, '#e5713b'], [1, '#f5a776']],
+      stops: [[0, '#6b2a1f'], [0.35, '#8f4530'], [0.70, '#b06a4e'], [1, '#c99578']],
       d: 'M -3,0 C -6,-7 -14,-13 -22,-16 C -29,-18 -36,-17 -39,-21 C -41,-25 -36,-27 -30,-24 ' +
          'C -23,-21 -17,-20 -20,-28 C -23,-34 -27,-40 -24,-44 C -21,-47 -17,-42 -15,-35 ' +
          'C -12,-26 -8,-17 -5,-11 C -4,-22 1,-38 5,-52 C 7,-59 1,-64 -3,-60 C -6,-56 -6,-50 -5,-44 ' +
@@ -31,7 +37,7 @@
     },
     {
       key: 'main',
-      stops: [[0, '#a8401f'], [0.30, '#ce4a21'], [0.65, '#f27438'], [0.88, '#ffa670'], [1, '#ffcda3']],
+      stops: [[0, '#7e3a24'], [0.30, '#9c4c30'], [0.65, '#b96c4c'], [0.88, '#cf8c6a'], [1, '#dda487']],
       d: 'M -4,0 C -4,-8 -7,-15 -13,-22 C -18,-27 -25,-29 -31,-33 C -36,-36 -38,-41 -33,-43 ' +
          'C -29,-44 -25,-39 -21,-35 C -18,-32 -16,-30 -18,-37 C -20,-44 -25,-51 -27,-56 ' +
          'C -29,-61 -23,-63 -20,-58 C -16,-51 -13,-43 -11,-35 C -9,-29 -8,-26 -8,-34 ' +
@@ -43,7 +49,7 @@
     },
     {
       key: 'front',
-      stops: [[0, '#b83f1c'], [0.35, '#e25625'], [0.70, '#ff874a'], [1, '#ffd5b3']],
+      stops: [[0, '#8a4128'], [0.35, '#ab5b3c'], [0.70, '#c47d5c'], [1, '#d9a687']],
       d: 'M -2,0 C -5,-4 -12,-7 -19,-10 C -26,-13 -31,-11 -35,-16 C -37,-19 -33,-22 -28,-19 ' +
          'C -21,-16 -14,-13 -8,-9 C -4,-6 -2,-3 0,0 Z ' +
          'M 0,0 C 4,-4 9,-7 15,-9 C 18,-13 20,-19 22,-26 C 24,-31 28,-30 26,-24 ' +
@@ -63,14 +69,19 @@
     return e;
   }
 
-  function buildGradient(uid, layer) {
+  // Mistura cada stop da camada com a cor de neblina do horário atual, na
+  // mesma proporção que o resto do terreno usa naquela profundidade -
+  // é isso que faz o coral ler como "dentro da mesma água", não colado
+  // por cima da cena como um adesivo.
+  function buildGradient(uid, layer, fogColor, fogAmount) {
     var grad = el('linearGradient', {
       id: 'pmv-coral-' + layer.key + '-' + uid,
       x1: 0, y1: 5, x2: 0, y2: -75,
       gradientUnits: 'userSpaceOnUse'
     });
     layer.stops.forEach(function (s) {
-      grad.appendChild(el('stop', { offset: (s[0] * 100) + '%', 'stop-color': s[1] }));
+      var color = (fogAmount > 0 && fogColor) ? CanvasUtils.lerpHexColor(s[1], fogColor, fogAmount) : s[1];
+      grad.appendChild(el('stop', { offset: (s[0] * 100) + '%', 'stop-color': color }));
     });
     return grad;
   }
@@ -85,9 +96,12 @@
 
       var group = el('g', { 'data-pmv-component': 'coral' });
 
+      var fogColor = opts.fogColor || null;
+      var fogAmount = opts.fogAmount || 0;
+
       var defs = el('defs');
       LAYERS.forEach(function (layer) {
-        defs.appendChild(buildGradient(uid, layer));
+        defs.appendChild(buildGradient(uid, layer, fogColor, fogAmount));
       });
       var shadowGrad = el('radialGradient', {
         id: 'pmv-coral-shadow-' + uid,
@@ -116,10 +130,12 @@
       group.appendChild(inner);
 
       // Variação sutil de matiz por instância - expande a paleta aprovada
-      // sem reescrever gradientes (nunca deixa a luminância cair perto de
-      // preto: hueRotate/saturate não escurecem os stops já claros).
-      var hue = CanvasUtils.randRange(rng, -14, 14);
-      var sat = CanvasUtils.randRange(rng, 0.92, 1.12);
+      // sem reescrever gradientes. Só DESSATURA (nunca acima de 100%) -
+      // a base já foi retocada pra não ficar vibrante demais contra a
+      // água; este jitter é só pra as instâncias não serem clones, não
+      // pra puxar de volta pro laranja neon.
+      var hue = CanvasUtils.randRange(rng, -8, 8);
+      var sat = CanvasUtils.randRange(rng, 0.72, 0.95);
       group.style.filter = 'hue-rotate(' + hue.toFixed(1) + 'deg) saturate(' + sat.toFixed(2) + ')';
 
       // Balanço leve - coral é rígido, então grau baixo e período longo.

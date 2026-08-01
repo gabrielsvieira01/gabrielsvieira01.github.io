@@ -54,11 +54,13 @@
     var bg = this.background;
     var self = this;
 
-    this.instances = Composition.expandPlan(this.rng, this.width);
+    // expandPlan já resolve x/worldY por camada real (back/mid/front) e
+    // evita nascer em cima de rochedo/pedrinha - não recalcular Y aqui.
+    this.instances = Composition.expandPlan(this.rng, this.width, this.height, bg);
     this.fauna = Fauna.expandFauna(this.rng, this.instances, this.width, this.height);
 
     this.instances.forEach(function (inst) {
-      self._placeInstance(inst, bg.sandSurfaceYf(inst.x));
+      self._placeInstance(inst, inst.worldY);
     });
     this.fauna.forEach(function (inst) {
       self._placeInstance(inst, inst.y);
@@ -71,10 +73,19 @@
       // Arte ainda não integrada - slot fica reservado, nada é desenhado.
       return;
     }
+    var bg = this.background;
+    // Mesma regra de neblina de profundidade que o terreno usa - o
+    // organismo se mistura com a cor ambiente do horário atual na mesma
+    // proporção que tudo mais naquela profundidade, em vez de destoar.
+    var palette = bg.getPalette();
+    var fogAmount = (inst.depth === undefined) ? 0 : bg.getFogAmount(inst.depth);
+
     var built = Component.create(this._layer, {
       seed: Math.floor(this.rng() * 1e9),
       scale: inst.scale,
-      biasType: inst.biasType
+      biasType: inst.biasType,
+      fogColor: palette.fogColor,
+      fogAmount: fogAmount
     });
     if (!built || !built.group) return;
     SvgUtils.placeAtPivot(built.group, inst.x, worldY, inst.scale);
@@ -84,9 +95,10 @@
   RecifeTheme.prototype.setProgress = function (progress) {
     this.progress = Math.max(this.progress, progress);
     this._placedGroups.forEach(function (entry) {
-      if (entry.inst.threshold <= this.progress) {
-        SvgUtils.growNow(entry.group);
-      }
+      var span = entry.inst.growthSpan || 0.3;
+      var fraction = (this.progress - entry.inst.threshold) / span;
+      if (fraction <= 0) return;
+      SvgUtils.setGrowthFraction(entry.group, entry.inst.scale, fraction);
     }, this);
   };
 

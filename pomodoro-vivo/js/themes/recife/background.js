@@ -488,9 +488,71 @@
 
   // Expõe o Y real da superfície da areia (camada da frente, onde os
   // componentes se fixam por enquanto) pra um X (espaço do mundo).
+  // Mantido por compatibilidade - equivalente a surfaceYf('front', x).
   Background.prototype.sandSurfaceYf = function (x) {
-    if (!this._duneSegments || !this._duneSegments.front) return this._height * 0.86;
-    return CanvasUtils.sampleSmoothPathY(this._duneSegments.front, x);
+    return this.surfaceYf('front', x);
+  };
+
+  // Versão genérica por camada (back/mid/front) - é isso que permite os
+  // componentes nascerem em profundidades diferentes de fato, não só na
+  // duna da frente.
+  Background.prototype.surfaceYf = function (layerKey, x) {
+    var segs = this._duneSegments && this._duneSegments[layerKey];
+    if (!segs) return this._height * (DUNE_LAYER_DEFS[layerKey] ? DUNE_LAYER_DEFS[layerKey].baseYf : 0.86);
+    return CanvasUtils.sampleSmoothPathY(segs, x);
+  };
+
+  // Paleta do horário ATUAL, calculada na hora (não usa cache de draw()) -
+  // seguro de chamar durante a montagem da composição, antes do primeiro
+  // frame de canvas ter rodado.
+  Background.prototype.getPalette = function () {
+    return getTimePalette(this._resolveHourFraction());
+  };
+
+  // Mesmo cálculo de neblina de profundidade usado pelo terreno - exposto
+  // pra quem monta os organismos SVG poder aplicar a MESMA regra de fog,
+  // em vez de inventar uma cor separada que não bate com o cenário.
+  Background.prototype.getFogAmount = function (depth) {
+    return fogAmountForDepth(depth);
+  };
+
+  // ---- Obstáculos (evitar nascer em cima de rochedo/pedrinha) ----
+
+  // X livre de rochedo NAQUELE Y (checagem 2D de verdade) - o rochedo é
+  // ancorado na curva de trás e cresce pra CIMA a partir dali; um
+  // organismo em mid/front fica bem mais embaixo na tela, então X sozinho
+  // gera falso-positivo (marca colisão mesmo quando o rochedo termina bem
+  // acima de onde o organismo realmente nasce). xWindowPx é a janela em X
+  // usada pra amostrar a altura do contorno do rochedo perto desse ponto.
+  Background.prototype.isPositionClearOfRocks = function (x, y, marginPx, xWindowPx) {
+    if (!this._rockPolys) return true;
+    xWindowPx = xWindowPx || 40;
+    for (var i = 0; i < this._rockPolys.length; i++) {
+      var poly = this._rockPolys[i];
+      var minY = Infinity, maxY = -Infinity, found = false;
+      for (var j = 0; j < poly.length; j++) {
+        if (Math.abs(poly[j].x - x) <= xWindowPx) {
+          found = true;
+          if (poly[j].y < minY) minY = poly[j].y;
+          if (poly[j].y > maxY) maxY = poly[j].y;
+        }
+      }
+      if (found && y >= minY - marginPx && y <= maxY + marginPx) return false;
+    }
+    return true;
+  };
+
+  // Posição livre de pedrinha NAQUELA camada, com margem em px.
+  Background.prototype.isPositionClearOfPebbles = function (layerKey, x, y, marginPx) {
+    var pebbles = this._pebblesPx && this._pebblesPx[layerKey];
+    if (!pebbles) return true;
+    for (var i = 0; i < pebbles.length; i++) {
+      var p = pebbles[i];
+      var dx = x - p.x, dy = y - p.y;
+      var minDist = p.r + marginPx;
+      if ((dx * dx + dy * dy) < (minDist * minDist)) return false;
+    }
+    return true;
   };
 
   // Força um horário específico (0-24, fracionário) pra pré-visualização;
@@ -1051,6 +1113,15 @@
     ]);
     ctx.fillStyle = bottomGrad;
     ctx.fillRect(0, height * 0.52, width, height * 0.48);
+  };
+
+  // Profundidade fixa de cada camada (mesmos valores de DUNE_LAYER_DEFS) -
+  // exposta pra composition.js poder alinhar o depth dos organismos à
+  // MESMA camada física em que eles nascem, em vez de um número solto.
+  Background.LAYER_DEPTHS = {
+    back: DUNE_LAYER_DEFS.back.depth,
+    mid: DUNE_LAYER_DEFS.mid.depth,
+    front: DUNE_LAYER_DEFS.front.depth
   };
 
   PMV.Themes.Recife.Background = Background;

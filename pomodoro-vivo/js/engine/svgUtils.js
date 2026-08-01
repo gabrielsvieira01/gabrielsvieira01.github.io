@@ -102,9 +102,27 @@
   };
 
   // Dispara a transição de crescimento (chamar quando o progresso cruza o threshold).
+  // Mantido pra compatibilidade - crescimento em um pop só, de uma vez.
   SvgUtils.growNow = function (group) {
     if (group.classList.contains('pmv-grow')) return;
     group.classList.add('pmv-grow');
+  };
+
+  // Crescimento PROGRESSIVO: fraction vai de 0 (acabou de cruzar o
+  // threshold) a 1 (tamanho final atingido). Chamar de novo a cada vez
+  // que o progresso avança - cada chamada reaproveita a MESMA transição
+  // CSS já definida em .pmv-growable (900ms, leve overshoot), então uma
+  // sequência de chamadas com fraction crescente lê como o organismo
+  // crescendo aos poucos ao longo de vários ciclos, não um pop único.
+  // sproutFraction é o tamanho mínimo visível assim que nasce (nunca 0 -
+  // um coral recém-brotado ainda é visivelmente um coral, só pequeno).
+  var SPROUT_FRACTION = 0.22;
+  SvgUtils.setGrowthFraction = function (group, targetScale, fraction) {
+    if (fraction <= 0) return;
+    if (!group.classList.contains('pmv-grow')) group.classList.add('pmv-grow');
+    var f = fraction > 1 ? 1 : fraction;
+    var s = targetScale * (SPROUT_FRACTION + (1 - SPROUT_FRACTION) * f);
+    group.style.setProperty('--pmv-target-scale', s.toFixed(4));
   };
 
   PMV.Engine.SvgUtils = SvgUtils;
