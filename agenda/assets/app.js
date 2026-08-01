@@ -25,16 +25,27 @@
     QUINTA: "Qui",
     SEXTA: "Sex",
   };
+  const DAY_LABEL_FULL = {
+    SEGUNDA: "Segunda-feira",
+    TERCA: "Terça-feira",
+    QUARTA: "Quarta-feira",
+    QUINTA: "Quinta-feira",
+    SEXTA: "Sexta-feira",
+  };
   // getDay(): 0=domingo ... 6=sábado
   const JS_WEEKDAY_TO_KEY = { 1: "SEGUNDA", 2: "TERCA", 3: "QUARTA", 4: "QUINTA", 5: "SEXTA" };
 
-  const CATEGORY_ORDER = ["HAM", "CI_PRATICA", "PIEPE", "IESC_COMUNIDADES", "CI_MARC_PALESTRA"];
+  const CATEGORY_ORDER = ["HAM", "CI_PRATICA", "PIEPE", "IESC_COMUNIDADES", "CI_MARC_PALESTRA", "PESSOAL"];
   const CATEGORY_META = {
     HAM: { label: "HAM", color: "var(--cat-ham)", filterable: true },
     CI_PRATICA: { label: "CI Prática", color: "var(--cat-ci)", filterable: true },
     PIEPE: { label: "PIEPE", color: "var(--cat-piepe)", filterable: true },
     IESC_COMUNIDADES: { label: "IESC / Comunidades", color: "var(--cat-iesc)", filterable: true },
     CI_MARC_PALESTRA: { label: "CI MARC / Palestra", color: "var(--cat-marc)", filterable: false },
+    // Compromissos que a própria pessoa adiciona (estudo, outras aulas etc.)
+    // - não vem da planilha, não tem grupo/preceptor, por isso filterable:false
+    // (só liga/desliga, igual CI MARC/Palestra).
+    PESSOAL: { label: "Pessoal", color: "var(--cat-pessoal)", filterable: false },
   };
 
   // ---------------------------------------------------------------------
@@ -153,11 +164,14 @@
         return ev.subtype === "Palestra" ? "IESC – Palestra" : "Comunidades – Prática";
       case "CI_MARC_PALESTRA":
         return "Clínica Integrada – " + ev.subtype;
+      case "PESSOAL":
+        return ev.title || "Compromisso pessoal";
       default:
         return ev.category_label;
     }
   }
   function subtitleFor(ev) {
+    if (ev.category === "PESSOAL") return "Compromisso pessoal";
     const who = ev.preceptor || "";
     if (!ev.group || ev.group === "TODOS") {
       return "Todos os grupos" + (who ? " · " + who : "");
@@ -205,6 +219,39 @@
   }
 
   let filterState = loadFilterState();
+
+  // ---------------------------------------------------------------------
+  // Compromissos pessoais (a pessoa adiciona os próprios - estudo, outras
+  // aulas, o que quiser). Não vem da planilha, fica só no navegador dela.
+  // ---------------------------------------------------------------------
+  const CUSTOM_EVENTS_KEY = "semana-padrao-custom-events-v1";
+  const MAX_CUSTOM_EVENTS = 30;
+
+  function loadCustomEvents() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(CUSTOM_EVENTS_KEY) || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveCustomEvents(list) {
+    try {
+      localStorage.setItem(CUSTOM_EVENTS_KEY, JSON.stringify(list));
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  let customEvents = loadCustomEvents();
+
+  // Todos os eventos (planilha oficial + pessoais) - é isso que o grid, o
+  // cálculo de limites de horário e o modo foto devem usar, nunca
+  // DATA.events sozinho.
+  function allEvents() {
+    return DATA.events.concat(customEvents);
+  }
 
   // ---------------------------------------------------------------------
   // Estado compartilhável via URL (?state=...)
@@ -439,7 +486,7 @@
   function computeBounds() {
     let min = Infinity;
     let max = -Infinity;
-    DATA.events.forEach((ev) => {
+    allEvents().forEach((ev) => {
       min = Math.min(min, toMinutes(ev.start));
       max = Math.max(max, toMinutes(ev.end));
     });
@@ -449,6 +496,15 @@
   }
 
   const BOUNDS = computeBounds();
+
+  // Recalcula BOUNDS in-place (o objeto é const, só as propriedades mudam)
+  // - necessário quando um compromisso pessoal cai fora do intervalo de
+  // horário atual do grid (ex.: estudo às 6h, antes de qualquer aula).
+  function refreshBounds() {
+    const b = computeBounds();
+    BOUNDS.startHour = b.startHour;
+    BOUNDS.endHour = b.endHour;
+  }
 
   function hourPx() {
     return window.innerWidth <= 480 ? 52 : 64;
@@ -674,7 +730,7 @@
     agendaInner.appendChild(axis);
 
     // colunas dos dias
-    const visibleEvents = DATA.events.filter((ev) => isEventVisible(ev, filterState));
+    const visibleEvents = allEvents().filter((ev) => isEventVisible(ev, filterState));
 
     DAY_ORDER.forEach((day) => {
       const col = document.createElement("div");
@@ -958,6 +1014,160 @@
   }
 
   // ---------------------------------------------------------------------
+  // Painel "Meus horários" — compromissos pessoais (estudo, outras aulas,
+  // o que a pessoa quiser). Ficam só no localStorage dela, somados aos
+  // eventos oficiais em todo lugar que usa allEvents() (grid, limites de
+  // horário, modo foto).
+  // ---------------------------------------------------------------------
+  function personalEventsSorted() {
+    return customEvents.slice().sort((a, b) => {
+      const da = DAY_ORDER.indexOf(a.day), db = DAY_ORDER.indexOf(b.day);
+      if (da !== db) return da - db;
+      return toMinutes(a.start) - toMinutes(b.start);
+    });
+  }
+
+  function addCustomEvent(day, start, end, title) {
+    const entry = {
+      id: "pe" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      day: day,
+      day_label: DAY_LABEL_FULL[day],
+      category: "PESSOAL",
+      category_label: "Pessoal",
+      title: title,
+      start: start,
+      end: end,
+    };
+    customEvents.push(entry);
+    saveCustomEvents(customEvents);
+    refreshBounds();
+    renderGrid();
+    renderPersonalPanel();
+  }
+
+  function removeCustomEvent(id) {
+    customEvents = customEvents.filter((e) => e.id !== id);
+    saveCustomEvents(customEvents);
+    refreshBounds();
+    renderGrid();
+    renderPersonalPanel();
+  }
+
+  function renderPersonalPanel() {
+    const panel = document.getElementById("personal-panel");
+    panel.innerHTML = "";
+
+    const hint = document.createElement("p");
+    hint.className = "week-panel-hint";
+    hint.textContent = "Adicione seus próprios compromissos (estudo, outras aulas etc.) - eles aparecem no grid junto com o resto, só que só você vê.";
+    panel.appendChild(hint);
+
+    const form = document.createElement("div");
+    form.className = "personal-form";
+
+    const daySelect = document.createElement("select");
+    daySelect.className = "personal-input";
+    DAY_ORDER.forEach((day) => {
+      const opt = document.createElement("option");
+      opt.value = day;
+      opt.textContent = DAY_LABEL_FULL[day];
+      daySelect.appendChild(opt);
+    });
+
+    const startInput = document.createElement("input");
+    startInput.type = "time";
+    startInput.className = "personal-input";
+
+    const endInput = document.createElement("input");
+    endInput.type = "time";
+    endInput.className = "personal-input";
+
+    const titleInput = document.createElement("input");
+    titleInput.type = "text";
+    titleInput.className = "personal-input personal-input-title";
+    titleInput.placeholder = "Ex: Estudo, Inglês...";
+    titleInput.maxLength = 40;
+
+    const addBtn = document.createElement("button");
+    addBtn.type = "button";
+    addBtn.className = "personal-add-btn";
+    addBtn.textContent = "Adicionar";
+
+    const row1 = document.createElement("div");
+    row1.className = "personal-form-row";
+    row1.appendChild(daySelect);
+    row1.appendChild(startInput);
+    row1.appendChild(endInput);
+
+    const row2 = document.createElement("div");
+    row2.className = "personal-form-row";
+    row2.appendChild(titleInput);
+    row2.appendChild(addBtn);
+
+    form.appendChild(row1);
+    form.appendChild(row2);
+    panel.appendChild(form);
+
+    if (customEvents.length >= MAX_CUSTOM_EVENTS) {
+      addBtn.disabled = true;
+      addBtn.title = "Máximo de " + MAX_CUSTOM_EVENTS + " compromissos pessoais";
+    }
+
+    addBtn.addEventListener("click", () => {
+      if (customEvents.length >= MAX_CUSTOM_EVENTS) return;
+      if (!startInput.value || !endInput.value) {
+        (startInput.value ? endInput : startInput).focus();
+        return;
+      }
+      if (toMinutes(endInput.value) <= toMinutes(startInput.value)) {
+        endInput.focus();
+        return;
+      }
+      const title = titleInput.value.trim() || "Compromisso";
+      addCustomEvent(daySelect.value, startInput.value, endInput.value, title);
+      titleInput.value = "";
+      startInput.value = "";
+      endInput.value = "";
+    });
+
+    const list = personalEventsSorted();
+    if (list.length === 0) return;
+
+    const listWrap = document.createElement("div");
+    listWrap.className = "personal-list";
+    list.forEach((ev) => {
+      const row = document.createElement("div");
+      row.className = "week-panel-row personal-list-row";
+
+      const label = document.createElement("div");
+      label.className = "wp-label";
+      label.innerHTML =
+        escapeHtml(ev.title) +
+        '<span class="wp-sub">' + escapeHtml(DAY_LABEL_FULL[ev.day]) + " · " + fmtRange(ev.start, ev.end) + "</span>";
+      row.appendChild(label);
+
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "personal-remove-btn";
+      removeBtn.textContent = "Remover";
+      removeBtn.addEventListener("click", () => removeCustomEvent(ev.id));
+      row.appendChild(removeBtn);
+
+      listWrap.appendChild(row);
+    });
+    panel.appendChild(listWrap);
+  }
+
+  function setupPersonalPanelButton() {
+    const btn = document.getElementById("personal-config-btn");
+    const panel = document.getElementById("personal-panel");
+    btn.addEventListener("click", () => {
+      panel.hidden = !panel.hidden;
+      if (!panel.hidden) renderPersonalPanel();
+    });
+  }
+
+  // ---------------------------------------------------------------------
   // Tema claro / escuro
   // ---------------------------------------------------------------------
   function applyTheme(theme) {
@@ -1025,6 +1235,16 @@
       "<span>Horário do MARC</span>";
     left.appendChild(marcBtn);
 
+    const personalBtn = document.createElement("button");
+    personalBtn.className = "icon-btn";
+    personalBtn.type = "button";
+    personalBtn.id = "personal-config-btn";
+    personalBtn.title = "Adicionar seus próprios compromissos (estudo, outras aulas etc.)";
+    personalBtn.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>' +
+      "<span>Meus horários</span>";
+    left.appendChild(personalBtn);
+
     actionBar.appendChild(left);
 
     const right = document.createElement("div");
@@ -1045,6 +1265,7 @@
 
     setupWeekPanelButton();
     setupMarcPanelButton();
+    setupPersonalPanelButton();
   }
 
   async function copyShareLink() {
@@ -1096,7 +1317,7 @@
   // Modo foto (nova aba)
   // ---------------------------------------------------------------------
   function openPhotoMode() {
-    const visibleEvents = DATA.events
+    const visibleEvents = allEvents()
       .filter((ev) => isEventVisible(ev, filterState))
       .map((ev) => Object.assign({}, ev, { weekClass: weekClassFor(ev) }));
     const theme = document.documentElement.getAttribute("data-theme") || "light";
@@ -1145,6 +1366,7 @@
     PIEPE: { label: "PIEPE" },
     IESC_COMUNIDADES: { label: "IESC / Comunidades" },
     CI_MARC_PALESTRA: { label: "CI MARC / Palestra" },
+    PESSOAL: { label: "Pessoal" },
   };
 
   function toMinutes(hhmm){ const [h,m]=hhmm.split(":").map(Number); return h*60+m; }
@@ -1158,10 +1380,12 @@
       case "PIEPE": return "PIEPE";
       case "IESC_COMUNIDADES": return ev.subtype === "Palestra" ? "IESC \u2013 Palestra" : "Comunidades \u2013 Prática";
       case "CI_MARC_PALESTRA": return "Clínica Integrada \u2013 " + ev.subtype;
+      case "PESSOAL": return ev.title || "Compromisso pessoal";
       default: return ev.category_label;
     }
   }
   function subtitleFor(ev) {
+    if (ev.category === "PESSOAL") return "Compromisso pessoal";
     const who = ev.preceptor || "";
     if (!ev.group || ev.group === "TODOS") return "Todos os grupos" + (who ? " · " + who : "");
     return "Grupo " + ev.group + (who ? " · " + who : "");

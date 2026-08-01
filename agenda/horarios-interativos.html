@@ -22,6 +22,8 @@
   --cat-iesc-ink: #ffffff;
   --cat-marc: #0c8599;
   --cat-marc-ink: #ffffff;
+  --cat-pessoal: #d6336c;
+  --cat-pessoal-ink: #ffffff;
 
   /* --- Tipografia --- */
   --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -487,6 +489,7 @@ button, select, input {
 .event-block.cat-PIEPE { background: var(--cat-piepe); }
 .event-block.cat-IESC_COMUNIDADES { background: var(--cat-iesc); }
 .event-block.cat-CI_MARC_PALESTRA { background: var(--cat-marc); }
+.event-block.cat-PESSOAL { background: var(--cat-pessoal); }
 
 .empty-state {
   padding: 40px 20px;
@@ -833,6 +836,73 @@ body.photo-mode {
 }
 
 /* ========================================================================
+   Painel "Meus horários" (compromissos pessoais)
+   ======================================================================== */
+
+.personal-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.personal-input {
+  border: 1px solid var(--border-strong);
+  background: var(--bg-inset);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 7px 8px;
+  font-size: 0.8rem;
+  font-family: var(--font-ui);
+  min-width: 0;
+}
+
+.personal-input-title {
+  flex: 1 1 160px;
+}
+
+.personal-add-btn {
+  border: none;
+  background: var(--cat-pessoal);
+  color: var(--cat-pessoal-ink);
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.personal-add-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.personal-list {
+  margin-top: 6px;
+}
+
+.personal-list-row .wp-label {
+  flex: 1 1 auto;
+}
+
+.personal-remove-btn {
+  border: 1px solid var(--border-strong);
+  background: var(--bg-inset);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  font-size: 0.74rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.personal-remove-btn:hover {
+  color: var(--cat-pessoal);
+  border-color: var(--cat-pessoal);
+}
+
+/* ========================================================================
    Modo compartilhado / Embed (?state=... na URL)
    Mostra só o calendário — ideal pra incorporar no Notion.
    ======================================================================== */
@@ -894,7 +964,7 @@ body.embed-mode #embed-scaler {
   <header class="app-header">
     <div>
       <h1>Semana Padrão — 8º Período</h1>
-      <p class="subtitle">HAM · CI Prática (5/6) · PIEPE · IESC/Comunidades · CI MARC/Palestra — clique nos filtros abaixo pra ajustar</p>
+      <p class="subtitle">HAM · CI Prática (5/6) · PIEPE · IESC/Comunidades · CI MARC/Palestra · Pessoal — clique nos filtros abaixo pra ajustar</p>
     </div>
     <div class="header-actions">
       <button class="icon-btn" id="theme-toggle" type="button" title="Alternar tema claro/escuro">
@@ -912,6 +982,7 @@ body.embed-mode #embed-scaler {
 
   <div class="week-panel" id="week-panel" hidden></div>
   <div class="week-panel" id="marc-panel" hidden></div>
+  <div class="week-panel" id="personal-panel" hidden></div>
 
   <div class="grid-scroll-wrap" id="grid-scroll-wrap">
     <div class="agenda" id="agenda">
