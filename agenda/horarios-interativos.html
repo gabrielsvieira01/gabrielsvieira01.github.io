@@ -2,8 +2,16 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Semana Padrão — 8º Período</title>
+<meta name="description" content="Agenda interativa da semana padrão do 8º período de Medicina: filtros por categoria e grupo, visão de dia, modo foto e exportação pro calendário.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Semana Padrão">
+<meta name="theme-color" content="#f4f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14161c" media="(prefers-color-scheme: dark)">
 <style id="main-styles">
 /* =========================================================================
    Semana Padrão — 8º Período
@@ -73,6 +81,13 @@
 
 * {
   box-sizing: border-box;
+}
+
+/* O atributo `hidden` vale só `display: none` na folha do navegador, então
+   qualquer classe que declare `display` (ex.: .filters-bar { display:flex })
+   passa por cima dele e o painel aparece mesmo escondido. */
+[hidden] {
+  display: none !important;
 }
 
 html {
@@ -350,6 +365,12 @@ button, select, input {
   padding-left: 3px;
 }
 
+/* O primeiro rótulo do eixo (ex.: "07:00") ficava metade pra fora do grid
+   por causa do -6px acima, e era clipado pela borda de cima. */
+.time-axis .tick:first-child span {
+  top: 2px;
+}
+
 .day-col {
   position: relative;
   border-right: 1px solid var(--border);
@@ -424,8 +445,13 @@ button, select, input {
   font-weight: 700;
   margin-top: 1px;
   white-space: normal;
+  /* `word-break: break-word` partia palavra no meio sem hífen nenhum
+     ("CLÍNICA ACADÊMI/CA"). Com hyphens:auto + lang="pt-BR" o navegador
+     quebra nas sílabas e coloca o hífen; overflow-wrap só entra como
+     último recurso, pra palavra que não cabe de jeito nenhum. */
+  hyphens: auto;
+  -webkit-hyphens: auto;
   overflow-wrap: break-word;
-  word-break: break-word;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -437,11 +463,27 @@ button, select, input {
 .event-block .ev-sub {
   opacity: 0.92;
   white-space: normal;
+  hyphens: auto;
+  -webkit-hyphens: auto;
   overflow-wrap: break-word;
-  word-break: break-word;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Evento curto inteiramente contido num bem mais longo (ex.: PIEPE de
+   50min dentro da CI Prática de 4h). Em vez de os dois dividirem a
+   largura meio a meio — e nenhum ficar legível —, o curto flutua por
+   cima, encostado à direita, deixando a faixa esquerda do longo sempre
+   visível. Ver layoutOverlaps() em assets/shared.js. */
+.event-block.overlay {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.42);
+}
+
+.event-block:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
 
 .event-block.compact .ev-sub,
@@ -517,8 +559,28 @@ button, select, input {
   .filter-chip {
     flex: 1 1 calc(50% - 8px);
   }
-  .agenda-inner {
-    min-width: 720px;
+  /* min-width/grid-template-columns de .agenda-inner são definidos por JS
+     em renderGrid(), porque dependem de quantos dias estão visíveis
+     (semana inteira vs. um dia só). */
+  .app-header h1 {
+    font-size: 1.25rem;
+  }
+  .app-header .subtitle {
+    display: none;
+  }
+}
+
+/* Em tela estreita os 4 botões de configuração quebravam em várias linhas
+   e empurravam o calendário pra baixo. Viram só ícone; o nome continua
+   acessível via title/aria-label. */
+@media (max-width: 560px) {
+  .action-bar-left .icon-btn span:not(.btn-badge),
+  .action-bar-right .icon-btn span:not(.btn-badge) {
+    display: none;
+  }
+  .action-bar-left .icon-btn,
+  .action-bar-right .icon-btn {
+    padding: 9px 11px;
   }
 }
 
@@ -659,6 +721,54 @@ body.photo-mode {
   margin-top: 1px;
 }
 
+/* --- Marca de "agora" na lista ---
+   Equivalente da linha vermelha da grade. Como a lista não tem eixo de
+   tempo, ela é inserida ENTRE os cards, na posição cronológica certa
+   (ver renderAgendaList em assets/shared.js). */
+
+.list-now {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 8px;
+  padding-left: 2px;
+}
+
+.list-now-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--now-line);
+  flex-shrink: 0;
+}
+
+.list-now-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--now-line);
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.list-now-rule {
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--now-line);
+  opacity: 0.85;
+}
+
+/* Evento acontecendo agora */
+.list-card.is-now {
+  border-color: var(--now-line);
+  box-shadow: 0 0 0 1px var(--now-line);
+}
+
+.list-day.is-today > h3 {
+  color: var(--accent);
+}
+
 /* ========================================================================
    Link compartilhável / Toast
    ======================================================================== */
@@ -676,10 +786,103 @@ body.photo-mode {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 #marc-config-btn[hidden] {
   display: none;
+}
+
+/* Tela estreita: `display: contents` dissolve os agrupamentos
+   esquerda/direita, então os botões viram irmãos diretos e fluem numa
+   linha só, em vez de a direita quebrar sozinha por causa do
+   space-between. Precisa vir DEPOIS de .action-bar-left acima — mesma
+   especificidade, quem vem por último ganha. */
+@media (max-width: 560px) {
+  .share-bar {
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  .action-bar-left,
+  .action-bar-right {
+    display: contents;
+  }
+}
+
+/* Contador ao lado de "Filtros" — mostra quantas categorias estão ligadas
+   sem precisar abrir o painel. */
+.btn-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--bg-inset);
+  color: var(--text-muted);
+}
+
+.btn-badge.partial {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.icon-btn[aria-expanded="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ========================================================================
+   Alternância Semana / Dia + navegação entre dias
+   ======================================================================== */
+
+.view-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.day-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 2px;
+  box-shadow: var(--shadow);
+}
+
+.day-nav-btn {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.1rem;
+  line-height: 1;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.day-nav-btn:hover:not(:disabled) {
+  background: var(--bg-inset);
+}
+
+.day-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.day-nav-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  min-width: 8.5ch;
+  text-align: center;
+}
+
+.day-nav-label.is-today {
+  color: var(--accent);
 }
 
 .app-toast {
@@ -766,6 +969,14 @@ body.photo-mode {
   cursor: pointer;
 }
 
+/* Estado ativo genérico — usado por "Toda semana" e "Ambos", que não têm
+   data-week/data-slot. As regras mais específicas abaixo sobrescrevem. */
+.wp-toggle button.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+
 .wp-toggle button.active[data-week="1"] {
   background: var(--cat-ci);
   color: var(--cat-ci-ink);
@@ -815,6 +1026,22 @@ body.photo-mode {
   background: var(--cat-ci);
 }
 
+.week-anchor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.week-anchor .wp-label {
+  flex: 1 1 220px;
+  font-size: 0.82rem;
+}
+
 .week-legend .wl-swatch.wl-2 {
   background-image: repeating-linear-gradient(
     45deg,
@@ -825,7 +1052,10 @@ body.photo-mode {
   );
 }
 
-.event-block.cat-CI_PRATICA.week-2 {
+/* Hachura da semana 2. Vale pra qualquer categoria que tenha quinzena —
+   práticas de CI (marcadas no painel "Semanas") e compromissos pessoais
+   marcados como quinzenais. */
+.event-block.week-2 {
   background-image: repeating-linear-gradient(
     45deg,
     rgba(255, 255, 255, 0.22),
@@ -902,6 +1132,183 @@ body.photo-mode {
   border-color: var(--cat-pessoal);
 }
 
+/* --- Painel "Ajustar horários" --- */
+
+.adjust-row {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.adjust-row .wp-label {
+  flex: 1 1 200px;
+}
+
+.adjust-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.adjust-controls .personal-input {
+  padding: 5px 6px;
+  font-size: 0.76rem;
+}
+
+/* Faixa na lateral marcando que aquele evento saiu do horário oficial. */
+.adjust-row.is-adjusted {
+  border-left: 3px solid var(--accent);
+  padding-left: 8px;
+  margin-left: -11px;
+}
+
+.adjust-original {
+  color: var(--text-faint);
+  text-decoration: line-through;
+}
+
+/* Evento com horário ajustado ganha um contorno tracejado no grid, pra
+   lembrar que aquele não é o horário da planilha. */
+.event-block.adjusted {
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.75);
+}
+
+/* --- Paleta de cores dos compromissos pessoais --- */
+
+.color-palette {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.color-swatch:hover {
+  transform: scale(1.12);
+}
+
+/* O anel usa a cor do fundo do painel, criando um vão entre a bolinha e
+   a borda — funciona igual nos dois temas, sem cor fixa. */
+.color-swatch.selected {
+  border-color: var(--text);
+  box-shadow: inset 0 0 0 2px var(--bg-elevated);
+}
+
+.color-swatch:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.personal-color-row {
+  align-items: center;
+  gap: 10px;
+}
+
+.personal-color-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.personal-color-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.personal-color-btn:hover {
+  transform: scale(1.12);
+}
+
+.personal-palette-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 0 10px 30px;
+}
+
+/* --- "O que é o .ics e como importar" --- */
+
+.ics-help {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.ics-help > summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
+  list-style: none;
+  padding: 4px 0;
+}
+
+.ics-help > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Triângulo próprio, que gira ao abrir — o marcador nativo não dá pra
+   estilizar de forma consistente entre navegadores. */
+.ics-help > summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 6px;
+  transition: transform 0.15s ease;
+}
+
+.ics-help[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.ics-help > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.ics-help-body {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.ics-help-body p {
+  margin: 8px 0;
+}
+
+.ics-help-body strong {
+  color: var(--text);
+}
+
+.ics-help-step {
+  padding-left: 10px;
+  border-left: 2px solid var(--border-strong);
+}
+
+.ics-help-tip {
+  background: var(--bg-inset);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+
 /* ========================================================================
    Modo compartilhado / Embed (?state=... na URL)
    Mostra só o calendário — ideal pra incorporar no Notion.
@@ -910,6 +1317,7 @@ body.photo-mode {
 body.embed-mode .app-header,
 body.embed-mode .filters-bar,
 body.embed-mode .week-panel,
+body.embed-mode #share-panel,
 body.embed-mode .share-bar {
   display: none !important;
 }
@@ -952,6 +1360,76 @@ body.embed-mode #embed-scaler {
   transform-origin: top left;
 }
 
+/* Embed em espaço apertado (celular no Notion, bloco baixo): a grade
+   escalada ficaria com texto de ~7px. Aí trocamos pra lista, que não
+   depende de altura disponível — só rola — e mantém o texto no tamanho
+   real. Ver EMBED_MIN_SCALE em assets/app.js. */
+body.embed-mode #embed-list {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0 12px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+body.embed-mode.embed-list-mode .grid-scroll-wrap {
+  overflow: visible;
+}
+
+body.embed-mode #embed-list .list-day {
+  padding: 10px 12px 2px;
+}
+
+body.embed-mode #embed-list .list-day h3 {
+  margin-bottom: 6px;
+  font-size: 0.88rem;
+  /* O título do dia gruda no topo enquanto se rola dentro daquele dia:
+     num embed baixo, sem isso você perde a referência de qual dia está
+     olhando depois de dois ou três eventos. */
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 2;
+  padding-top: 4px;
+}
+
+body.embed-mode #embed-list .list-card {
+  padding: 7px 9px;
+  margin-bottom: 6px;
+  align-items: center;
+}
+
+body.embed-mode #embed-list .list-card .lc-time {
+  min-width: 86px;
+  font-size: 0.72rem;
+}
+
+body.embed-mode #embed-list .list-card .lc-title {
+  font-size: 0.82rem;
+}
+
+body.embed-mode #embed-list .list-card .lc-sub {
+  font-size: 0.74rem;
+}
+
+/* Telas bem estreitas: horário vai pra cima do título em vez de disputar
+   a largura com ele. */
+@media (max-width: 380px) {
+  body.embed-mode #embed-list .list-card {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  body.embed-mode #embed-list .list-card .lc-time {
+    min-width: 0;
+  }
+  body.embed-mode #embed-list .list-card .lc-body {
+    flex: 1 1 100%;
+    padding-left: 20px;
+  }
+}
+
 @media print {
   .photo-toolbar { position: static; }
   .photo-stage { height: auto !important; }
@@ -964,7 +1442,7 @@ body.embed-mode #embed-scaler {
   <header class="app-header">
     <div>
       <h1>Semana Padrão — 8º Período</h1>
-      <p class="subtitle">HAM · CI Prática (5/6) · PIEPE · IESC/Comunidades · CI MARC/Palestra · Pessoal — clique nos filtros abaixo pra ajustar</p>
+      <p class="subtitle">Agenda da faculdade de Medicina</p>
     </div>
     <div class="header-actions">
       <button class="icon-btn" id="theme-toggle" type="button" title="Alternar tema claro/escuro">
@@ -978,11 +1456,16 @@ body.embed-mode #embed-scaler {
     </div>
   </header>
 
-  <div class="filters-bar" id="filters-bar"></div>
+  <!-- A barra de ações é inserida por app.js logo antes de #filters-bar.
+       Todos os painéis começam fechados pra não empurrar o calendário
+       pra fora da primeira tela. -->
+  <div class="filters-bar" id="filters-bar" hidden></div>
 
   <div class="week-panel" id="week-panel" hidden></div>
   <div class="week-panel" id="marc-panel" hidden></div>
+  <div class="week-panel" id="adjust-panel" hidden></div>
   <div class="week-panel" id="personal-panel" hidden></div>
+  <div class="week-panel" id="share-panel" hidden></div>
 
   <div class="grid-scroll-wrap" id="grid-scroll-wrap">
     <div class="agenda" id="agenda">
@@ -996,6 +1479,17 @@ body.embed-mode #embed-scaler {
 </div>
 
 <script src="output/events.js"></script>
+<script src="assets/shared.js"></script>
 <script src="assets/app.js"></script>
+<script>
+// Service worker: deixa a agenda abrir offline e "instalar" na tela de
+// início do celular. Só roda em http(s) — abrindo o arquivo direto pelo
+// file:// o registro falha, e tudo bem: a página funciona igual sem ele.
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  });
+}
+</script>
 </body>
 </html>

@@ -1,0 +1,27 @@
+{
+  "name": "Semana Padrão — 8º Período",
+  "short_name": "Semana Padrão",
+  "description": "Agenda interativa da semana padrão do 8º período de Medicina.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "horarios-interativos.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f5f7",
+  "theme_color": "#3b5bdb",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

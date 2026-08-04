@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Semana Padrão">
+  <rect width="512" height="512" rx="112" fill="#3b5bdb"/>
+  <rect x="104" y="128" width="304" height="288" rx="36" fill="#ffffff"/>
+  <rect x="104" y="128" width="304" height="64" rx="36" fill="#2f3a5c"/>
+  <rect x="104" y="168" width="304" height="24" fill="#2f3a5c"/>
+  <rect x="160" y="92" width="32" height="72" rx="16" fill="#2f3a5c"/>
+  <rect x="320" y="92" width="32" height="72" rx="16" fill="#2f3a5c"/>
+  <rect x="148" y="232" width="88" height="52" rx="12" fill="#3b5bdb"/>
+  <rect x="264" y="232" width="104" height="52" rx="12" fill="#2f9e44"/>
+  <rect x="148" y="308" width="104" height="52" rx="12" fill="#e8590c"/>
+  <rect x="280" y="308" width="88" height="52" rx="12" fill="#ae3ec9"/>
+</svg>
