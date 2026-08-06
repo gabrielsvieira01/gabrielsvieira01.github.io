@@ -179,9 +179,11 @@ O que continua valendo a pena olhar:
   - *Baixar .ics*: exporta **tudo o que você está vendo** — aulas dos
     filtros ligados, compromissos pessoais e seus ajustes de horário. Os
     horários vão sem fuso ("floating"), então 09:00 continua 09:00 em
-    qualquer lugar. Dentro do painel há um "O que é o .ics e como
-    importar" (fechado por padrão) com o passo a passo do Google e da
-    Apple — a explicação mora onde a pessoa está, não só neste README.
+    qualquer lugar. Dá pra escolher um **alerta** (5 min a 1 h antes, ou
+    nenhum) que vale pra todos os eventos. Dentro do painel há um "O que é
+    o .ics e como importar" (fechado por padrão) com o passo a passo do
+    Google e da Apple — a explicação mora onde a pessoa está, não só neste
+    README.
 - **Embed no Notion**: o link de embed se adapta ao tamanho do bloco. Se a
   grade couber sem o texto ficar menor que ~8,5px, mostra a grade
   escalada, alargada pra preencher o bloco. Se não couber — bloco baixo,
@@ -230,6 +232,31 @@ não importa arquivos) está dentro do próprio painel, no bloco recolhível
 >
 > Duas formas de exportar, uma delas silenciosamente errada, é pior do que
 > uma só correta.
+### Alertas e cores no .ics
+
+**Alerta** funciona de verdade: vira um `VALARM` com `ACTION:DISPLAY` e
+`TRIGGER:-PT<n>M` em cada evento, e tanto o Google quanto a Apple leem
+isso na importação e criam a notificação. O tempo é escolhido no painel
+Compartilhar e fica salvo; "Sem alerta" é uma escolha válida e persiste
+(cuidado ao mexer: `""` é *falsy*, então testar presença — não verdade —
+é o que preserva essa opção).
+
+**Cor por evento** é outra história. O arquivo leva `COLOR:` (RFC 7986,
+que só aceita nome de cor CSS3, por isso o mapa `ICS_CATEGORY_COLOR` /
+`ICS_PERSONAL_COLOR` em vez de hex), mas:
+
+- o **Google Agenda ignora** `COLOR` ao importar — ele tem cor por evento,
+  só que exposta pela interface/API dele, não pelo `.ics`;
+- o **Apple Calendário** não tem o conceito de cor por evento: ele colore
+  por calendário.
+
+Ou seja, nos dois apps que interessam aqui isso provavelmente não vai
+aparecer. Ficou no arquivo porque é padrão, custa três linhas e clientes
+que respeitam (vários CalDAV, Thunderbird) passam a mostrar certo. Quem
+quiser separação visual no Google/Apple define a cor **do calendário**
+depois de importar — e é por isso que a recomendação de usar um
+calendário dedicado aparece na ajuda do painel.
+
 ## Reimportar não duplica: o contrato do UID
 
 Cada `VEVENT` leva um `UID`, e é ele que o Google/Apple usa pra decidir se

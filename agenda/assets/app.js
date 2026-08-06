@@ -277,6 +277,8 @@
       if (saved.weekAssignment) Object.assign(state.weekAssignment, saved.weekAssignment);
       if (saved.marcSlot) Object.assign(state.marcSlot, saved.marcSlot);
       if (saved.weekAnchor) state.weekAnchor = saved.weekAnchor;
+      // "" é uma escolha válida (sem alerta), então testa presença, não verdade
+      if (saved.icsAlarm !== undefined) state.icsAlarm = saved.icsAlarm;
     }
     return state;
   }
@@ -2089,7 +2091,42 @@
       panel.appendChild(row);
     });
 
+    renderAlarmRow(panel);
     renderIcsHelp(panel);
+  }
+
+  // Alerta aplicado a todos os eventos do .ics baixado. Fica aqui, junto do
+  // botão de baixar, porque só afeta a exportação — não muda nada no grid.
+  function renderAlarmRow(panel) {
+    const row = document.createElement("div");
+    row.className = "week-panel-row";
+
+    const label = document.createElement("label");
+    label.className = "wp-label";
+    label.htmlFor = "ics-alarm-select";
+    label.innerHTML =
+      "Alerta antes de cada aula" +
+      '<span class="wp-sub">Vira notificação no Google Agenda e no Apple Calendário</span>';
+    row.appendChild(label);
+
+    const select = document.createElement("select");
+    select.id = "ics-alarm-select";
+    select.className = "personal-input";
+    const atual = filterState.icsAlarm === undefined ? DEFAULT_ICS_ALARM : filterState.icsAlarm;
+    ICS_ALARM_OPTIONS.forEach((opt) => {
+      const o = document.createElement("option");
+      o.value = opt.value;
+      o.textContent = opt.label;
+      if (String(atual) === opt.value) o.selected = true;
+      select.appendChild(o);
+    });
+    select.addEventListener("change", () => {
+      filterState.icsAlarm = select.value;
+      saveFilterState(filterState);
+    });
+    row.appendChild(select);
+
+    panel.appendChild(row);
   }
 
   // ---------------------------------------------------------------------
@@ -2126,6 +2163,12 @@
       "<p class='ics-help-step'><strong>Apple Calendário</strong><br>" +
       "No Mac: Arquivo → Importar. No iPhone: toque no arquivo e escolha " +
       "“Adicionar tudo”.</p>" +
+
+      "<p class='ics-help-note'><strong>Sobre as cores:</strong> o arquivo leva a " +
+      "cor de cada aula, mas o Google ignora essa informação ao importar e o Apple " +
+      "colore por calendário, não por evento — então nos dois a cor provavelmente " +
+      "não vai aparecer. O jeito que funciona é escolher a cor do calendário " +
+      "inteiro, no próprio app, depois de importar.</p>" +
 
       "<p class='ics-help-tip'><strong>Crie um calendário só pra isso</strong>, " +
       "não use o principal. Quando o horário mudar, baixe de novo e importe no " +
@@ -2173,6 +2216,66 @@
   // embutir uma VTIMEZONE inteira no arquivo.
   // ---------------------------------------------------------------------
   const ICS_BYDAY = { SEGUNDA: "MO", TERCA: "TU", QUARTA: "WE", QUINTA: "TH", SEXTA: "FR" };
+
+  // ---------------------------------------------------------------------
+  // Cor por evento (RFC 7986). A propriedade COLOR só aceita NOME de cor
+  // CSS3 — não hex —, então cada cor nossa vira o nome mais próximo.
+  //
+  // Aviso honesto: o Google Agenda ignora COLOR ao importar (ele tem cor
+  // por evento, mas só pela API/interface dele) e o Apple Calendário nem
+  // tem o conceito de cor por evento — ele colore por calendário. Ou seja,
+  // nos dois apps que você usa isto provavelmente não vai aparecer. Fica
+  // porque é padrão, custa três linhas, e clientes que respeitam (vários
+  // CalDAV, Thunderbird) passam a mostrar certo.
+  // ---------------------------------------------------------------------
+  const ICS_CATEGORY_COLOR = {
+    HAM: "royalblue",
+    CI_PRATICA: "forestgreen",
+    PIEPE: "chocolate",
+    IESC_COMUNIDADES: "darkorchid",
+    CI_MARC_PALESTRA: "darkcyan",
+    PESSOAL: "mediumvioletred",
+  };
+
+  // A paleta pessoal é fixa (ver PERSONAL_COLORS), então dá pra mapear
+  // direto, sem calcular "cor mais próxima".
+  const ICS_PERSONAL_COLOR = {
+    "#d6336c": "mediumvioletred",
+    "#c92a2a": "firebrick",
+    "#a16207": "darkgoldenrod",
+    "#4d7c0f": "olivedrab",
+    "#087f5b": "seagreen",
+    "#1e3a8a": "midnightblue",
+    "#6741d9": "blueviolet",
+    "#495057": "dimgray",
+  };
+
+  function icsColorFor(ev) {
+    if (ev.color) {
+      return ICS_PERSONAL_COLOR[String(ev.color).toLowerCase()] || null;
+    }
+    return ICS_CATEGORY_COLOR[ev.category] || null;
+  }
+
+  // ---------------------------------------------------------------------
+  // Alerta (VALARM). Diferente da cor, este funciona: tanto o Google
+  // quanto o Apple leem VALARM na importação e criam a notificação.
+  // ---------------------------------------------------------------------
+  const ICS_ALARM_OPTIONS = [
+    { value: "", label: "Sem alerta" },
+    { value: "5", label: "5 min antes" },
+    { value: "10", label: "10 min antes" },
+    { value: "15", label: "15 min antes" },
+    { value: "30", label: "30 min antes" },
+    { value: "60", label: "1 hora antes" },
+  ];
+  const DEFAULT_ICS_ALARM = "10";
+
+  function icsAlarmMinutes() {
+    const raw = filterState.icsAlarm === undefined ? DEFAULT_ICS_ALARM : filterState.icsAlarm;
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
 
   // A recorrência termina em 30/11 — último dia da última semana de
   // novembro. É uma DATA fixa, não uma contagem de semanas: quem baixar em
@@ -2297,6 +2400,7 @@
     ];
 
     const anchor = weekAnchorDate();
+    const alarme = icsAlarmMinutes();
 
     events.forEach((ev, i) => {
       const week = weekMarkFor(ev);
@@ -2330,9 +2434,26 @@
           "BYDAY=" + ICS_BYDAY[ev.day] + ";UNTIL=" + until,
         "SUMMARY:" + icsEscape(titleFor(ev)),
         "DESCRIPTION:" + icsEscape(notes.join(" · ")),
-        "CATEGORIES:" + icsEscape(ev.category_label || ev.category),
-        "END:VEVENT"
+        "CATEGORIES:" + icsEscape(ev.category_label || ev.category)
       );
+
+      const cor = icsColorFor(ev);
+      if (cor) lines.push("COLOR:" + cor);
+
+      if (alarme) {
+        lines.push(
+          "BEGIN:VALARM",
+          "ACTION:DISPLAY",
+          // TRIGGER negativo = antes do início do evento
+          "TRIGGER:-PT" + alarme + "M",
+          // DESCRIPTION é obrigatória em ACTION:DISPLAY — é o texto que
+          // aparece na notificação.
+          "DESCRIPTION:" + icsEscape(titleFor(ev)),
+          "END:VALARM"
+        );
+      }
+
+      lines.push("END:VEVENT");
     });
 
     lines.push("END:VCALENDAR");
