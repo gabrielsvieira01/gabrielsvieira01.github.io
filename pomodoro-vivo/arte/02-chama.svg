@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-35 -95 70 105" width="70" height="105">
+  <g id="chama-lingua-1">
+    <path fill="#C1552F" d="M-9.7,0 C-12.3,-30 -5.3,-52 2.7,-85 C8,-50 11.5,-28 9.7,0 Z"></path>
+    <path fill="#E09A45" d="M-7,0 C-8.8,-24 -3.5,-42 1.8,-58 C5.3,-40 8,-22 7,0 Z"></path>
+    <path fill="#F0DDA8" d="M-4.4,0 C-5.3,-12 -2.7,-22 0.9,-30 C3.5,-20 5.3,-11 4.4,0 Z"></path>
+  </g>
+  <g id="chama-lingua-2">
+    <path fill="#C1552F" d="M-18.5,0 C-20.3,-20 -19.4,-36 -15.8,-52 C-10.6,-32 -7,-16 -7,0 Z"></path>
+    <path fill="#E09A45" d="M-15.8,0 C-16.8,-16 -16.8,-28 -15,-38 C-11.5,-24 -9.7,-12 -9.7,0 Z"></path>
+  </g>
+  <g id="chama-lingua-3">
+    <path fill="#C1552F" d="M6.2,0 C6.2,-18 9.7,-36 16.8,-58 C19.4,-34 20.3,-16 19.4,0 Z"></path>
+    <path fill="#E09A45" d="M8.8,0 C8.8,-16 11.5,-28 15.8,-42 C17.6,-26 17.6,-12 16.8,0 Z"></path>
+  </g>
+  <g id="chama-lingua-4">
+    <path fill="#E09A45" d="M-12.3,0 C-13.2,-12 -10.6,-20 -7,-27 C-4.4,-18 -2.7,-9 -2.7,0 Z"></path>
+    <path fill="#F0DDA8" d="M-9.7,0 C-9.7,-9 -8.8,-14 -7,-18 C-5.3,-12 -4.4,-6 -4.4,0 Z"></path>
+  </g>
+  <g id="chama-lingua-5">
+    <path fill="#E09A45" d="M1.8,0 C1.8,-13 4.4,-22 8.8,-31 C11.5,-20 12.3,-9 12.3,0 Z"></path>
+    <path fill="#F0DDA8" d="M4.4,0 C4.4,-10 6.2,-16 8,-21 C9.7,-14 9.7,-6 9.7,0 Z"></path>
+  </g>
+  <g id="lenha-brasa">
+    <polygon fill="#453A31" points="-29,-3 2,-6 4,0.5 -28,3.5"></polygon>
+    <polygon fill="#5A4B3E" points="-29,-3 2,-6 3,-3.6 -28,-0.6"></polygon>
+    <polygon fill="#C1552F" points="-29,-3 -28,3.5 -31,1.7 -31.4,-3.6"></polygon>
+    <polygon fill="#453A31" points="-3,-5.5 29,-3.5 28,2.5 -4,0.8"></polygon>
+    <polygon fill="#5A4B3E" points="-3,-5.5 29,-3.5 29,-1.2 -3,-3.2"></polygon>
+    <polygon fill="#C1552F" points="29,-3.5 28,2.5 31,0.9 31.4,-4.3"></polygon>
+    <polygon fill="#453A31" points="-14,-2 6,-4 8,2 -12,4"></polygon>
+    <polygon fill="#5A4B3E" points="-14,-2 6,-4 7,-1 -13,1"></polygon>
+    <polygon fill="#C1552F" points="6,-4 8,2 11,0.5 10,-5"></polygon>
+  </g>
+</svg>

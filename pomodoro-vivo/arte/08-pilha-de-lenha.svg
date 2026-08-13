@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-63 -42 95 44" width="95" height="44">
+  <g id="lenha-4-esquerda">
+    <ellipse fill="#4A4136" cx="-13" cy="-13" rx="3.2" ry="7.5"></ellipse>
+    <polygon fill="#4A4136" points="-55.1,-0.6 -12.1,-5.6 -13.9,-20.4 -56.9,-15.4"></polygon>
+    <polygon fill="#6E6152" points="-56.9,-15.4 -13.9,-20.4 -13.3,-15.9 -56.3,-10.9"></polygon>
+    <ellipse fill="#4A4136" cx="-56" cy="-8" rx="4.2" ry="7.5"></ellipse>
+    <ellipse fill="#B49B74" cx="-56" cy="-8" rx="3.4" ry="6.4"></ellipse>
+    <ellipse fill="#8E7654" cx="-56" cy="-8" rx="1.5" ry="3.2"></ellipse>
+  </g>
+  <g id="lenha-3-topo">
+    <ellipse fill="#4A4136" cx="-3" cy="-32" rx="3.2" ry="7.5"></ellipse>
+    <polygon fill="#4A4136" points="-43.4,-15.7 -1.4,-24.7 -4.6,-39.3 -46.6,-30.3"></polygon>
+    <polygon fill="#6E6152" points="-46.6,-30.3 -4.6,-39.3 -3.6,-34.8 -45.6,-25.8"></polygon>
+    <ellipse fill="#4A4136" cx="-45" cy="-23" rx="4.2" ry="7.5"></ellipse>
+    <ellipse fill="#B49B74" cx="-45" cy="-23" rx="3.4" ry="6.4"></ellipse>
+    <ellipse fill="#8E7654" cx="-45" cy="-23" rx="1.5" ry="3.2"></ellipse>
+  </g>
+  <g id="lenha-2-base">
+    <ellipse fill="#4A4136" cx="-2" cy="-17" rx="3.2" ry="7.5"></ellipse>
+    <polygon fill="#4A4136" points="-42.4,-0.7 -0.4,-9.7 -3.6,-24.3 -45.6,-15.3"></polygon>
+    <polygon fill="#6E6152" points="-45.6,-15.3 -3.6,-24.3 -2.6,-19.8 -44.6,-10.8"></polygon>
+    <ellipse fill="#4A4136" cx="-44" cy="-8" rx="4.2" ry="7.5"></ellipse>
+    <ellipse fill="#B49B74" cx="-44" cy="-8" rx="3.4" ry="6.4"></ellipse>
+    <ellipse fill="#8E7654" cx="-44" cy="-8" rx="1.5" ry="3.2"></ellipse>
+  </g>
+  <g id="lenha-1-frente">
+    <ellipse fill="#4A4136" cx="25" cy="-21" rx="3.2" ry="7.5"></ellipse>
+    <polygon fill="#4A4136" points="-13.7,-0.9 27.3,-13.9 22.7,-28.1 -18.3,-15.1"></polygon>
+    <polygon fill="#6E6152" points="-18.3,-15.1 22.7,-28.1 24.1,-23.8 -16.9,-10.8"></polygon>
+    <ellipse fill="#4A4136" cx="-16" cy="-8" rx="4.2" ry="7.5"></ellipse>
+    <ellipse fill="#B49B74" cx="-16" cy="-8" rx="3.4" ry="6.4"></ellipse>
+    <ellipse fill="#8E7654" cx="-16" cy="-8" rx="1.5" ry="3.2"></ellipse>
+  </g>
+</svg>

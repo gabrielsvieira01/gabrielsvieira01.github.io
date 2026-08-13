@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-210 -195 420 215" width="420" height="215">
+  <g id="agua-lateral">
+    <path fill="#94795A" d="M40,0 Q-6,-72 -42.5,-144 L42.5,-160 Q98,-90 125,-16 Z"></path>
+  </g>
+  <g id="empena-frente">
+    <path fill="#C2A175" d="M-125,0 Q-88,-70 -42.5,-144 Q-2,-72 40,0 Z"></path>
+  </g>
+  <g id="tirantes">
+    <polygon fill="#D6C8AE" points="-43.1,-141.5 -41.9,-140.5 -169.9,-2.5 -172.1,-4.5"></polygon>
+    <polygon fill="#D6C8AE" points="41,-159.5 44.5,-156.5 169.6,-25 167.4,-23"></polygon>
+    <polygon fill="#D6C8AE" points="-43.1,-141.5 -41.9,-142.5 75.7,4.1 73.3,5.9"></polygon>
+  </g>
+  <g id="estacas">
+    <polygon fill="#6B5946" points="-176,-7 -167,-7 -170,7"></polygon>
+    <polygon fill="#6B5946" points="164,-35 173,-35 169,-21"></polygon>
+    <polygon fill="#6B5946" points="70,-1 79,-1 75,13"></polygon>
+  </g>
+  <g id="aba-porta">
+    <path fill="#3A2E22" d="M-42.5,-114 Q-26,-58 -8,-3 L-77,-3 Q-59,-58 -42.5,-114 Z"></path>
+    <path fill="#94795A" d="M-40,-108 C-50,-72 -62,-38 -65,-4 L-84,-5 C-79,-42 -66,-76 -55,-110 Z"></path>
+    <polygon fill="#D6C8AE" points="-60.5,-84 -46.5,-81 -47.5,-72.5 -61.5,-75.5"></polygon>
+    <polygon fill="#D6C8AE" points="-67,-44 -53,-42 -53.5,-33.5 -67.5,-35.5"></polygon>
+  </g>
+</svg>

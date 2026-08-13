@@ -1,0 +1,551 @@
+:root {
+  --pmv-accent: #f4802a;
+  --pmv-accent-2: #ffd45e;
+  --pmv-ink: #2b2418;
+  --pmv-panel-bg: rgba(255, 252, 246, 0.9);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Some da tela, permanece para leitores de tela. */
+.pmv-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: #132244;
+}
+
+#pmv-canvas,
+#pmv-svg,
+#pmv-canvas-fg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+
+#pmv-svg,
+#pmv-canvas-fg {
+  pointer-events: none;
+}
+
+/* ---- Modo de edição ----
+   A cena é INERTE por padrão, e isso não é economia: um app de pomodoro fica
+   25 minutos aberto, e uma cena que responde ao ponteiro o tempo todo convida
+   a mexer justamente na hora de não mexer.
+
+   Com o modo ligado, a raiz continua sem receber ponteiro - só as peças
+   móveis recebem. Assim o clique fora de uma peça atravessa a camada e chega
+   na vitrine embaixo, em vez de ser engolido por um retângulo de tela cheia.
+
+   touch-action: none é o que impede o navegador de tratar o arrasto como
+   rolagem no celular; sem isso o primeiro movimento do dedo rouba o gesto. */
+#pmv-svg.pmv-editando {
+  touch-action: none;
+}
+
+#pmv-svg.pmv-editando [data-pmv-movel] {
+  pointer-events: auto;
+  cursor: grab;
+}
+
+#pmv-svg.pmv-editando [data-pmv-movel].pmv-arrastando {
+  cursor: grabbing;
+}
+
+/* Recusa visível: a peça esmaece quando está sobre um ponto onde não pode
+   ficar (a água, por exemplo). Sem retorno, o usuário só descobre que a
+   colocação foi recusada quando solta e a peça volta. */
+#pmv-svg.pmv-editando [data-pmv-movel].pmv-invalido {
+  opacity: 0.45;
+}
+
+#pmv-svg.pmv-editando [data-pmv-movel].pmv-selecionado {
+  outline: 2px dashed var(--pmv-accent-2);
+  outline-offset: 4px;
+}
+
+/* Foco de teclado: mais forte que a seleção por clique, e sempre visível.
+   Quem chega na peça por Tab não tem cursor pra confirmar onde está. */
+#pmv-svg.pmv-editando [data-pmv-movel]:focus-visible {
+  outline: 3px solid var(--pmv-accent);
+  outline-offset: 5px;
+}
+
+/* ---- Bandeja ----
+   As peças ganhas e ainda não postas em cena. Cada item é um botão de
+   verdade: clicar posiciona no lugar sugerido, arrastar escolhe onde. */
+.pmv-bandeja {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 10px;
+}
+
+.pmv-bandeja-vazia {
+  font-size: 12px;
+  line-height: 1.35;
+  opacity: 0.6;
+  padding: 4px 0;
+}
+
+.pmv-bandeja-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 62px;
+  /* Altura mínima de alvo de toque: no celular a bandeja é o principal
+     jeito de pôr peça em cena, e um alvo menor que isso erra o dedo. */
+  min-height: 62px;
+  padding: 5px 3px;
+  border: 1px solid rgba(43, 36, 24, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.55);
+  cursor: grab;
+  /* Sem isto, o primeiro movimento do dedo vira rolagem da página em vez de
+     arrasto da peça. */
+  touch-action: none;
+}
+
+.pmv-bandeja-item:hover {
+  border-color: var(--pmv-accent);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.pmv-bandeja-item svg {
+  width: 40px;
+  height: 40px;
+  display: block;
+  pointer-events: none;
+}
+
+.pmv-bandeja-nome {
+  font-size: 9px;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--pmv-ink);
+  opacity: 0.8;
+}
+
+/* ---- Controles flutuantes da peça em colocação ----
+   Nascem grudados na peça e morrem quando ela é confirmada. Girar e
+   espelhar são verbos sobre AQUELA peça: num painel de canto a pessoa
+   precisaria olhar pra um lugar e ver o efeito em outro.
+
+   Presos à TELA (position: fixed), não à cena: a peça encolhe conforme vai
+   pro fundo, e botão que encolhe com a perspectiva vira alvo impossível. */
+.pmv-flutuante {
+  position: fixed;
+  display: none;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 12px;
+  background: var(--pmv-panel-bg);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 22px rgba(9, 34, 54, 0.28);
+  pointer-events: auto;
+  z-index: 5;
+}
+
+.pmv-flutuante.pmv-visivel {
+  display: flex;
+}
+
+.pmv-flutuante-btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--pmv-ink);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pmv-flutuante-btn:hover:not(:disabled) {
+  background: var(--pmv-accent);
+  color: #fff;
+}
+
+.pmv-flutuante-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Confirmar é a ação que não tem volta: destacada, e única em cor. */
+.pmv-flutuante-btn.pmv-flutuante-ok {
+  background: var(--pmv-accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.pmv-flutuante-btn.pmv-flutuante-ok:hover {
+  background: var(--pmv-ink);
+}
+
+/* ---- Abas do cartão ---- */
+.pmv-abas {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.pmv-aba {
+  flex: 1;
+  border: none;
+  border-radius: 9px;
+  padding: 7px 4px;
+  background: rgba(43, 36, 24, 0.07);
+  color: var(--pmv-ink);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pmv-aba.pmv-active {
+  background: var(--pmv-ink);
+  color: #fff;
+}
+
+/* Bolinha de aviso: tem peça esperando lugar. */
+.pmv-aba.pmv-tem-pendente::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 5px;
+  border-radius: 50%;
+  background: var(--pmv-accent);
+  vertical-align: middle;
+}
+
+.pmv-aba.pmv-active.pmv-tem-pendente::after {
+  background: var(--pmv-accent-2);
+}
+
+.pmv-painel {
+  display: none;
+}
+
+.pmv-painel.pmv-visivel {
+  display: block;
+}
+
+/* Transição de crescimento (ver placeAtPivot/growNow em js/engine/svgUtils.js).
+   Posição, rotação e escala ficam na MESMA propriedade transform, nesta
+   ordem. Como o translate vem primeiro, a escala pivota na base do objeto:
+   com scale(0) o grupo colapsa no seu próprio ponto de fixação na areia,
+   e não no canto da tela. transform-origin 0 0 sobre a view-box mantém a
+   matriz exatamente como escrita (sem deslocamento de origem).
+
+   Não usar a propriedade CSS individual `scale` aqui: ela compõe depois do
+   transform, escalando a posição junto. */
+/* Duas maneiras de uma peça entrar em cena, e a diferença NÃO é estética.
+
+   .pmv-appear - o padrão do acampamento. --pmv-growth só governa a
+   OPACIDADE; a escala fica parada no valor final. É o que uma coisa
+   construída faz: alguém armou a barraca, encostou a canoa, empilhou a
+   lenha. Elas chegam prontas, no tamanho que têm.
+
+   .pmv-growable - só pra quem cresce de verdade. Hoje é a chama, e só ela:
+   --pmv-growth multiplica a escala, então o fogo sobe conforme o foco
+   acumula. É o mostrador de quanto já foi feito.
+
+   A escala crescente vinha do tema anterior (recife), onde TUDO era
+   organismo e crescer era o argumento do app. Num acampamento, canoa que
+   incha é o mesmo erro que planta que aparece pronta. */
+.pmv-appear,
+.pmv-growable {
+  --pmv-growth: 0;
+  transform-box: view-box;
+  transform-origin: 0px 0px;
+}
+
+/* --pmv-flip (1 ou -1) espelha na horizontal. Vai multiplicando só o X da
+   escala, e como a origem é o ponto de contato com o chão, a peça vira sem
+   sair do lugar. A transição é só de opacidade de propósito: durante um
+   arrasto a transform precisa acompanhar o dedo no mesmo quadro, e qualquer
+   transição aqui viraria atraso. */
+.pmv-appear {
+  opacity: var(--pmv-growth);
+  transform: translate(var(--pmv-x, 0px), var(--pmv-y, 0px))
+             rotate(var(--pmv-rot, 0deg))
+             scale(calc(var(--pmv-target-scale, 1) * var(--pmv-flip, 1)),
+                   var(--pmv-target-scale, 1));
+  transition: opacity 1100ms ease-out;
+}
+
+/* A opacidade corre 2,5x mais rápido que a escala pra que a chama já
+   apareça sólida quando ainda é pequena, em vez de fantasma. */
+.pmv-growable {
+  opacity: calc(var(--pmv-growth) * 2.5);
+  transform: translate(var(--pmv-x, 0px), var(--pmv-y, 0px))
+             rotate(var(--pmv-rot, 0deg))
+             scale(calc(var(--pmv-target-scale, 1) * var(--pmv-growth)));
+  transition: transform 1600ms cubic-bezier(0.22, 1, 0.36, 1), opacity 1100ms ease-out;
+}
+
+/* ---- Animação dos organismos ----
+   Tudo aqui era SMIL (<animateTransform>) e custava caro: 205 animações
+   SMIL sobre 1200 elementos forçam o navegador a re-rasterizar o SVG
+   INTEIRO a cada frame, e a cena caía pra ~5fps num navegador de verdade
+   (o canvas, medido à parte, gasta só 2,2ms). Em CSS, cada grupo animado
+   vira sua própria camada composta e o resto do SVG não é retocado.
+
+   Contrato: a classe vai sempre num grupo cujo (0,0) LOCAL já é o pivô do
+   movimento - por isso transform-origin: 0 0. Ver placeAtPivot para o
+   porquê de não usar as propriedades individuais (scale/rotate/translate). */
+@keyframes pmv-sway {
+  from { transform: rotate(calc(var(--pmv-sway-deg, 4) * -1deg)); }
+  to   { transform: rotate(calc(var(--pmv-sway-deg, 4) * 1deg)); }
+}
+
+@keyframes pmv-bob {
+  from { transform: translateY(calc(var(--pmv-bob-amp, 4) * -1px)); }
+  to   { transform: translateY(calc(var(--pmv-bob-amp, 4) * 1px)); }
+}
+
+/* Pulsação da chama. Escala em torno do (0,0) do grupo - que é o centro da
+   fogueira NO CHÃO -, então a língua cresce e encolhe a partir da lenha, e
+   nunca flutua. Y varia mais que X: fogo sobe, não engorda.
+
+   Ciclo completo (0 -> 50 -> 100) em vez de alternate: cada língua tem
+   duração e atraso negativo próprios, e com `alternate` as durações
+   próximas voltavam a sincronizar depois de alguns segundos. */
+@keyframes pmv-flame {
+  0%   { transform: translateX(calc(var(--pmv-flame-lean, 0) * -6px)) scale(0.92, 0.80); }
+  50%  { transform: translateX(calc(var(--pmv-flame-lean, 0) * 6px))  scale(1.05, 1.16); }
+  100% { transform: translateX(calc(var(--pmv-flame-lean, 0) * -6px)) scale(0.92, 0.80); }
+}
+
+.pmv-sway,
+.pmv-bob,
+.pmv-flame {
+  transform-box: view-box;
+  transform-origin: 0px 0px;
+}
+
+.pmv-flame {
+  animation: pmv-flame var(--pmv-flame-dur, 1s) ease-in-out infinite;
+  animation-delay: var(--pmv-flame-delay, 0s);
+  will-change: transform;
+}
+
+.pmv-sway {
+  animation: pmv-sway var(--pmv-sway-dur, 6s) ease-in-out infinite alternate;
+  animation-delay: var(--pmv-sway-delay, 0s);
+}
+
+.pmv-bob {
+  animation: pmv-bob var(--pmv-bob-dur, 4s) ease-in-out infinite alternate;
+  animation-delay: var(--pmv-bob-delay, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pmv-appear,
+  .pmv-growable {
+    transition-duration: 1ms;
+  }
+  .pmv-sway,
+  .pmv-bob,
+  .pmv-flame {
+    animation: none;
+  }
+}
+
+/* Vitrine (demo harness) - pastilha compacta no canto inferior direito;
+   nunca ocupa o centro da tela, então o cenário fica sempre visível.
+   Tocar na pastilha expande um cartão pequeno ancorado no mesmo canto. */
+#pmv-demo-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px;
+}
+
+.pmv-demo-pill {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  border-radius: 999px;
+  /* 44px de altura mínima: é a pastilha que abre tudo, e ela é o único
+     alvo permanente na tela do celular. */
+  padding: 12px 16px;
+  min-height: 44px;
+  background: var(--pmv-ink);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(9, 34, 54, 0.3);
+  cursor: pointer;
+}
+
+.pmv-demo-pill.pmv-active {
+  background: linear-gradient(135deg, var(--pmv-accent), var(--pmv-accent-2));
+  color: var(--pmv-ink);
+}
+
+.pmv-demo-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pmv-accent), var(--pmv-accent-2));
+  flex-shrink: 0;
+}
+
+.pmv-demo-pill.pmv-active .pmv-demo-pill-dot {
+  background: var(--pmv-ink);
+}
+
+.pmv-demo-card {
+  display: none;
+  position: relative;
+  pointer-events: auto;
+  background: var(--pmv-panel-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 18px;
+  padding: 34px 18px 16px;
+  width: min(240px, 78vw);
+  box-shadow: 0 12px 30px rgba(9, 34, 54, 0.25);
+  color: var(--pmv-ink);
+}
+
+.pmv-demo-card.pmv-open {
+  display: block;
+}
+
+.pmv-demo-card-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(18, 48, 71, 0.08);
+  color: var(--pmv-ink);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pmv-demo-progress-label {
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.pmv-demo-subtitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin: 12px 0 6px;
+}
+
+.pmv-demo-time-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pmv-demo-time-btn {
+  border: 1px solid rgba(18, 48, 71, 0.15);
+  background: transparent;
+  color: var(--pmv-ink);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pmv-demo-time-btn.pmv-active {
+  background: var(--pmv-ink);
+  color: white;
+  border-color: var(--pmv-ink);
+}
+
+.pmv-demo-bar-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(18, 48, 71, 0.12);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.pmv-demo-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pmv-accent), var(--pmv-accent-2));
+  transition: width 500ms ease-out;
+}
+
+.pmv-demo-btn {
+  display: block;
+  width: 100%;
+  border: none;
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  cursor: pointer;
+  background: var(--pmv-ink);
+  color: white;
+  transition: transform 150ms ease, opacity 150ms ease;
+}
+
+.pmv-demo-btn:hover {
+  opacity: 0.9;
+}
+
+.pmv-demo-btn:active {
+  transform: scale(0.97);
+}
+
+.pmv-demo-btn-ghost {
+  background: transparent;
+  color: var(--pmv-ink);
+  border: 1px solid rgba(18, 48, 71, 0.2);
+}
+
+.pmv-demo-note {
+  font-size: 12px;
+  opacity: 0.6;
+  line-height: 1.4;
+  margin-top: 4px;
+}

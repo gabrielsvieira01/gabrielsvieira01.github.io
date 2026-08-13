@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-42 -72 84 76" width="84" height="76">
+  <g id="fogueira-lenha-fundo">
+      <polygon fill="#453A31" points="-20.2,0.4 5.7,-42.2 0.3,-45.8 -27.8,-4.4"></polygon>
+      <polygon fill="#5A4B3E" points="-27.8,-4.4 0.3,-45.8 2.6,-44.2 -25.3,-2.9"></polygon>
+      <polygon fill="#453A31" points="27.8,-4.4 -0.3,-45.8 -5.7,-42.2 20.2,0.4"></polygon>
+      <polygon fill="#5A4B3E" points="20.2,0.4 -5.7,-42.2 -3.4,-43.8 22.7,-1.1"></polygon>
+  </g>
+  <g id="fogueira-chamas">
+    <g id="fogueira-chama-lingua-1">
+    <path fill="#C1552F" d="M-7.3,-1 C-9.2,-23.5 -4,-40 2,-64.7 C6,-38.5 8.6,-22 7.3,-1 Z"></path>
+    <path fill="#E09A45" d="M-5.2,-1 C-6.6,-19 -2.6,-32.5 1.4,-44.5 C4,-31 6,-17.5 5.3,-1 Z"></path>
+    <path fill="#F0DDA8" d="M-3.3,-1 C-4,-10 -2,-17.5 0.7,-23.5 C2.6,-16 4,-9.2 3.3,-1 Z"></path>
+      </g>
+    <g id="fogueira-chama-lingua-2">
+    <path fill="#C1552F" d="M-13.9,-1 C-15.2,-16 -14.5,-28 -11.9,-40 C-7.9,-25 -5.2,-13 -5.2,-1 Z"></path>
+    <path fill="#E09A45" d="M-11.9,-1 C-12.6,-13 -12.6,-22 -11.2,-29.5 C-8.6,-19 -7.3,-10 -7.3,-1 Z"></path>
+      </g>
+    <g id="fogueira-chama-lingua-3">
+    <path fill="#C1552F" d="M4.7,-1 C4.7,-14.5 7.3,-28 12.6,-44.5 C14.6,-26.5 15.2,-13 14.6,-1 Z"></path>
+    <path fill="#E09A45" d="M6.6,-1 C6.6,-13 8.6,-22 11.9,-32.5 C13.2,-20.5 13.2,-10 12.6,-1 Z"></path>
+      </g>
+    <g id="fogueira-chama-lingua-4">
+    <path fill="#E09A45" d="M-9.2,-1 C-9.9,-10 -7.9,-16 -5.2,-21.2 C-3.3,-14.5 -2,-7.7 -2,-1 Z"></path>
+    <path fill="#F0DDA8" d="M-7.3,-1 C-7.3,-7.7 -6.6,-11.5 -5.2,-14.5 C-4,-10 -3.3,-5.5 -3.3,-1 Z"></path>
+      </g>
+    <g id="fogueira-chama-lingua-5">
+    <path fill="#E09A45" d="M1.4,-1 C1.4,-10.7 3.3,-17.5 6.6,-24.2 C8.6,-16 9.2,-7.7 9.2,-1 Z"></path>
+    <path fill="#F0DDA8" d="M3.3,-1 C3.3,-8.5 4.7,-13 6,-16.7 C7.3,-11.5 7.3,-5.5 7.3,-1 Z"></path>
+      </g>
+  </g>
+  <g id="fogueira-lenha-frente">
+      <polygon fill="#453A31" points="-30.2,0.7 0.7,-37.7 -4.7,-42.3 -37.8,-5.7"></polygon>
+      <polygon fill="#5A4B3E" points="-37.8,-5.7 -4.7,-42.3 -2.4,-40.3 -35.3,-3.6"></polygon>
+      <polygon fill="#453A31" points="37.8,-5.7 4.7,-42.3 -0.7,-37.7 30.2,0.7"></polygon>
+      <polygon fill="#5A4B3E" points="30.2,0.7 -0.7,-37.7 1.6,-39.7 32.7,-1.4"></polygon>
+  </g>
+  <g id="fogueira-brasa">
+    <polygon fill="#453A31" points="-21.7,-3.2 1.5,-5.5 3,-0.6 -21,1.6"></polygon>
+    <polygon fill="#5A4B3E" points="-21.7,-3.2 1.5,-5.5 2.3,-3.7 -21,-1.4"></polygon>
+    <polygon fill="#C1552F" points="-21.7,-3.2 -21,1.6 -23.2,0.3 -23.5,-3.7"></polygon>
+    <polygon fill="#453A31" points="-2.2,-5.1 21.8,-3.6 21,0.9 -3,-0.4"></polygon>
+    <polygon fill="#5A4B3E" points="-2.2,-5.1 21.8,-3.6 21.8,-1.9 -2.2,-3.4"></polygon>
+    <polygon fill="#C1552F" points="21.8,-3.6 21,0.9 23.3,-0.3 23.5,-4.2"></polygon>
+    <polygon fill="#453A31" points="-10.5,-2.5 4.5,-4 6,0.5 -9,2"></polygon>
+    <polygon fill="#5A4B3E" points="-10.5,-2.5 4.5,-4 5.3,-1.7 -9.7,-0.2"></polygon>
+    <polygon fill="#C1552F" points="4.5,-4 6,0.5 8.3,-0.6 7.5,-4.7"></polygon>
+    </g>
+</svg>

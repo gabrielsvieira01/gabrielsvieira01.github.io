@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pomodoro Vivo — Acampamento</title>
+<link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <!-- Ordem de empilhamento: paisagem no canvas de trás, acampamento no SVG,
+       e o primeiro plano num canvas próprio POR CIMA de tudo - é o que está
+       entre a câmera e a clareira, então precisa ocluir o acampamento. -->
+  <!-- A cena inteira é canvas + SVG decorativo: sem isto um leitor de tela
+       recebe uma página vazia. O texto é atualizado conforme o acampamento
+       se monta (ver refresh() em js/demo/harness.js). -->
+  <h1 class="pmv-sr-only">Pomodoro Vivo — um acampamento que se monta a cada ciclo de foco</h1>
+  <p id="pmv-a11y-status" class="pmv-sr-only" role="status">Clareira no início: nada foi montado ainda.</p>
+
+  <canvas id="pmv-canvas" aria-hidden="true"></canvas>
+  <svg id="pmv-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+  <canvas id="pmv-canvas-fg" aria-hidden="true"></canvas>
+  <div id="pmv-demo-root"></div>
+
+  <script src="js/engine/canvasUtils.js"></script>
+  <!-- O modelo de luz vem cedo: cenário e objetos dependem dele. -->
+  <script src="js/engine/light.js"></script>
+  <script src="js/engine/svgUtils.js"></script>
+  <script src="js/engine/svgImport.js"></script>
+  <script src="js/engine/loop.js"></script>
+  <script src="js/camera/camera.js"></script>
+  <script src="js/world/inventory.js"></script>
+  <script src="js/world/placement.js"></script>
+  <script src="js/world/sceneManager.js"></script>
+  <script src="js/components/index.js"></script>
+  <script src="js/components/common.js"></script>
+  <!-- Peças ILUSTRADAS: a arte (gerada de arte/*.svg) e os componentes que a
+       importam. Substituíram os três componentes procedurais, que foram
+       apagados - a ilustração autoral substituiu o DESENHO, nunca o modelo:
+       plano de chão, modelo de luz e composição continuam os mesmos. -->
+  <script src="js/assets/acampamento/pecas.js"></script>
+  <script src="js/components/importados.js"></script>
+  <script src="js/themes/acampamento/background.js"></script>
+  <script src="js/themes/acampamento/composition.js"></script>
+  <script src="js/themes/acampamento/index.js"></script>
+  <script src="js/demo/harness.js"></script>
+  <script>
+    (function () {
+      var canvas = document.getElementById('pmv-canvas');
+      var svg = document.getElementById('pmv-svg');
+      var fgCanvas = document.getElementById('pmv-canvas-fg');
+
+      // Seed por sessão: cada carregamento sorteia um padrão novo de serra,
+      // mata e chão. A partir daqui tudo é determinístico (mesma seed ->
+      // mesmo resultado) - só a escolha da seed muda a cada sessão.
+      var sessionSeed = Date.now() % 2147483647;
+
+      // O inventário é carregado ANTES da cena: é ele que sabe o progresso e
+      // quais peças estão em cena, e o tema monta a partir disso. Carregar
+      // depois faria a cena nascer vazia e se corrigir num segundo quadro.
+      var inventory = new PMV.World.Inventory().load();
+
+      var scene = new PMV.World.SceneManager();
+      scene.init({
+        canvas: canvas, svg: svg, foregroundCanvas: fgCanvas,
+        seed: sessionSeed, fps: 30, initialProgress: inventory.progresso
+      });
+
+      var theme = new PMV.Themes.Acampamento.ThemeModule({ inventory: inventory });
+      scene.setTheme(theme);
+
+      var placement = new PMV.World.Placement({ theme: theme, svg: svg });
+
+      var harness = new PMV.Demo.Harness(scene, inventory, placement);
+      harness.mount(document.getElementById('pmv-demo-root'));
+      // A escuta fica sempre ligada: quem decide o que aceita ponteiro é o
+      // estado de cada peça, não um modo global.
+      placement.ligarEscuta();
+
+      scene.start();
+
+      // Gancho de depuração (console do navegador / testes) - não afeta produção.
+      PMV.debug = { scene: scene, theme: theme, inventory: inventory, placement: placement };
+    })();
+  </script>
+</body>
+</html>
