@@ -37,7 +37,11 @@
   }
 
   AcampamentoTheme.prototype.init = function (opts) {
-    this.svgRoot = opts.svgRoot;
+    this.bands = opts.bands;
+    // A primeira raiz serve de referência pra coordenadas e pros defs. Todas
+    // têm o mesmo viewBox, então qualquer uma responderia - fixar UMA evita
+    // que dois trechos escolham raízes diferentes e discordem por um pixel.
+    this.svgRoot = this.bands[0].svg;
     this.rng = opts.rng;
     this.width = opts.width;
     this.height = opts.height;
@@ -46,11 +50,36 @@
 
     this._defs = SvgUtils.createEl('defs');
     this.svgRoot.appendChild(this._defs);
-    this._layer = SvgUtils.createEl('g', { 'data-pmv-layer': 'acampamento' });
-    this.svgRoot.appendChild(this._layer);
 
+    // Uma camada por faixa. `_layer` continua existindo e aponta pra faixa
+    // onde a fogueira mora - é a camada "padrão" pra quem precisa de uma só.
+    this._layers = this.bands.map(function (b) {
+      var g = SvgUtils.createEl('g', { 'data-pmv-layer': 'acampamento' });
+      b.svg.appendChild(g);
+      return g;
+    });
+    this._layer = this._layers[this._faixaDe(0.62)];
+
+    // O espalhado precisa das MESMAS fronteiras que as peças usam, senão um
+    // tufo e uma barraca de profundidades vizinhas caem em faixas trocadas.
+    this.background.setBands(this.bands);
     this.background.resize(this.width, this.height, this.rng);
     this._buildComposition();
+  };
+
+  // Em que faixa uma profundidade cai. As faixas são meio abertas e a
+  // primeira e a última são ilimitadas, então isto sempre devolve um índice
+  // válido - peça fora da faixa de colocação (a fogueira, que é fixa) inclusive.
+  AcampamentoTheme.prototype._faixaDe = function (depth) {
+    var b = this.bands;
+    for (var i = 0; i < b.length; i++) {
+      if (depth >= b[i].de && depth < b[i].ate) return i;
+    }
+    return b.length - 1;
+  };
+
+  AcampamentoTheme.prototype._layerPara = function (depth) {
+    return this._layers[this._faixaDe(depth)];
   };
 
   AcampamentoTheme.prototype.resize = function (width, height) {
@@ -66,7 +95,9 @@
   // mudam quem existe no DOM e em que ordem. Arrastar NÃO passa por aqui -
   // reconstruir a cada movimento do ponteiro seria absurdo; ver `mover`.
   AcampamentoTheme.prototype._rebuildLayer = function () {
-    while (this._layer.firstChild) this._layer.removeChild(this._layer.firstChild);
+    this._layers.forEach(function (layer) {
+      while (layer.firstChild) layer.removeChild(layer.firstChild);
+    });
     this._placedGroups = [];
     this._fireEntry = null;
     this._buildComposition();
@@ -208,9 +239,16 @@
 
   // Traz a peça pra frente de tudo enquanto está na mão - coisa segurada
   // não é ocluída por coisa parada.
+  //
+  // Com a pilha em faixas, "na frente de tudo" quer dizer a ÚLTIMA camada,
+  // não a camada de origem. E isto resolve o arrasto de graça: a peça na mão
+  // não precisa migrar de faixa a cada movimento do ponteiro - ela fica no
+  // topo até ser solta, e `soltarPeca` a devolve pra faixa certa ao chamar
+  // _resortLayer. Migrar durante o gesto seria trabalho de DOM por
+  // pointermove pra corrigir uma oclusão que ninguém vê com a peça em cima.
   AcampamentoTheme.prototype.trazerPraFrente = function (slotId) {
     var entry = this.entradaDe(slotId);
-    if (entry) this._layer.appendChild(entry.group);
+    if (entry) this._layers[this._layers.length - 1].appendChild(entry.group);
   };
 
   // Gira dentro do que o slot permite. `rotRange` é [0, 0] em tudo que é
@@ -261,14 +299,56 @@
   // onde antes estava a direita, e é a face virada PRO FOGO que precisa
   // acender. A rotação não entra: ela é de poucos graus e o erro que
   // introduziria é menor que o passo de quantização da repintura.
+  // A DIREÇÃO da luz sai daqui junto com a quantidade, e não do componente,
+  // porque montá-la exige o plano de chão - e o plano mora no cenário.
+  //
+  // O vetor é 3D e cada eixo vem de uma fonte diferente:
+  //
+  //   x, y - direção na tela, do ponto até a fonte, normalizada;
+  //   z    - diferença de PROFUNDIDADE entre a fonte e a peça. É o que diz
+  //          se o fogo está mais perto da câmera que a barraca (e portanto
+  //          acende a empena da frente) ou atrás dela.
+  //
+  // Sem o z, uma peça a três passos atrás da fogueira teria frente e costas
+  // recebendo o mesmo - o produto escalar de uma normal em z com um vetor
+  // sem z é zero, e as duas faces empatariam em meio caminho.
+  //
+  // K = 6 satura a componente z com cerca de 0.17 de profundidade, que é
+  // pouco mais que a distância entre a fogueira e a barraca no catálogo.
+  var K_PROFUNDIDADE = 6;
+
   AcampamentoTheme.prototype._amostradorDeLuz = function (inst) {
     var bg = this.background;
     var art = (Math.min(this.width, this.height) / 1000) *
               inst.scale * bg.planeScaleFor(inst.depth);
     var flip = inst.espelhada ? -1 : 1;
     var ox = inst.x, oy = inst.y;
+    var depthPeca = inst.depth;
+
     return function (lx, ly) {
-      return bg.localLightAt(ox + lx * art * flip, oy + ly * art);
+      // O espelhamento entra no X porque uma peça virada tem a face esquerda
+      // onde antes estava a direita, e é a face virada PRO FOGO que precisa
+      // acender. Esquecer isto aqui faria a peça espelhada acender do lado
+      // errado - e só às vezes, que é o pior tipo de bug deste projeto.
+      var px = ox + lx * art * flip;
+      var py = oy + ly * art;
+      var luz = bg.localLightAt(px, py);
+
+      var dx = luz.sx - px, dy = luz.sy - py;
+      var comp = Math.sqrt(dx * dx + dy * dy);
+      // Em cima da própria fonte não existe direção definida; devolver o
+      // vetor nulo faz a face valer meio caminho, que é o certo.
+      if (comp < 0.0001) { luz.dirX = 0; luz.dirY = 0; luz.dirZ = 0; return luz; }
+
+      var dz = CanvasUtils.clamp(
+        (bg.depthAtPoint(luz.sx, luz.sy) - depthPeca) * K_PROFUNDIDADE, -1, 1);
+      // O que sobra do comprimento depois do z fica pra tela, e assim o vetor
+      // sai unitário sem que os três eixos precisem da mesma unidade.
+      var resto = Math.sqrt(Math.max(0, 1 - dz * dz));
+      luz.dirX = (dx / comp) * resto * flip;
+      luz.dirY = (dy / comp) * resto;
+      luz.dirZ = dz;
+      return luz;
     };
   };
 
@@ -284,15 +364,21 @@
     return null;
   };
 
-  // Reempilha a camada inteira por profundidade. Com 15 peças, reanexar
+  // Reempilha o acampamento inteiro por profundidade. Com 15 peças, reanexar
   // todas é mais barato de entender que procurar o vizinho certo, e
   // appendChild de um nó que já está no documento é uma MUDANÇA de posição,
   // não uma cópia.
+  //
+  // Agora isto também ROTEIA: cada peça vai pra camada da faixa em que a
+  // profundidade dela cai. Como a lista é percorrida em ordem de
+  // profundidade, o empilhamento dentro de cada faixa sai correto de graça.
   AcampamentoTheme.prototype._resortLayer = function () {
     var self = this;
     this._placedGroups.slice()
       .sort(function (a, b) { return a.inst.depth - b.inst.depth; })
-      .forEach(function (entry) { self._layer.appendChild(entry.group); });
+      .forEach(function (entry) {
+        self._layerPara(entry.inst.depth).appendChild(entry.group);
+      });
   };
 
   // Onde a peça PODE ficar. Não é limite técnico, é direção de arte: acima
@@ -528,12 +614,20 @@
     var list = this._placedGroups.map(function (entry) {
       var box;
       try { box = entry.built.inner.getBBox(); } catch (e) { box = null; }
-      if (!box || !box.width) return { x: entry.inst.x, halfWidth: 0, t: entry.inst.planeT };
+      if (!box || !box.width) {
+        return { x: entry.inst.x, halfWidth: 0, t: entry.inst.planeT,
+                 altura: 0, groundY: entry.inst.y };
+      }
       var px = unit * entry.inst.scale * this.background.planeScaleFor(entry.inst.depth);
       return {
         x: entry.inst.x + (box.x + box.width / 2) * px,
         halfWidth: (box.width * px) / 2,
-        t: entry.inst.planeT
+        t: entry.inst.planeT,
+        // Altura em pixels e ponto de CONTATO com o chão: é disso que sai a
+        // sombra projetada. A peça tem origem na base, então `inst.y` já é o
+        // contato e a caixa só precisa da altura.
+        altura: box.height * px,
+        groundY: entry.inst.y
       };
     }, this);
     this.background.setOccluders(list);
@@ -554,7 +648,10 @@
     var finalScale = inst.scale * this.background.planeScaleFor(inst.depth);
     var fire = this.background.localLightAt(inst.x, inst.y);
 
-    var built = Component.create(this._layer, {
+    // Nasce já na camada da própria faixa. Criar tudo numa camada só e
+    // reordenar depois funcionaria, mas faria cada peça atravessar o DOM
+    // duas vezes na montagem - e a montagem roda a cada resize.
+    var built = Component.create(this._layerPara(inst.depth), {
       seed: inst.seed,
       scale: finalScale,
       refUnit: Math.min(this.width, this.height),
@@ -708,6 +805,7 @@
     });
   };
 
+
   // Prévia de horário: repinta na hora, sem esperar o próximo tick.
   AcampamentoTheme.prototype.relightNow = function () {
     this._lightStamp = null;
@@ -734,8 +832,12 @@
     this.background.draw(ctx, camera, width, height);
   };
 
-  AcampamentoTheme.prototype.drawForeground = function (ctx, camera) {
-    this.background.drawForeground(ctx, camera);
+  AcampamentoTheme.prototype.drawBand = function (ctx, camera, width, height, faixa) {
+    this.background.drawBand(ctx, camera, width, height, faixa);
+  };
+
+  AcampamentoTheme.prototype.drawForeground = function (ctx, camera, width, height) {
+    this.background.drawForeground(ctx, camera, width, height);
   };
 
   AcampamentoTheme.prototype.currentPalette = function () {

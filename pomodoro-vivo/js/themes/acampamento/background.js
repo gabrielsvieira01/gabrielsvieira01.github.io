@@ -56,26 +56,37 @@
   //   fog       - névoa atmosférica. De dia é azul-pálida (perspectiva aérea
   //               de verdade: a serra distante desbota pro azul do céu), à
   //               noite é azul-escura.
+  //   fogDensity - QUANTA névoa, contra a referência em js/engine/light.js.
+  //               É chave separada de `fog` porque cor e quantidade não
+  //               andam juntas: a bruma da alvorada é espessa e rosada, a
+  //               do meio-dia é rala e azul. Enquanto isto não existia, a
+  //               densidade era constante e o meio-dia usava a dose de um
+  //               fim de tarde - o quadro inteiro abaixo da serra ficava
+  //               atrás de um véu cinza.
   var TIME_KEYFRAMES = [
     { hour: 0,  sky: [[0, '#080f28'], [0.34, '#0d1836'], [0.62, '#132244'], [0.84, '#1b2c50'], [1, '#243459']],
-      body: '#c9d8ff', bodyOpacityMul: 0.34, fog: '#16203c', ambient: 0.12, key: '#8fb4ff', keyStrength: 0.13 },
+      body: '#c9d8ff', bodyOpacityMul: 0.34, fog: '#16203c', fogDensity: 1.00, ambient: 0.12, key: '#8fb4ff', keyStrength: 0.13 },
+    // A alvorada é a hora MAIS enevoada, e é de propósito: é a única em que
+    // a névoa é o assunto do quadro em vez de ser distância.
     { hour: 5,  sky: [[0, '#1d2f5c'], [0.30, '#3a5279'], [0.58, '#6d7194'], [0.82, '#b98d8a'], [1, '#e0a87e']],
-      body: '#ffd2ab', bodyOpacityMul: 0.55, fog: '#6a6c85', ambient: 0.33, key: '#ffc39c', keyStrength: 0.26 },
+      body: '#ffd2ab', bodyOpacityMul: 0.55, fog: '#6a6c85', fogDensity: 1.15, ambient: 0.33, key: '#ffc39c', keyStrength: 0.26 },
     { hour: 8,  sky: [[0, '#3f86c8'], [0.30, '#63a4da'], [0.58, '#96c4e6'], [0.82, '#c2dcef'], [1, '#e2edf2']],
-      body: '#fff6dd', bodyOpacityMul: 0.90, fog: '#b6d0e2', ambient: 0.82, key: '#fff3d6', keyStrength: 0.42 },
+      body: '#fff6dd', bodyOpacityMul: 0.90, fog: '#b6d0e2', fogDensity: 0.78, ambient: 0.82, key: '#fff3d6', keyStrength: 0.42 },
+    // Meio-dia é a hora mais LIMPA. O ar já queimou a bruma da manhã e o sol
+    // a pino não deixa nada em meia-luz.
     { hour: 13, sky: [[0, '#2f78c4'], [0.30, '#559dd6'], [0.58, '#8fc2e6'], [0.82, '#bfdcee'], [1, '#e4eff5']],
-      body: '#ffffff', bodyOpacityMul: 1.0,  fog: '#c1dbec', ambient: 1.00, key: '#ffffff', keyStrength: 0.48 },
+      body: '#ffffff', bodyOpacityMul: 1.0,  fog: '#c1dbec', fogDensity: 0.58, ambient: 1.00, key: '#ffffff', keyStrength: 0.48 },
     { hour: 17, sky: [[0, '#3d7ab4'], [0.30, '#6e9bc2'], [0.58, '#a8adba'], [0.82, '#d8b493'], [1, '#f0cf9c']],
-      body: '#ffe3b0', bodyOpacityMul: 0.92, fog: '#c6b39c', ambient: 0.84, key: '#ffd79a', keyStrength: 0.46 },
+      body: '#ffe3b0', bodyOpacityMul: 0.92, fog: '#c6b39c', fogDensity: 0.76, ambient: 0.84, key: '#ffd79a', keyStrength: 0.46 },
     // Pôr do sol: o quente fica no TERÇO DE BAIXO do céu, junto do horizonte,
     // e o topo já puxa pro azul-noite. Laranja subindo até o topo do quadro
     // lê como filtro, não como fim de tarde.
     { hour: 19, sky: [[0, '#1e2551'], [0.30, '#3c3566'], [0.56, '#6e4269'], [0.80, '#c2645a'], [1, '#f0985a']],
-      body: '#ffab6a', bodyOpacityMul: 0.68, fog: '#8a6672', ambient: 0.42, key: '#ff9a5c', keyStrength: 0.40 },
+      body: '#ffab6a', bodyOpacityMul: 0.68, fog: '#8a6672', fogDensity: 1.00, ambient: 0.42, key: '#ff9a5c', keyStrength: 0.40 },
     { hour: 21, sky: [[0, '#0d1433'], [0.32, '#141d42'], [0.60, '#20264e'], [0.84, '#32305a'], [1, '#4a3d5e']],
-      body: '#c2b6ff', bodyOpacityMul: 0.42, fog: '#2a2f52', ambient: 0.18, key: '#9d92ff', keyStrength: 0.17 },
+      body: '#c2b6ff', bodyOpacityMul: 0.42, fog: '#2a2f52', fogDensity: 1.00, ambient: 0.18, key: '#9d92ff', keyStrength: 0.17 },
     { hour: 24, sky: [[0, '#080f28'], [0.34, '#0d1836'], [0.62, '#132244'], [0.84, '#1b2c50'], [1, '#243459']],
-      body: '#c9d8ff', bodyOpacityMul: 0.34, fog: '#16203c', ambient: 0.12, key: '#8fb4ff', keyStrength: 0.13 }
+      body: '#c9d8ff', bodyOpacityMul: 0.34, fog: '#16203c', fogDensity: 1.00, ambient: 0.12, key: '#8fb4ff', keyStrength: 0.13 }
   ];
 
   function getTimePalette(hourFraction) {
@@ -96,6 +107,7 @@
       bodyColor: CanvasUtils.lerpHexColor(a.body, b.body, t),
       bodyOpacityMul: CanvasUtils.lerp(a.bodyOpacityMul, b.bodyOpacityMul, t),
       fogColor: CanvasUtils.lerpHexColor(a.fog, b.fog, t),
+      fogDensity: CanvasUtils.lerp(a.fogDensity, b.fogDensity, t),
       ambient: CanvasUtils.lerp(a.ambient, b.ambient, t),
       keyColor: CanvasUtils.lerpHexColor(a.key, b.key, t),
       keyStrength: CanvasUtils.lerp(a.keyStrength, b.keyStrength, t)
@@ -109,10 +121,12 @@
   // que empurravam todos pro mesmo lado - o objeto lia como mais claro que o
   // chão em que se apoia. Ver o comentário no engine.
   var Light = PMV.Engine.Light;
-  var FOG_STRENGTH = Light.FOG_STRENGTH;
 
-  function fogAmountForDepth(t) {
-    return Light.fogForDepth(t);
+  // A paleta é obrigatória: é dela que sai a densidade da névoa. Chamar sem
+  // ela devolve a névoa da hora mais enevoada em qualquer horário, que é
+  // exatamente o véu de meio-dia que isto veio consertar.
+  function fogAmountForDepth(t, palette) {
+    return Light.fogForDepth(t, palette);
   }
 
   function shadeTerrain(baseHex, depth, palette) {
@@ -231,15 +245,12 @@
   // Tons auxiliares da textura, derivados das duas de cima.
   var GROUND_LIGHT = '#87954f';
   var GROUND_DARK = '#2e3a1e';
-  var PEBBLE_VARIANTS = [
-    { top: '#b4a88d', bottom: '#6f6650' },
-    { top: '#a3a49e', bottom: '#5d5e59' },
-    { top: '#8a7f6d', bottom: '#4b443a' }
-  ];
-  // Tufos de mato: agora nascem SOBRE grama, não sobre terra. Precisam de
-  // valor um pouco acima do chão pra registrar - tufo verde da mesma
-  // luminância do gramado vira ruído invisível e só custa quadro.
-  var GRASS_TONES = ['#7b8a4b', '#66763a', '#8b9857', '#556429'];
+
+  // As paletas de pedra, mato, conífera e folhosa saíram daqui: cada peça
+  // ilustrada traz as próprias cores, e o `tone` por indivíduo continua
+  // dando a variação que impedia a mata de ler como papel de parede. Manter
+  // tabelas de cor aqui seria uma segunda opinião sobre a cor de uma árvore
+  // que ninguém mais consulta.
 
   // ---- Serra ----
   // Montanha NÃO é a mesma curva do chão com mais amplitude: Catmull-Rom só
@@ -249,14 +260,34 @@
   // reconhece como cordilheira - picos agudos, vales em V, e detalhe fino
   // encaixado dentro do detalhe grosso.
   //
-  // Cor de base BEM escura e desfoque curto. A primeira versão usava azuis
-  // médios (#54708f) com blur largo, e a névoa de perspectiva aérea comia o
-  // resto: ao meio-dia a serra virava um borrão cinza indistinguível do céu.
-  // Perspectiva aérea faz o distante DESBOTAR, não DESAPARECER - se a peça
-  // não tem valor sobrando pra perder, ela some.
+  // Desfoque CURTO - essa parte segue valendo, e é dela que vem a silhueta.
+  //
+  // A cor base é outra história, e ela é um caso de bruma contada duas vezes.
+  // A primeira versão usava azuis médios (#54708f) com blur largo, e ao
+  // meio-dia a serra virava um borrão indistinguível do céu; a resposta foi
+  // escurecer a base até #33506e. Só que a serra não estava clara demais - a
+  // NÉVOA é que estava forte demais, porque a densidade dela era constante e
+  // o meio-dia levava dose de fim de tarde. Escurecer a base consertou o
+  // sintoma na camada errada: a partir dali a haze estava assada na cor E
+  // aplicada de novo pelo modelo de luz, e as duas metades somavam um total
+  // plausível só enquanto a segunda estivesse errada.
+  //
+  // Com a densidade consultando o horário (ver fogDensity, acima), sobrou a
+  // metade assada sozinha - e sozinha ela é escura: ao meio-dia a serra
+  // virava a massa mais pesada de um quadro de sol a pino. Estes valores
+  // devolvem a base pra perto do instinto original, agora que existe névoa
+  // de verdade pra desbotá-la.
+  //
+  // Isto quase não mexe na noite, e não por sorte: às 22h o `ambient` vale
+  // 0.16 e esmaga qualquer base antes do resto da conta - o quadro noturno é
+  // decidido pelo termo de névoa. Cor de base é alavanca de dia.
+  //
+  // O que continua valendo da lição antiga: perspectiva aérea faz o distante
+  // DESBOTAR, não DESAPARECER. Se a serra não tem valor sobrando pra perder,
+  // ela some - e é por isso que ela clareia até aqui e não além.
   var RIDGE_DEFS = {
-    far:  { depth: 0.10, baseYf: 0.492, amplitudeUnit: 0.150, roughness: 0.56, subdiv: 6, blurUnit: 0.0045, color: '#33506e', rim: 0.16 },
-    near: { depth: 0.17, baseYf: 0.566, amplitudeUnit: 0.105, roughness: 0.52, subdiv: 6, blurUnit: 0.0028, color: '#26405a', rim: 0.24 }
+    far:  { depth: 0.10, baseYf: 0.492, amplitudeUnit: 0.150, roughness: 0.56, subdiv: 6, blurUnit: 0.0045, color: '#4e6987', rim: 0.16 },
+    near: { depth: 0.17, baseYf: 0.566, amplitudeUnit: 0.105, roughness: 0.52, subdiv: 6, blurUnit: 0.0028, color: '#3d5673', rim: 0.24 }
   };
   var RIDGE_ORDER = ['far', 'near'];
 
@@ -286,36 +317,36 @@
     nearBands: [[-0.06, 0.13], [0.94, 1.06]]  // >= midMax: só as bordas
   };
 
-  var CONIFER_COLORS = [
-    { top: '#4a6b46', base: '#263d2c' },
-    { top: '#3f6350', base: '#1e3630' },
-    { top: '#557047', base: '#2b4029' },
-    { top: '#446040', base: '#213526' }
-  ];
-  var BROADLEAF_COLORS = [
-    { top: '#6b7c3f', base: '#3b4a26' },
-    { top: '#5d7847', base: '#33472b' },
-    { top: '#77804a', base: '#454a2b' }
-  ];
-  var TRUNK_COLOR = '#3b2f24';
-
   // Mato e pedra: densidades por unidade de largura. O `t` de cada item é
   // sorteado UNIFORME, o que dá distribuição uniforme na TELA (porque y é
   // linear em t) - e não amontoada no horizonte.
-  // Com chão de gramado o tufo deixou de ser "mato ocasional" e virou a
-  // TEXTURA do chão: é ele que impede o gramado de ler como feltro liso. Por
-  // isso a densidade subiu ~2,5x. São traços de 1px, o item mais barato do
-  // espalhado - o custo por quadro subiu menos de 1ms.
+
+  // O tufo é a TEXTURA do gramado: é ele que impede o chão de ler como
+  // feltro liso.
+  //
+  // A densidade caiu de ~120 para ~65 quando a relva passou a ser ilustrada.
+  // O número alto tinha sido calibrado para tufos de 3 a 6 riscos de 1px; a
+  // relva desenhada tem 6 a 8 lâminas PREENCHIDAS e cobre muito mais chão
+  // por peça. Mantendo a densidade antiga, o gramado virava mato fechado.
   var GRASS_DEF = {
-    densityRange: [105, 140], minCount: 70, maxCount: 340,
-    sizeUnitRange: [0.020, 0.046]   // tamanho antes da escala do plano
+    densityRange: [55, 78], minCount: 40, maxCount: 190,
+    sizeUnitRange: [0.022, 0.050]   // tamanho antes da escala do plano
+  };
+
+  // Arbustos: a família que faltava entre o tufo (0.02 de refUnit) e a
+  // árvore (0.38). Sem ela a mata encontrava o gramado por um degrau de
+  // escala, e o olho lê degrau de escala como colagem.
+  var BUSH_DEF = {
+    density: 9, minCount: 5, maxCount: 22,
+    heightUnitRange: [0.055, 0.105],
+    // Nem no fundo (viram manchas) nem rente à câmera (viram parede): a
+    // moita serve na meia distância, que é onde a clareira encontra a mata.
+    tRange: [0.14, 0.62]
   };
   var PEBBLE_DEF = {
     densityRange: [8, 13], minCount: 6, maxCount: 30,
     sizeUnitRange: [0.010, 0.032]
   };
-  var PEBBLE_BLOB_POINTS_RANGE = [7, 9];
-  var PEBBLE_BLOB_JITTER_RANGE = [0.70, 1.24];
 
   var SOIL_TEXTURE_DEF = {
     // Sulcos: contornos do chão em profundidades fixas. Como yAtT interpola
@@ -342,6 +373,60 @@
   };
 
   var STAR_DEF = { count: 110, sizeRange: [0.5, 1.5], skyFrac: 0.72, twinkleRange: [0.25, 0.9] };
+
+  // ---- Órbita do sol e da lua ----
+  //
+  // O corpo celeste ficava num ponto sorteado por sessão e só trocava de
+  // DESENHO conforme a hora. Isso bastava enquanto ele era um adereço do
+  // céu. A partir do momento em que ele anda, ele vira a fonte visível da
+  // direção da luz - e a cena inteira passa a ter que concordar com onde ele
+  // está, senão a mata acende do lado errado e o erro fica gritante
+  // justamente porque agora há para onde olhar.
+  //
+  // Por isso `_lightDirX` deixou de sair da inclinação sorteada dos feixes e
+  // passa a sair DAQUI. Eram dois sorteios independentes que não se falavam;
+  // ninguém notava só porque o sol não saía do lugar.
+  //
+  // As janelas se cruzam de propósito. Às 5h30 o sol nasce à esquerda com a
+  // lua ainda se pondo à direita: os dois nunca dividem o mesmo ponto, que
+  // era o risco da dissolvência antiga - dois desenhos empilhados no mesmo
+  // lugar não leem como transição, leem como erro de camada.
+  var ORBIT = {
+    sol: { nasce: 5.5,  poe: 20.0 },
+    // A lua atravessa a meia-noite: 19h30 até 6h30 do dia seguinte.
+    lua: { nasce: 19.5, poe: 30.5 },
+    xNasce: 0.06, xPoe: 0.94,
+    yApice: 0.10, yHorizonte: 0.52,
+    // Fração da janela gasta nascendo e se pondo. 0.07 de 14h30 dá cerca de
+    // uma hora de cada lado, que é a mesma dissolvência de antes.
+    bordaFade: 0.07,
+    // (0.5 - xf) -> tangente da inclinação da luz. Calibrado pra bater com o
+    // alcance que os feixes já tinham (baseTiltDegRange, ±16°): com o corpo
+    // rente à borda a luz deita ~16°, e a pino ela cai reta.
+    espalhamentoLuz: 0.65
+  };
+
+  // Onde o corpo está, e com que força, numa hora dada. Devolve null quando
+  // ele não está no céu.
+  //
+  // A força sai do MESMO `u` que a posição: era conta separada, e conta
+  // separada é como as duas cópias do modelo de luz começaram. Assim um
+  // corpo não tem como estar aceso fora da própria janela.
+  function posicaoOrbital(janela, hora) {
+    var vao = janela.poe - janela.nasce;
+    var u = (hora - janela.nasce) / vao;
+    // Testar a hora somada de 24 é o que faz a madrugada cair dentro da
+    // janela da lua - senão ela sumiria justo quando é a única coisa no céu.
+    if (u < 0 || u > 1) u = (hora + 24 - janela.nasce) / vao;
+    if (u < 0 || u > 1) return null;
+
+    var borda = ORBIT.bordaFade;
+    return {
+      xf: ORBIT.xNasce + (ORBIT.xPoe - ORBIT.xNasce) * u,
+      yf: ORBIT.yHorizonte - (ORBIT.yHorizonte - ORBIT.yApice) * Math.sin(Math.PI * u),
+      forca: CanvasUtils.clamp(u / borda, 0, 1) * CanvasUtils.clamp((1 - u) / borda, 0, 1)
+    };
+  }
 
   // Poeira/pólen em suspensão - nunca chama atenção, só reforça que existe
   // ar entre a câmera e a mata.
@@ -470,8 +555,17 @@
         baseTiltDeg: CanvasUtils.randRange(rng, SHAFT_DEF.baseTiltDegRange[0], SHAFT_DEF.baseTiltDegRange[1])
       },
       stars: pickSeed(rng),
-      bodyXf: CanvasUtils.randRange(rng, 0.16, 0.84),
-      bodyYf: CanvasUtils.randRange(rng, 0.10, 0.26),
+      // O sol e a lua já não moram num ponto sorteado: a órbita decide onde
+      // eles estão pela HORA (ver ORBIT). Os dois sorteios continuam sendo
+      // CONSUMIDOS, e nesta posição exata - o rng é uma sequência, e pular
+      // duas leituras empurraria todas as de baixo, reembaralhando poeira e
+      // primeiro plano. É a mesma regra que manteve a cena idêntica entre
+      // resizes quando o espelhamento por lado entrou: consuma igual mesmo
+      // quando for descartar.
+      _orbitaDescartada: [
+        CanvasUtils.randRange(rng, 0.16, 0.84),
+        CanvasUtils.randRange(rng, 0.10, 0.26)
+      ],
       dust: pickSeed(rng),
       foreground: pickSeed(rng)
     };
@@ -535,106 +629,73 @@
     return pts;
   }
 
-  // ---- Árvores ----
+  // ---- Ilustração do cenário ----
   //
-  // Conífera NÃO é um triângulo. São tiers empilhados: cada galho sai do
-  // tronco, desce e afina até a ponta, e o tier de cima é mais curto que o
-  // de baixo. A silhueta resultante é serrilhada, e é o serrilhado que o
-  // olho lê como pinheiro. Um triângulo liso lê como cone de trânsito.
+  // Árvore, arbusto, pedra e relva deixaram de ser desenho procedural e
+  // passaram a ser ARTE, compilada em Path2D por js/engine/svgPaths.js.
   //
-  // Os dois lados são sorteados SEPARADAMENTE (larguras e quedas próprias),
-  // porque simetria perfeita denuncia o gerador na hora.
-  function buildConifer(rng, height, halfWidth) {
-    // Muitos galhos CURTOS, não poucos galhos longos. Com 6-9 tiers a
-    // reentrância entre eles fica tão funda que a silhueta lê como uma pilha
-    // de losangos (ou de pontas de flecha) empilhados; com 10-14 vira o
-    // serrilhado fino que o olho aceita como folhagem.
-    var tiers = Math.round(CanvasUtils.randRange(rng, 10, 14));
-    var trunkTopY = -height * 0.12;
-    var canopy = height * 0.86;
-    var lean = CanvasUtils.randRange(rng, -0.045, 0.045); // inclinação leve do eixo
+  // O que sumiu junto foram ~200 linhas que geravam silhueta ponto a ponto:
+  // o serrilhado da conífera, os lobos da folhosa, o blob da pedra. Elas
+  // existiam porque não havia ilustração; existindo, manter as duas seria
+  // manter duas respostas para "que forma tem um pinheiro".
+  //
+  // Cada família tem variantes, e a escolha é seedada - a mesma cena volta
+  // igual, mas duas árvores vizinhas não são gêmeas.
+  var SPRITES = {
+    conifera: ['conifera1Larga', 'conifera2Magra', 'conifera3Inclinada', 'conifera4Falhada'],
+    folhosa: ['folhosa1Copada', 'folhosa2Alta', 'folhosa3Aberta'],
+    arbusto: ['arbusto1Largo', 'arbusto2Compacto', 'arbusto3Aberto'],
+    pedra: ['pedra1Grande', 'pedra2Media', 'pedra3Chata', 'pedra4Alta'],
+    relva: ['relva1Densa', 'relva2Alta', 'relva3Baixa', 'relva4Inclinada']
+  };
 
-    function axisXAt(y) { return -y * lean; }
+  // Compilado sob demanda e guardado: o Path2D de cada forma é construído
+  // uma vez na vida da aba, não por quadro nem por item.
+  var _formasCache = {};
+  function formasDe(nome) {
+    if (_formasCache[nome] !== undefined) return _formasCache[nome];
+    var markup = PMV.Assets && PMV.Assets.Cenario ? PMV.Assets.Cenario[nome] : null;
+    _formasCache[nome] = markup ? PMV.Engine.SvgPaths.parse(markup, nome) : null;
+    return _formasCache[nome];
+  }
 
-    function side(sign) {
-      var out = [];
-      for (var i = 0; i < tiers; i++) {
-        var t = i / (tiers - 1);
-        var attachY = trunkTopY - canopy * t;
-        // Envelope quase linear: o contorno GERAL de uma conífera é um
-        // triângulo estreito, e quem tira a cara de triângulo é o serrilhado
-        // por cima dele - não uma curva exótica no envelope.
-        var w = halfWidth * Math.pow(1 - t, 0.95) * CanvasUtils.randRange(rng, 0.90, 1.07);
-        w = Math.max(w, halfWidth * 0.045);
-        // A ponta do galho CAI um pouco abaixo do ponto onde sai do tronco.
-        var tipY = attachY + height * CanvasUtils.randRange(rng, 0.012, 0.026) * (1 - t * 0.5);
-        out.push({ x: axisXAt(attachY) + sign * w, y: tipY });
-        // Reentrância RASA: volta só até ~70% da largura do galho. Voltar
-        // até perto do tronco (era 26-40%) é o que cavava o dente fundo.
-        var notchY = attachY - (canopy / (tiers - 1)) * CanvasUtils.randRange(rng, 0.42, 0.60);
-        out.push({ x: axisXAt(notchY) + sign * w * CanvasUtils.randRange(rng, 0.62, 0.82), y: notchY });
-      }
-      return out;
+  // Onde começa o "primeiro plano" pro espelhamento por lado. Abaixo disso a
+  // peça é pequena e distante, e a névoa já comeu o contraste entre a massa
+  // de sombra e a de luz - virar a peça não muda nada em quadro.
+  var PRIMEIRO_PLANO_T = 0.45;
+
+  // Escolhe variante e devolve o que o desenho precisa: as formas, a escala
+  // que leva a arte à altura pedida em pixels, e o espelhamento.
+  //
+  // `xf` (posição na largura, 0 a 1) e `t` decidem o espelhamento das peças
+  // de primeiro plano. Toda a coleção foi desenhada com a luz vindo da
+  // DIREITA - medi: em todas as vinte, o centro da massa `...-sombra` está à
+  // esquerda do centro da `...-luz`. Então o desenho nativo já serve pra
+  // metade esquerda da tela, e a metade direita é espelhada.
+  //
+  // O efeito é que as sombras do primeiro plano apontam pra FORA, e a luz
+  // parece vir do meio do quadro - que é onde a fogueira está. A moldura de
+  // plantas passa a concordar com o centro da cena em vez de brigar com ele.
+  //
+  // No fundo continua sorteado: lá a peça é pequena, a névoa comeu o
+  // contraste entre as duas massas, e um padrão regular de espelhamento só
+  // criaria simetria - que é o que se quer evitar numa mata.
+  function escolherSprite(rng, familia, alturaPx, xf, t) {
+    var lista = SPRITES[familia];
+    var nome = lista[Math.floor(rng() * lista.length) % lista.length];
+    // O sorteio acontece SEMPRE, mesmo quando o resultado é descartado: a
+    // sequência do rng é a mesma pra qualquer decisão de espelhamento, e é
+    // isso que mantém a cena idêntica entre dois resizes.
+    var sorteado = rng() < 0.5 ? -1 : 1;
+    var flip = sorteado;
+    if (t !== undefined && t >= PRIMEIRO_PLANO_T) {
+      flip = xf < 0.5 ? 1 : -1;
     }
-
-    var trunkHalf = Math.max(1, halfWidth * 0.085);
-    var right = side(1);
-    var left = side(-1);
-    left.reverse();
-
-    var pts = [{ x: trunkHalf, y: 0 }, { x: axisXAt(trunkTopY) + trunkHalf, y: trunkTopY }];
-    pts = pts.concat(right);
-    pts.push({ x: axisXAt(-height), y: -height });   // ápice
-    pts = pts.concat(left);
-    pts.push({ x: axisXAt(trunkTopY) - trunkHalf, y: trunkTopY });
-    pts.push({ x: -trunkHalf, y: 0 });
-    return { points: pts, trunkHalf: trunkHalf, trunkTopY: trunkTopY };
+    var f = formasDe(nome);
+    var escala = f && f.caixa.altura ? alturaPx / f.caixa.altura : 0;
+    return { sprite: nome, escala: escala, flip: flip };
   }
 
-  // Folhosa: NÃO é um blob só - são 3 a 5 massas agrupadas, cada uma com
-  // centro e raio próprios. Um blob único lê como pirulito.
-  //
-  // Duas correções sobre a primeira versão, que lia como NUVEM: as massas
-  // eram círculos de raio parecido distribuídos em anel, e o anel fechado de
-  // bolhas iguais é exatamente o desenho de nuvem de história em quadrinhos.
-  // Agora cada lobo é uma elipse achatada de raio bem variado, o
-  // agrupamento é mais alto que largo, e um lobo dominante segura o centro -
-  // copa de árvore tem massa principal e satélites, não bolhas em coro.
-  function buildBroadleaf(rng, height, halfWidth) {
-    var crownY = -height * CanvasUtils.randRange(rng, 0.64, 0.74);
-    var lobes = [{
-      cx: CanvasUtils.randRange(rng, -0.12, 0.12) * halfWidth,
-      cy: crownY,
-      rx: halfWidth * CanvasUtils.randRange(rng, 0.78, 0.94),
-      ry: halfWidth * CanvasUtils.randRange(rng, 0.62, 0.80)
-    }];
-    var satellites = Math.round(CanvasUtils.randRange(rng, 3, 5));
-    for (var i = 0; i < satellites; i++) {
-      // Distribuídos na METADE DE CIMA da copa, com uma volta incompleta: um
-      // lobo pendurado embaixo do centro não existe em árvore nenhuma.
-      var a = Math.PI + (i / satellites) * Math.PI + CanvasUtils.randRange(rng, -0.30, 0.30);
-      var spread = halfWidth * CanvasUtils.randRange(rng, 0.42, 0.76);
-      var r = halfWidth * CanvasUtils.randRange(rng, 0.30, 0.58);
-      lobes.push({
-        cx: Math.cos(a) * spread,
-        cy: crownY + Math.sin(a) * spread * 0.72,
-        rx: r,
-        ry: r * CanvasUtils.randRange(rng, 0.72, 0.94)
-      });
-    }
-    return {
-      lobes: lobes,
-      trunkHalf: Math.max(1, halfWidth * 0.12),
-      trunkTopY: crownY + halfWidth * 0.30
-    };
-  }
-
-  function generatePebbleBlob(rng) {
-    var n = Math.round(CanvasUtils.randRange(rng, PEBBLE_BLOB_POINTS_RANGE[0], PEBBLE_BLOB_POINTS_RANGE[1]));
-    var radii = [];
-    for (var i = 0; i < n; i++) radii.push(CanvasUtils.randRange(rng, PEBBLE_BLOB_JITTER_RANGE[0], PEBBLE_BLOB_JITTER_RANGE[1]));
-    return radii;
-  }
 
   // ---- Os habitantes do chão ----
   // Árvore, pedra e tufo de mato agora vão todos pra MESMA lista, cada um
@@ -724,20 +785,39 @@
       var broadleafRoll = rng();
       var broadleaf = d >= TREE_DEF.farMax && d < TREE_DEF.midMax &&
                       broadleafRoll < TREE_DEF.broadleafChance;
-      var treeShape = broadleaf ? buildBroadleaf(rng, h, halfW * 1.35) : buildConifer(rng, h, halfW);
+      var escolha = escolherSprite(rng, broadleaf ? 'folhosa' : 'conifera', h, xf, t);
       // Árvore não nasce dentro d'água. O sorteio acontece do mesmo jeito
       // (o rng já foi consumido acima) - só a peça não entra na lista, então
       // a margem do lago some da mata sem desviar a sequência aleatória.
       if (this._lake && this._lake.contains(xf * width, t)) continue;
       items.push({
-        kind: 'tree', t: t, x: xf * width, hw: halfW * (broadleaf ? 1.35 : 1.0),
-        shape: treeShape,
-        leafy: broadleaf,
+        t: t, x: xf * width, hw: halfW * (broadleaf ? 1.35 : 1.0),
+        sprite: escolha.sprite, escala: escolha.escala, flip: escolha.flip,
         height: h,
-        colorIndex: Math.floor(rng() * 4),
         // Escurecimento próprio: uma mata em que toda árvore tem o mesmo
         // valor lê como papel de parede.
         tone: CanvasUtils.randRange(rng, 0.84, 1.14)
+      });
+    }
+
+    // --- arbustos ---
+    // Família nova: a ilustração trouxe moitas, e elas resolvem um buraco
+    // real de escala. Entre o tufo de relva (40 unidades) e a árvore (300)
+    // não havia nada, e a mata encontrava o gramado por um degrau.
+    rng = CanvasUtils.mulberry32((layout.trees.seed ^ 0x9e37) >>> 0);
+    var bushCount = densityCount(BUSH_DEF.density, width, refUnit, BUSH_DEF.minCount, BUSH_DEF.maxCount);
+    for (i = 0; i < bushCount; i++) {
+      var bt = CanvasUtils.randRange(rng, BUSH_DEF.tRange[0], BUSH_DEF.tRange[1]);
+      var bx = CanvasUtils.randRange(rng, -0.03, 1.03) * width;
+      var bh = CanvasUtils.randRange(rng, BUSH_DEF.heightUnitRange[0], BUSH_DEF.heightUnitRange[1]) *
+               refUnit * plane.rawScaleAt(bt);
+      var bEscolha = escolherSprite(rng, 'arbusto', bh, bx / width, bt);
+      var bTom = CanvasUtils.randRange(rng, 0.86, 1.12);
+      if (this._lake && this._lake.contains(bx, bt)) continue;
+      items.push({
+        t: bt, x: bx, hw: bh * 0.7,
+        sprite: bEscolha.sprite, escala: bEscolha.escala, flip: bEscolha.flip,
+        height: bh, tone: bTom
       });
     }
 
@@ -750,12 +830,11 @@
       var pt = CanvasUtils.randRange(rng, 0.04, 1.0);
       var px = rng() * width;
       var pr = CanvasUtils.randRange(rng, PEBBLE_DEF.sizeUnitRange[0], PEBBLE_DEF.sizeUnitRange[1]) * refUnit * plane.rawScaleAt(pt);
+      var pEscolha = escolherSprite(rng, 'pedra', pr * 1.6);
       var pebble = {
-        kind: 'pebble', t: pt, x: px, hw: pr, r: pr,
-        aspect: CanvasUtils.randRange(rng, 0.72, 0.96),
-        rotationRad: rng() * Math.PI * 2,
-        colorVariant: Math.floor(rng() * PEBBLE_VARIANTS.length),
-        radii: generatePebbleBlob(rng)
+        t: pt, x: px, hw: pr,
+        sprite: pEscolha.sprite, escala: pEscolha.escala, flip: pEscolha.flip,
+        tone: CanvasUtils.randRange(rng, 0.88, 1.10)
       };
       if (!(this._lake && this._lake.contains(px, pt))) items.push(pebble);
     }
@@ -766,20 +845,14 @@
     for (i = 0; i < grassCount; i++) {
       var gt = CanvasUtils.randRange(rng, 0.02, 1.0);
       var size = CanvasUtils.randRange(rng, GRASS_DEF.sizeUnitRange[0], GRASS_DEF.sizeUnitRange[1]) * refUnit * plane.rawScaleAt(gt);
-      var blades = [];
-      var bladeCount = Math.round(CanvasUtils.randRange(rng, 3, 6));
-      for (var b = 0; b < bladeCount; b++) {
-        blades.push({
-          dx: CanvasUtils.randRange(rng, -size * 0.5, size * 0.5),
-          lean: CanvasUtils.randRange(rng, -0.75, 0.75),
-          len: size * CanvasUtils.randRange(rng, 0.55, 1.15)
-        });
-      }
+      // O x vem ANTES da escolha do sprite: é ele que decide o espelhamento
+      // das peças de primeiro plano.
       var gx = CanvasUtils.randRange(rng, -0.03, 1.03) * width;
+      var gEscolha = escolherSprite(rng, 'relva', size, gx / width, gt);
       var tuft = {
-        kind: 'grass', t: gt, x: gx, hw: size * 0.5,
-        blades: blades, size: size,
-        toneIndex: Math.floor(rng() * GRASS_TONES.length) % GRASS_TONES.length
+        t: gt, x: gx, hw: size * 0.5,
+        sprite: gEscolha.sprite, escala: gEscolha.escala, flip: gEscolha.flip,
+        tone: CanvasUtils.randRange(rng, 0.84, 1.14)
       };
       if (!(this._lake && this._lake.contains(gx, gt))) items.push(tuft);
     }
@@ -951,9 +1024,10 @@
     this._width = width;
     this._height = height;
     if (!this._layout) this._layout = this._generateLayout(rng);
-    // Direção horizontal da luz da sessão - a MESMA inclinação dos feixes de
-    // sol, pra que o realce nas cristas concorde com a direção da luz.
-    this._lightDirX = Math.tan(this._layout.shafts.baseTiltDeg * Math.PI / 180);
+    // Um valor inicial pra quem desenhar antes do primeiro quadro; a partir
+    // daí quem manda é `draw`, porque a direção da luz mudou de natureza:
+    // era sorteio de sessão, virou consequência de onde o sol está.
+    this._lightDirX = this._lightDirXAgora();
     this._bottomY = CLEARING_DEF.bottomYf * height;
     this._rebuildGeometry(width, height);
     this._seedParticles(width, height);
@@ -1077,6 +1151,36 @@
   }
 
   // Contribuição da fogueira num ponto do mundo, em [0, FIRE_MAX_ADD].
+  //
+  // ---- POR QUE O CHÃO NÃO USA ISTO ----
+  //
+  // Quem lê `pointLight` são as PEÇAS e o espalhado - coisas discretas, que
+  // sombreiam forma a forma. O chão recebe luz por outro caminho: uma poça
+  // pintada em `_drawFireGlow` / `_drawLampGlow`, com centro, raio e
+  // achatamento próprios.
+  //
+  // Isso PARECE duplicação, e já foi tratado como tal: as duas contas foram
+  // unificadas, o chão passou a ser um desenho exato deste campo, e o
+  // resultado foi pior - o chão inundou e as peças viraram silhuetas escuras
+  // sobre ele. A unificação foi desfeita.
+  //
+  // O motivo é que os dois NÃO respondem à mesma pergunta, e a diferença
+  // está no eixo Y. Este campo é uma elipse em espaço de TELA, e `reachY`
+  // (= reachX/1.7) foi calibrado como queda por ALTURA: o fogo está no chão,
+  // a luz vem de baixo e lambe a base das coisas, então o ápice de uma
+  // barraca recebe bem menos que o pé dela.
+  //
+  // Só que no CHÃO deslocamento vertical em tela não é altura, é
+  // PROFUNDIDADE - pelo plano, y = H(x) + (rodapé - H(x)) · t. Cem pixels
+  // abaixo do horizonte são centenas de metros; cem pixels rente à câmera
+  // são poucos passos. Aplicar a queda-por-altura sobre essa distância
+  // espalha a luz por uma área enorme da clareira.
+  //
+  // Uma elipse em tela não descreve as duas grandezas ao mesmo tempo. Fazer
+  // o chão ler o campo do objeto exigiria primeiro converter Y em distância
+  // pelo plano (depthAtY existe e é exato) - e isso é modelo novo, não
+  // conserto. Enquanto não for feito, os dois caminhos são separados DE
+  // PROPÓSITO, e a divergência entre eles é o preço conhecido.
   Background.prototype.fireLightAt = function (x, y) {
     var f = this.fire;
     if (!f.active) return 0;
@@ -1148,33 +1252,166 @@
   // ela devolve a cor do fogo sem tocar em texto nenhum. Misturar cor exige
   // ler e escrever hex, e fazer isso 278 vezes por quadro custou 2,5 ms
   // quando estava no caminho de todos.
+  // Devolve também DE ONDE a luz vem: `sx`,`sy` são a posição das fontes
+  // ponderada pelo quanto cada uma contribui naquele ponto. É o que permite
+  // a uma superfície saber se está virada pra luz ou de costas pra ela.
+  //
+  // Ponderar, e não escolher a fonte mais forte, é o mesmo raciocínio da
+  // direção da luz-chave: entre o fogo e um lampião, a normal varre
+  // suavemente de um pro outro em vez de saltar quando a dominância troca.
   Background.prototype.localLightAt = function (x, y) {
     var amount = this.fireLightAt(x, y);
+    var f = this.fire;
     var lamps = this._lamps;
     if (!lamps || !lamps.length) {
-      return { amount: amount, color: FIRE_LIGHT_COLOR };
+      return { amount: amount, color: FIRE_LIGHT_COLOR, sx: f.x, sy: f.y };
     }
     var night = nightFactor(this.currentPalette());
 
-    var r = 0, g = 0, b = 0, total = 0;
+    var r = 0, g = 0, b = 0, total = 0, px = 0, py = 0;
     for (var i = 0; i < lamps.length; i++) {
       var a = pointLight(lamps[i], x, y, night);
       if (a <= 0.002) continue;
       var c = lamps[i].rgb;
       r += c.r * a; g += c.g * a; b += c.b * a;
+      px += lamps[i].x * a; py += lamps[i].y * a;
       total += a;
     }
     // Nenhuma luminária alcança aqui: a resposta é a do fogo, sem mistura.
-    if (total <= 0.002) return { amount: amount, color: FIRE_LIGHT_COLOR };
+    if (total <= 0.002) return { amount: amount, color: FIRE_LIGHT_COLOR, sx: f.x, sy: f.y };
 
     if (amount > 0) {
       r += FIRE_RGB.r * amount; g += FIRE_RGB.g * amount; b += FIRE_RGB.b * amount;
+      px += f.x * amount; py += f.y * amount;
       total += amount;
     }
     return {
       amount: Math.min(total, FIRE_MAX_ADD),
-      color: rgbToHexLocal(r / total, g / total, b / total)
+      color: rgbToHexLocal(r / total, g / total, b / total),
+      sx: px / total, sy: py / total
     };
+  };
+
+  // Profundidade no plano de um ponto de tela. A fonte de luz é dada em
+  // pixels; a face de um objeto precisa saber se a luz está À FRENTE ou
+  // ATRÁS dele, e isso é profundidade, não altura.
+  Background.prototype.depthAtPoint = function (x, y) {
+    return this.depthAtY(x, y);
+  };
+
+  // ---- Sombra projetada no chão ----
+  //
+  // A geometria aqui é mais simples do que parece, e o motivo vale escrever:
+  // a sombra vai do PONTO DE CONTATO do oclusor, na direção oposta ao PONTO
+  // DE CONTATO da fonte. Os dois pontos estão sobre o plano, e entre dois
+  // pontos do plano a direção em espaço de tela JÁ É a direção no chão - a
+  // perspectiva está embutida no mapeamento do plano. Só faria falta o
+  // cálculo em (x, profundidade) se um dos dois estivesse no ar.
+  //
+  // Comprimento cresce com a altura do oclusor, com teto no alcance da
+  // própria fonte: sombra que passa de onde a luz chega não descreve nada,
+  // porque ali já não há brilho pra subtrair.
+  var SOMBRA_POR_ALTURA = 2.6;   // quanto de sombra cada pixel de altura dá
+  var SOMBRA_ESPALHA = 1.55;     // quanto a sombra alarga na ponta
+  var SOMBRA_BORRAO = 0.055;     // desfoque da borda, em fração do alcance
+
+  // Achatamento do plano visto quase de lado: um passo AFASTANDO-SE da
+  // câmera anda muito menos pixels na vertical do que um passo pro lado anda
+  // na horizontal. É a mesma constante da poça no chão, e ela aparece duas
+  // vezes aqui - na pegada do oclusor e no teste de "luz por dentro".
+  var ACHATAMENTO_DO_CHAO = 0.34;
+
+  function quadDeSombra(srcX, srcY, occ, alcance) {
+    if (occ.halfWidth <= 0 || occ.altura <= 0) return null;
+
+    var dx = occ.x - srcX, dy = occ.groundY - srcY;
+
+    // Luz DENTRO do oclusor não é bloqueada por ele - é o caso da chama
+    // dentro da roda de pedras. O teste é ELÍPTICO, não só em X: com a
+    // comparação horizontal sozinha, qualquer peça larga que cruzasse a
+    // vertical do fogo era descartada mesmo estando passos atrás ou à frente
+    // dele. Era assim que o varal, a barraca e a pilha de lenha deixavam de
+    // projetar sombra alguma.
+    var ry = occ.halfWidth * ACHATAMENTO_DO_CHAO;
+    if ((dx * dx) / (occ.halfWidth * occ.halfWidth) + (dy * dy) / (ry * ry) < 1) return null;
+
+    var d = Math.sqrt(dx * dx + dy * dy);
+    if (d < 1) return null;
+    var ux = dx / d, uy = dy / d;
+    var comp = Math.min(occ.altura * SOMBRA_POR_ALTURA, alcance * 1.4);
+    if (comp < 2) return null;
+
+    // A largura da sombra é a pegada do oclusor MEDIDA PERPENDICULARMENTE à
+    // luz - e a pegada é uma elipse no chão, não um segmento em X.
+    //
+    // Usar sempre a extensão horizontal era o bug do "tronco deitado com
+    // sombra em pé": com o fogo ao lado, a perpendicular fica vertical, e a
+    // largura de 200 px do tronco era desenhada ao longo do eixo Y da tela.
+    // Em pixels de tela, a mesma distância no chão vale ACHATAMENTO_DO_CHAO
+    // quando medida na vertical.
+    var px = -uy, py = ux;
+    var hw = occ.halfWidth *
+             Math.sqrt(px * px + (py * ACHATAMENTO_DO_CHAO) * (py * ACHATAMENTO_DO_CHAO));
+    if (hw < 1) return null;
+    var hwLonge = hw * SOMBRA_ESPALHA;
+    var fx = occ.x + ux * comp, fy = occ.groundY + uy * comp;
+    return [
+      occ.x + px * hw, occ.groundY + py * hw,
+      occ.x - px * hw, occ.groundY - py * hw,
+      fx - px * hwLonge, fy - py * hwLonge,
+      fx + px * hwLonge, fy + py * hwLonge
+    ];
+  }
+
+  // Desenha um brilho e SUBTRAI dele as sombras dos oclusores.
+  //
+  // Subtrair, e não pintar escuro por cima do chão: o brilho é aditivo e vem
+  // depois do terreno, então escurecer o chão antes seria desfeito pelo
+  // próprio brilho no passo seguinte. A sombra é ausência de luz, e é assim
+  // que ela é construída aqui.
+  //
+  // Vai num canvas fora de tela porque a borda precisa ser MACIA. Um clip
+  // recorta com borda dura, e borda dura de sombra lê como mancha de tinta -
+  // é o mesmo erro da coluna de luz do recife. Com `destination-out` e um
+  // filtro de desfoque, a sombra come o brilho com a borda certa.
+  Background.prototype._brilhoComSombra = function (ctx, width, height, alcance, srcX, srcY, desenhar) {
+    var occ = this._occluders || [];
+    var quads = [];
+    for (var i = 0; i < occ.length; i++) {
+      var q = quadDeSombra(srcX, srcY, occ[i], alcance);
+      if (q) quads.push(q);
+    }
+    if (!quads.length) { desenhar(ctx); return; }
+
+    var buf = this._bufSombra;
+    if (!buf || buf.width !== width || buf.height !== height) {
+      buf = this._bufSombra = document.createElement('canvas');
+      buf.width = width; buf.height = height;
+      this._bufSombraCtx = buf.getContext('2d');
+    }
+    var b = this._bufSombraCtx;
+    b.setTransform(1, 0, 0, 1, 0, 0);
+    b.clearRect(0, 0, width, height);
+    b.globalCompositeOperation = 'source-over';
+    desenhar(b);
+
+    b.globalCompositeOperation = 'destination-out';
+    if ('filter' in b) b.filter = 'blur(' + Math.max(2, alcance * SOMBRA_BORRAO) + 'px)';
+    b.fillStyle = '#000';
+    b.beginPath();
+    for (var k = 0; k < quads.length; k++) {
+      var q = quads[k];
+      b.moveTo(q[0], q[1]);
+      b.lineTo(q[2], q[3]);
+      b.lineTo(q[4], q[5]);
+      b.lineTo(q[6], q[7]);
+      b.closePath();
+    }
+    b.fill();
+    if ('filter' in b) b.filter = 'none';
+    b.globalCompositeOperation = 'source-over';
+
+    ctx.drawImage(buf, 0, 0);
   };
 
   function rgbToHexLocal(r, g, b) {
@@ -1280,6 +1517,13 @@
     var palette = getTimePalette(this._resolveHourFraction());
     this._currentPalette = palette;
 
+    // Por QUADRO, não por resize: a direção da luz agora depende da hora,
+    // porque depende de onde o sol está. Fica aqui, antes de qualquer
+    // desenho, pra que serra, mata e feixes leiam todos o mesmo valor no
+    // mesmo quadro - se cada um recalculasse por conta, voltaríamos a ter
+    // várias opiniões sobre onde está o sol.
+    this._lightDirX = this._lightDirXAgora();
+
     ctx.fillStyle = CanvasUtils.makeVerticalGradient(ctx, 0, 0, 0, height, palette.skyStops);
     ctx.fillRect(0, 0, width, height);
 
@@ -1296,29 +1540,40 @@
     // O lago vem DEPOIS da textura do chão, e por isso a cobre no trecho em
     // que o chão é água - em vez de ter que recortar sulco e grão um a um.
     this._drawLake(ctx, camera, palette);
-    // E tudo que se apoia nele, do fundo pra frente. Só a parte que fica
-    // ATRÁS do acampamento: o resto é desenhado no canvas de primeiro plano.
-    this._drawScatter(ctx, camera, palette, false);
 
     // A luz da fogueira entra DEPOIS de todo o terreno: ela ilumina o chão
     // que já existe, em vez de virar mais uma camada de cenário.
+    //
+    // E entra AQUI, no canvas de fundo, antes de qualquer espalhado. Antes o
+    // espalhado de trás vinha primeiro e levava o brilho pintado por cima -
+    // mas ele já recebe a luz local no próprio sombreamento, via
+    // localLightAt. Era luz contada duas vezes; a pilha desfez isso sozinha,
+    // porque agora o espalhado mora em outra camada.
     this._drawFireGlow(ctx, width, height, palette);
     this._drawLampGlow(ctx, palette);
-    this._drawEmbers(ctx, palette);
-    this._drawDustTier(ctx, 'front', palette);
 
     this._drawHorizonHaze(ctx, width, height, palette);
-    this._drawVignette(ctx, width, height, palette);
   };
 
-  // O canvas de primeiro plano fica POR CIMA do SVG do acampamento. Além da
-  // moita oclusora que sempre esteve aqui, ele agora carrega a parte do
-  // espalhado que está na frente das peças - é o que impede uma barraca
-  // distante de aparecer colada por cima de uma árvore rente à câmera.
-  Background.prototype.drawForeground = function (ctx, camera) {
+  // O espalhado de UMA faixa. Vai no canvas que fica logo abaixo do SVG
+  // daquela faixa, e é isso que dá a terceira gaveta.
+  Background.prototype.drawBand = function (ctx, camera, width, height, faixa) {
+    this._drawScatter(ctx, camera, this.currentPalette(), faixa);
+  };
+
+  // O canvas de primeiro plano fica POR CIMA da pilha inteira: é o que está
+  // entre a câmera e a clareira.
+  //
+  // A atmosfera (brasas, poeira e vinheta) subiu pra cá junto com a moita.
+  // Ela estava no canvas de fundo, ou seja, DEBAIXO do acampamento - a
+  // vinheta escurecia o chão nas bordas e não tocava numa peça posta ali. É
+  // atmosfera entre a câmera e a cena; ela vale pra tudo que está em quadro.
+  Background.prototype.drawForeground = function (ctx, camera, width, height) {
     var palette = this.currentPalette();
-    this._drawScatter(ctx, camera, palette, true);
     this._drawForeground(ctx, camera, palette);
+    this._drawEmbers(ctx, palette);
+    this._drawDustTier(ctx, 'front', palette);
+    this._drawVignette(ctx, width || this._width, height || this._height, palette);
   };
 
   Background.prototype._drawStars = function (ctx, width, height, palette) {
@@ -1340,38 +1595,104 @@
     ctx.restore();
   };
 
-  // Um único corpo celeste faz sol E lua: a cor e a opacidade vêm da paleta
-  // do horário, e o raio encolhe conforme a noite entra. Dois elementos
-  // separados exigiriam decidir a hora do nascer/pôr, e a transição ficaria
-  // marcada; assim ele simplesmente esfria e diminui.
+  // Sol e lua, cada um na própria posição da órbita (ver ORBIT).
+  //
+  // A lição que sobrevive de duas versões atrás, e que continua sendo a
+  // razão de a janela ser em HORA e não em `ambient`: às 5h o ambiente vale
+  // 0.33 e às 19h vale 0.42 - quase o mesmo -, mas numa o sol nasce e na
+  // outra se põe. Decidir pelo ambiente fazia a alvorada mostrar sol e lua
+  // somados no mesmo ponto, e dois desenhos empilhados não leem como corpo
+  // em transição, leem como erro de camada.
+  //
+  // Agora a hora resolve as duas coisas de uma vez: ela diz a força E o
+  // lugar, e na virada os dois estão em bordas opostas do quadro. O que era
+  // uma sobreposição a ser evitada virou uma leitura - o sol nascendo de um
+  // lado enquanto a lua se põe do outro.
+  //
+  // O corpo é desenhado ANTES das serras de propósito: é o que o faz se pôr
+  // atrás da montanha sem nenhum recorte.
   Background.prototype._drawCelestialBody = function (ctx, width, height, palette) {
-    var layout = this._layout;
-    if (!layout) return;
     var refUnit = Math.min(width, height);
-    var cx = layout.bodyXf * width;
-    var cy = layout.bodyYf * height;
     var r = refUnit * (0.030 + 0.026 * palette.ambient);
+    var ceu = this._corposNoCeu();
+
+    ctx.save();
+    // A lua primeiro: nas horas em que os dois aparecem, o sol é quem manda
+    // no quadro e fica por cima.
+    this._desenharCorpoNoCeu(ctx, width, height, palette, 'lua', ceu.lua, r * 1.9);
+    this._desenharCorpoNoCeu(ctx, width, height, palette, 'sol', ceu.sol, r * 2.0);
+    ctx.restore();
+  };
+
+  // Onde cada corpo está agora. Um só lugar responde isso, e tanto o desenho
+  // quanto a direção da luz bebem daqui - se fossem duas contas, elas
+  // divergiriam, e o sol acabaria num canto com a luz vindo de outro.
+  Background.prototype._corposNoCeu = function () {
+    var hora = this._resolveHourFraction();
+    return {
+      sol: posicaoOrbital(ORBIT.sol, hora),
+      lua: posicaoOrbital(ORBIT.lua, hora)
+    };
+  };
+
+  // A inclinação horizontal da luz-chave, tirada de onde os corpos estão.
+  //
+  // Pesada pela força dos dois, e não "o mais forte manda": na virada o sol
+  // está numa borda e a lua na outra, então escolher um deles faria a luz
+  // saltar de um lado pro outro num quadro. Pesando, ela varre o meio e
+  // passa por zero - luz reta, sem direção, que é exatamente o que a meia-luz
+  // do crepúsculo é.
+  Background.prototype._lightDirXAgora = function () {
+    var ceu = this._corposNoCeu();
+    var fSol = ceu.sol ? ceu.sol.forca : 0;
+    var fLua = ceu.lua ? ceu.lua.forca : 0;
+    var total = fSol + fLua;
+    if (total < 0.001) return 0;
+    var xf = ((ceu.sol ? ceu.sol.xf * fSol : 0) + (ceu.lua ? ceu.lua.xf * fLua : 0)) / total;
+    return (0.5 - xf) * ORBIT.espalhamentoLuz;
+  };
+
+  Background.prototype._desenharCorpoNoCeu = function (ctx, width, height, palette, nome, pos, raio) {
+    if (!pos || pos.forca <= 0.01) return;
+    var cx = pos.xf * width;
+    var cy = pos.yf * height;
+    var forca = pos.forca;
 
     ctx.save();
     // Halo largo cobrindo a tela toda - um fillRect estreito com gradiente
     // deixa a borda dura visível (foi o bug da coluna de luz do recife).
     var halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(width, height) * 0.55);
-    halo.addColorStop(0, CanvasUtils.hexToRgba(palette.bodyColor, 0.20 * palette.bodyOpacityMul));
-    halo.addColorStop(0.28, CanvasUtils.hexToRgba(palette.bodyColor, 0.07 * palette.bodyOpacityMul));
+    var pico = 0.20 * palette.bodyOpacityMul * forca;
+    halo.addColorStop(0, CanvasUtils.hexToRgba(palette.bodyColor, pico));
+    halo.addColorStop(0.28, CanvasUtils.hexToRgba(palette.bodyColor, pico * 0.35));
     halo.addColorStop(1, CanvasUtils.hexToRgba(palette.bodyColor, 0));
     ctx.fillStyle = halo;
     ctx.fillRect(0, 0, width, height);
 
-    var disc = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 1.9);
-    disc.addColorStop(0, CanvasUtils.hexToRgba(palette.bodyColor, 0.95));
-    disc.addColorStop(0.52, CanvasUtils.hexToRgba(palette.bodyColor, 0.55));
-    disc.addColorStop(1, CanvasUtils.hexToRgba(palette.bodyColor, 0));
-    ctx.fillStyle = disc;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r * 1.9, 0, Math.PI * 2);
-    ctx.fill();
+    desenharCorpo(ctx, nome, cx, cy, raio, forca, palette);
     ctx.restore();
   };
+
+  function desenharCorpo(ctx, nome, cx, cy, raio, forca, palette) {
+    if (forca <= 0.01) return;
+    var f = formasDe(nome);
+    if (!f || !f.caixa.altura) return;
+    var escala = (raio * 2) / f.caixa.altura;
+
+    ctx.save();
+    ctx.globalAlpha = forca;
+    ctx.translate(cx, cy);
+    ctx.scale(escala, escala);
+    for (var i = 0; i < f.formas.length; i++) {
+      var forma = f.formas[i];
+      // O corpo celeste é EMISSOR: não passa pelo sombreamento nem pela
+      // névoa. O que ele faz é tomar a cor da hora - é a mesma luz que
+      // pinta o céu, e um sol branco num céu de pôr do sol lê como furo.
+      ctx.fillStyle = CanvasUtils.lerpHexColor(forma.base, palette.bodyColor, 0.55);
+      ctx.fill(forma.caminho);
+    }
+    ctx.restore();
+  }
 
   Background.prototype._drawRidge = function (ctx, width, height, camera, key, palette) {
     var pts = this._ridges && this._ridges[key];
@@ -1406,7 +1727,7 @@
     strokeLitRim(ctx, pts, palette, {
       lightDirX: this._lightDirX,
       lineWidth: key === 'near' ? 2.2 : 1.8,
-      maxAlpha: def.rim * (1 - fogAmountForDepth(def.depth)),
+      maxAlpha: def.rim * (1 - fogAmountForDepth(def.depth, palette)),
       exponent: 1.4
     });
 
@@ -1423,6 +1744,19 @@
     var refUnit = Math.min(width, height);
     var self = this;
 
+    // Os feixes eram inclinados por um ângulo sorteado na sessão, e o sol
+    // ficava onde outro sorteio mandasse - dois valores independentes que
+    // por acaso nunca se contradiziam, porque nada se movia. Com o sol
+    // andando, feixe apontando pra um lado e sol no outro é a primeira coisa
+    // que o olho pega.
+    //
+    // Cada feixe guarda a variação PRÓPRIA em relação à base antiga; o que
+    // muda aqui é a âncora, que passa a ser o sol. Assim a dispersão entre
+    // feixes continua a mesma e nenhum rng novo é lido - a cena sobrevive ao
+    // resize igual.
+    var ancoraAntiga = this._layout.shafts.baseTiltDeg;
+    var ancoraNova = Math.atan(this._lightDirX) * 180 / Math.PI;
+
     ctx.save();
     var parallax = camera ? camera.parallaxFor(0.10) : { x: 0, y: 0 };
     ctx.translate(parallax.x * 0.25, 0);
@@ -1431,7 +1765,8 @@
       var sway = Math.sin(self._time * shaft.swaySpeed + shaft.phase) * refUnit * 0.014;
       var topX = shaft.xf * width + sway;
       var len = height * shaft.lengthFrac;
-      var bottomX = topX + Math.tan(shaft.tiltDeg * Math.PI / 180) * len;
+      var tilt = shaft.tiltDeg - ancoraAntiga + ancoraNova;
+      var bottomX = topX + Math.tan(tilt * Math.PI / 180) * len;
       var w = Math.max(2, shaft.widthUnit * refUnit);
       var opacity = shaft.opacity * strength;
 
@@ -1506,7 +1841,7 @@
     strokeLitRim(ctx, pts, palette, {
       lightDirX: this._lightDirX,
       lineWidth: 2.0,
-      maxAlpha: 0.10 * (1 - fogAmountForDepth(0.1))
+      maxAlpha: 0.10 * (1 - fogAmountForDepth(0.1, palette))
     });
 
     ctx.restore();
@@ -1681,26 +2016,45 @@
     this._partitionScatter();
   };
 
+  // Roteia cada item do espalhado pra uma FAIXA da pilha.
+  //
+  // Isto era binário e é a pendência que mais incomodava. A camada da frente
+  // era um canvas por cima do SVG INTEIRO - não por cima de uma peça -, então
+  // entre "atrás de tudo" e "na frente de tudo" não havia terceira gaveta.
+  // Um tufo que cruzava a barraca do fundo, se promovido, passava a cobrir
+  // também a rede que está vários passos à frente dele. A regra vigente
+  // ("só sobe quem está na frente de TUDO que cruza") era uma defesa contra
+  // isso, não uma descrição da cena: ela errava pra trás de propósito.
+  //
+  // Agora a cena tem uma pilha alternada de faixas, e o item simplesmente
+  // vai pra faixa da própria profundidade. A pergunta "na frente de quem?"
+  // deixou de existir - cada tufo é desenhado entre as peças que de fato
+  // estão atrás e na frente dele. O erro residual é a LARGURA da faixa, não
+  // mais a cena inteira, e ele encolhe aumentando o número de faixas.
   Background.prototype._partitionScatter = function () {
     var list = this._scatter;
-    if (!list) return;
-    var occ = this._occluders || [];
+    if (!list || !this._bands) return;
+    var bands = this._bands;
     for (var i = 0; i < list.length; i++) {
       var it = list[i];
-      var front = false;
-      for (var j = 0; j < occ.length; j++) {
-        var o = occ[j];
-        if (o.halfWidth <= 0 || it.t <= o.t) continue;
-        // Soma as duas meias-larguras: encostar de raspão já é cruzar.
-        if (Math.abs(it.x - o.x) <= o.halfWidth + (it.hw || 0)) { front = true; break; }
+      it.band = 0;
+      for (var k = 0; k < bands.length; k++) {
+        if (it.t >= bands[k].de && it.t < bands[k].ate) { it.band = k; break; }
+        if (k === bands.length - 1) it.band = k;
       }
-      it.front = front;
     }
+  };
+
+  // O tema publica as faixas aqui: quem sabe a geometria do espalhado é o
+  // background, e quem sabe em quantas faixas a cena foi fatiada é a pilha.
+  Background.prototype.setBands = function (bands) {
+    this._bands = bands;
+    this._partitionScatter();
   };
 
   // Um laço só, do fundo pra frente. Árvore, pedra e mato dividem a mesma
   // lista ordenada por `t`, então a oclusão entre eles sai de graça.
-  Background.prototype._drawScatter = function (ctx, camera, palette, wantFront) {
+  Background.prototype._drawScatter = function (ctx, camera, palette, faixa) {
     var list = this._scatter;
     if (!list) return;
     var plane = this.plane;
@@ -1714,142 +2068,70 @@
 
     for (var i = 0; i < list.length; i++) {
       var it = list[i];
-      if (!!it.front !== !!wantFront) continue;
+      if (it.band !== faixa) continue;
       var f = parallaxFactor(it.t);
       var x = it.x + camX * f;
       var y = plane.yAtT(it.x, it.t) + camY * f * 0.3;
       var luz = self.localLightAt(x, y);
-
-      if (it.kind === 'tree') drawTree(ctx, it, x, y, palette, luz, lightDirX);
-      else if (it.kind === 'pebble') drawPebble(ctx, it, x, y, palette, luz);
-      else drawGrassTuft(ctx, it, x, y, palette, luz, time);
+      drawSprite(ctx, it, x, y, palette, luz);
     }
 
     ctx.globalAlpha = 1;
     ctx.restore();
   };
 
-  function drawTree(ctx, tree, x, y, palette, luz, lightDirX) {
-    var pal = tree.leafy
-      ? BROADLEAF_COLORS[tree.colorIndex % BROADLEAF_COLORS.length]
-      : CONIFER_COLORS[tree.colorIndex % CONIFER_COLORS.length];
-    var topColor = shadeTerrain(CanvasUtils.scaleHexColor(pal.top, tree.tone), tree.t, palette);
-    var baseColor = shadeTerrain(CanvasUtils.scaleHexColor(pal.base, tree.tone), tree.t, palette);
-    var trunkColor = shadeTerrain(TRUNK_COLOR, tree.t, palette);
-    if (luz.amount > 0.001) {
-      // A luz local lambe a base primeiro - por isso o termo é maior no
-      // baixo da árvore que no alto.
-      topColor = CanvasUtils.addHexLight(topColor, luz.color, luz.amount * 0.35);
-      baseColor = CanvasUtils.addHexLight(baseColor, luz.color, luz.amount * 0.85);
-      trunkColor = CanvasUtils.addHexLight(trunkColor, luz.color, luz.amount * 0.9);
-    }
+  // Desenha uma peça ilustrada do cenário.
+  //
+  // Uma passada por forma, e a cor de cada uma sai do MESMO modelo de luz que
+  // o chão usa (Light.shade, via shadeTerrain). Três termos por forma:
+  //
+  //   tom      - escurecimento próprio do indivíduo, pra que uma mata não
+  //              seja papel de parede de árvores idênticas;
+  //   luz-chave - só nas massas nomeadas "...-luz", que são as faces viradas
+  //              pra luz. É o que faz a mata inteira concordar com a direção
+  //              do sol em vez de cada árvore ter volume inventado;
+  //   luz local - fogueira e luminárias, com peso por grupo: o tronco leva
+  //              0.9 e a copa 0.35, porque o fogo está no chão e decai rápido
+  //              na vertical.
+  function drawSprite(ctx, it, x, y, palette, luz) {
+    var f = formasDe(it.sprite);
+    if (!f || !it.escala) return;
 
-    var shape = tree.shape;
-    ctx.save();
-    ctx.translate(x, y);
-
-    // Tronco só quando há tronco pra ver. Abaixo de ~26px de altura ele vira
-    // um risco de 1px sob a copa, e um risco de 1px sob uma massa
-    // arredondada é exatamente o desenho de um pirulito. Numa mata distante
-    // real não se enxerga tronco nenhum - só a massa da folhagem.
-    if (tree.height > 26) {
-      ctx.fillStyle = trunkColor;
-      ctx.fillRect(-shape.trunkHalf, shape.trunkTopY, shape.trunkHalf * 2, -shape.trunkTopY + 1);
-    }
-
-    var grad = ctx.createLinearGradient(0, -tree.height, 0, 0);
-    grad.addColorStop(0, topColor);
-    grad.addColorStop(1, baseColor);
-    ctx.fillStyle = grad;
-
-    if (tree.leafy) {
-      for (var i = 0; i < shape.lobes.length; i++) {
-        var lobe = shape.lobes[i];
-        ctx.beginPath();
-        ctx.ellipse(lobe.cx, lobe.cy, lobe.rx, lobe.ry, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    } else {
-      ctx.beginPath();
-      ctx.moveTo(shape.points[0].x, shape.points[0].y);
-      for (var j = 1; j < shape.points.length; j++) ctx.lineTo(shape.points[j].x, shape.points[j].y);
-      ctx.closePath();
-      ctx.fill();
-      // Luz direta na silhueta só nas árvores próximas: no fundo ela some na
-      // névoa e só custaria tempo de quadro.
-      if (tree.t > 0.34) {
-        strokeLitRim(ctx, shape.points, palette, {
-          lightDirX: lightDirX,
-          lineWidth: 1.0 + tree.t,
-          maxAlpha: 0.13 * (1 - fogAmountForDepth(tree.t)),
-          exponent: 2.4
-        });
-      }
-    }
-    ctx.restore();
-  }
-
-  function drawPebble(ctx, p, x, y, palette, luz) {
-    var variant = PEBBLE_VARIANTS[p.colorVariant] || PEBBLE_VARIANTS[0];
-    var topColor = CanvasUtils.addHexLight(
-      shadeTerrain(variant.top, p.t, palette),
-      palette.keyColor,
-      palette.keyStrength * 0.22 * (1 - fogAmountForDepth(p.t))
-    );
-    var bottomColor = shadeTerrain(variant.bottom, p.t, palette);
-    if (luz.amount > 0.001) {
-      topColor = CanvasUtils.addHexLight(topColor, luz.color, luz.amount * 0.7);
-      bottomColor = CanvasUtils.addHexLight(bottomColor, luz.color, luz.amount * 0.95);
-    }
-
-    ctx.save();
-    ctx.translate(x, y + p.r * 0.35);
-    ctx.scale(1.5, 0.5);
-    var shadowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, p.r);
-    shadowGrad.addColorStop(0, 'rgba(14,12,8,0.26)');
-    shadowGrad.addColorStop(1, 'rgba(14,12,8,0)');
-    ctx.fillStyle = shadowGrad;
-    ctx.beginPath();
-    ctx.arc(0, 0, p.r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    var nevoa = fogAmountForDepth(it.t, palette);
+    var chave = palette.keyStrength * 0.16 * (1 - nevoa);
 
     ctx.save();
     ctx.translate(x, y);
-    ctx.scale(1, p.aspect);
-    var blobPts = CanvasUtils.buildBlobPoints(0, 0, p.r, p.radii, p.rotationRad);
-    var grad = ctx.createLinearGradient(0, -p.r, 0, p.r);
-    grad.addColorStop(0, topColor);
-    grad.addColorStop(1, bottomColor);
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    CanvasUtils.tracePointsSmooth(ctx, blobPts);
-    ctx.fill();
-    ctx.restore();
-  }
+    ctx.scale(it.escala * it.flip, it.escala);
 
-  function drawGrassTuft(ctx, tuft, x, y, palette, luz, time) {
-    var color = shadeTerrain(GRASS_TONES[tuft.toneIndex], tuft.t, palette);
-    if (luz.amount > 0.001) color = CanvasUtils.addHexLight(color, luz.color, luz.amount * 0.9);
-    ctx.strokeStyle = color;
-    ctx.globalAlpha = 0.45 + tuft.t * 0.5;
-    ctx.lineWidth = Math.max(0.7, 0.8 + tuft.t * 1.1);
-    // Balanço leve, comum ao tufo inteiro: lâmina por lâmina com fase
-    // própria vira ruído, não vento.
-    var sway = Math.sin(time * 0.7 + tuft.x * 0.01) * 0.14;
-    for (var i = 0; i < tuft.blades.length; i++) {
-      var b = tuft.blades[i];
-      var bx = x + b.dx;
-      ctx.beginPath();
-      ctx.moveTo(bx, y);
-      ctx.quadraticCurveTo(
-        bx + (b.lean + sway) * b.len * 0.35, y - b.len * 0.6,
-        bx + (b.lean + sway) * b.len * 0.9, y - b.len
+    for (var i = 0; i < f.formas.length; i++) {
+      var forma = f.formas[i];
+      // A luz local vai DENTRO de Light.shade, com o peso da forma - não
+      // somada por fora depois.
+      //
+      // Este trecho somava a luz local por conta própria, depois de o
+      // sombreamento já ter terminado. Era o mesmo termo aditivo que fazia
+      // cores diferentes convergirem, e ele sobreviveu à correção do modelo
+      // justamente por estar FORA dele: o acampamento passou a receber a luz
+      // como iluminação e o mato continuou recebendo como tinta laranja por
+      // cima. Cenário e peças de novo com dois modelos, que é o erro que a
+      // seção 5 do documento existe pra impedir.
+      //
+      // A luz-chave (direcional, do sol) continua somada aqui: ela é outro
+      // fenômeno, e só as faces nomeadas "-luz" a recebem.
+      var cor = Light.shade(
+        CanvasUtils.scaleHexColor(forma.base, it.tone),
+        palette, it.t, luz, forma.peso
       );
-      ctx.stroke();
+      if (forma.iluminada && chave > 0.002) {
+        cor = CanvasUtils.addHexLight(cor, palette.keyColor, chave);
+      }
+      ctx.fillStyle = cor;
+      ctx.fill(forma.caminho);
     }
-    ctx.globalAlpha = 1;
+    ctx.restore();
   }
+
 
   // O halo da fogueira. Duas peças, e a divisão importa:
   //
@@ -1862,6 +2144,10 @@
   // Ambos em composição 'lighter': luz SOMA, não substitui. Com
   // 'source-over' a poça viraria um adesivo laranja opaco por cima do chão,
   // apagando a textura que o modelo de luz acabou de desenhar.
+  // A poça no chão. Geometria PRÓPRIA, e isso é deliberado - ver o comentário
+  // longo em fireLightAt: o achatamento 0.34 daqui é a perspectiva do plano
+  // vista de quase de lado, não a queda por altura que o campo dos objetos
+  // usa. Já foram unificados uma vez, e a cena piorou.
   Background.prototype._drawFireGlow = function (ctx, width, height, palette) {
     var f = this.fire;
     if (!f.active) return;
@@ -1874,18 +2160,23 @@
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
 
-    ctx.save();
-    ctx.translate(f.x, f.y);
-    ctx.scale(1, 0.34);
-    var pool = ctx.createRadialGradient(0, 0, 0, 0, 0, reach);
-    pool.addColorStop(0, CanvasUtils.hexToRgba(FIRE_LIGHT_COLOR, 0.50 * strength));
-    pool.addColorStop(0.35, CanvasUtils.hexToRgba(FIRE_LIGHT_COLOR, 0.20 * strength));
-    pool.addColorStop(1, CanvasUtils.hexToRgba(FIRE_LIGHT_COLOR, 0));
-    ctx.fillStyle = pool;
-    ctx.beginPath();
-    ctx.arc(0, 0, reach, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    // A poça no chão é o que as peças bloqueiam. O halo no ar, logo abaixo,
+    // não: é fumaça acesa ACIMA do fogo, e nada em cena está entre ela e a
+    // câmera pra fazer sombra nela.
+    this._brilhoComSombra(ctx, width, height, reach, f.x, f.y, function (alvo) {
+      alvo.save();
+      alvo.translate(f.x, f.y);
+      alvo.scale(1, 0.34);
+      var pool = alvo.createRadialGradient(0, 0, 0, 0, 0, reach);
+      pool.addColorStop(0, CanvasUtils.hexToRgba(FIRE_LIGHT_COLOR, 0.50 * strength));
+      pool.addColorStop(0.35, CanvasUtils.hexToRgba(FIRE_LIGHT_COLOR, 0.20 * strength));
+      pool.addColorStop(1, CanvasUtils.hexToRgba(FIRE_LIGHT_COLOR, 0));
+      alvo.fillStyle = pool;
+      alvo.beginPath();
+      alvo.arc(0, 0, reach, 0, Math.PI * 2);
+      alvo.fill();
+      alvo.restore();
+    });
 
     var airR = reach * 0.72;
     var air = ctx.createRadialGradient(f.x, f.y - airR * 0.22, 0, f.x, f.y - airR * 0.22, airR);
@@ -1904,7 +2195,13 @@
   // rua com neblina.
   //
   // Achatada em 0.30 na vertical, como a do fogo, porque é luz caindo num
-  // chão visto quase de lado - poça redonda lê como bola flutuando.
+  // chão visto quase de lado - poça redonda lê como bola flutuando. E é
+  // centrada no CHÃO, não na lâmpada: é a marca que a luz deixa na
+  // superfície, não a lâmpada vista de perto.
+  //
+  // Sim, isto diverge do campo que as peças leem, e sim, isso é medível -
+  // o poste recebe mais luz que o chão logo atrás dele. Ver fireLightAt
+  // para por que a resposta NÃO é unificar os dois.
   Background.prototype._drawLampGlow = function (ctx, palette) {
     var lamps = this._lamps;
     if (!lamps || !lamps.length) return;
@@ -1918,18 +2215,23 @@
       var forca = l.intensity * night;
       if (forca < 0.02) continue;
       var raio = l.reachX * 0.85;
-      ctx.save();
-      ctx.translate(l.x, l.groundY);
-      ctx.scale(1, 0.30);
-      var poca = ctx.createRadialGradient(0, 0, 0, 0, 0, raio);
-      poca.addColorStop(0, CanvasUtils.hexToRgba(l.color, 0.30 * forca));
-      poca.addColorStop(0.4, CanvasUtils.hexToRgba(l.color, 0.10 * forca));
-      poca.addColorStop(1, CanvasUtils.hexToRgba(l.color, 0));
-      ctx.fillStyle = poca;
-      ctx.beginPath();
-      ctx.arc(0, 0, raio, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
+      // Cada luminária é sombreada pelos SEUS próprios oclusores: a barraca
+      // que corta a luz do lampião não corta a da fogueira do outro lado.
+      this._brilhoComSombra(ctx, this._width, this._height, raio, l.x, l.groundY,
+        function (alvo) {
+          alvo.save();
+          alvo.translate(l.x, l.groundY);
+          alvo.scale(1, 0.30);
+          var poca = alvo.createRadialGradient(0, 0, 0, 0, 0, raio);
+          poca.addColorStop(0, CanvasUtils.hexToRgba(l.color, 0.30 * forca));
+          poca.addColorStop(0.4, CanvasUtils.hexToRgba(l.color, 0.10 * forca));
+          poca.addColorStop(1, CanvasUtils.hexToRgba(l.color, 0));
+          alvo.fillStyle = poca;
+          alvo.beginPath();
+          alvo.arc(0, 0, raio, 0, Math.PI * 2);
+          alvo.fill();
+          alvo.restore();
+        });
     }
     ctx.restore();
   };

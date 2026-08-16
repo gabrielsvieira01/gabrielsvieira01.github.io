@@ -40,8 +40,66 @@
   // uma árvore leva 0.9, uma pedra 0.95. Uma lona que acendesse MAIS que a
   // grama em que ela se apoia é justamente o efeito de "objeto com luz
   // própria" que essa unificação veio matar.
-  Common.shade = function (hex, palette, depth, fire) {
-    return PMV.Engine.Light.shade(hex, palette, depth, fire, 0.9);
+  // ---- Face ----
+  //
+  // O nome do grupo na ilustração diz para ONDE a superfície aponta, e isso
+  // estava sendo jogado fora: toda parte de toda peça recebia peso 0.9, então
+  // a empena de trás de uma barraca acendia igual à da frente. A vegetação
+  // nunca sofreu disso - em svgPaths uma `copa-sombra` leva 0.35 contra 0.9
+  // de um `tronco`. Era só o acampamento que não lia a própria arte.
+  //
+  // As peças não usam o vocabulário `-luz`/`-sombra` do cenário, e ainda bem:
+  // aquele é relativo ao SOL, e à noite quem manda é o fogo. `frente`, `lado`
+  // e `tras` são intrínsecos ao objeto, então dá pra cruzá-los com a direção
+  // real da fonte, seja ela qual for.
+  //
+  // Em coordenadas de tela: x cresce pra direita, y cresce pra BAIXO (por
+  // isso `topo` é -1 em y), e z sai da tela na direção da câmera.
+  var NORMAIS = [
+    [/(^|-)tras(-|$)/,     [0, 0, -1]],
+    [/(^|-)frente(-|$)/,   [0, 0, 1]],
+    [/(^|-)fundo(-|$)/,    [0, 0, -1]],
+    [/(^|-)esquerda(-|$)/, [-1, 0, 0]],
+    [/(^|-)direita(-|$)/,  [1, 0, 0]],
+    [/(^|-)lado(-|$)/,     [1, 0, 0]],
+    [/(^|-)lateral(-|$)/,  [1, 0, 0]],
+    [/(^|-)topo(-|$)/,     [0, -1, 0]],
+    [/(^|-)tampa(-|$)/,    [0, -1, 0]]
+  ];
+
+  // Sem sufixo conhecido a superfície não declara orientação. Ela recebe uma
+  // normal nula, que o cálculo abaixo traduz em "meio caminho" - nem face
+  // acesa nem face de costas. Chutar uma direção seria pior que admitir que
+  // não se sabe.
+  Common.normalDe = function (parte) {
+    if (!parte) return null;
+    for (var i = 0; i < NORMAIS.length; i++) {
+      if (NORMAIS[i][0].test(parte)) return NORMAIS[i][1];
+    }
+    return null;
+  };
+
+  // Quanto da luz local esta face recebe, em [FACE_MIN, 1].
+  //
+  // Não é Lambert puro: costa totalmente preta é o erro espelhado do piso de
+  // luminância que já custou uma rodada a este projeto. Um extremo lavava o
+  // objeto, o outro o apaga. A faixa resultante (0.36 a 0.90, depois do peso
+  // 0.9) é a mesma família dos pesos que a vegetação já usa.
+  var FACE_MIN = 0.40;
+
+
+  function fatorDeFace(normal, luz) {
+    if (!normal || !luz || luz.dirX === undefined) return 0.85;
+    var d = normal[0] * luz.dirX + normal[1] * luz.dirY + normal[2] * luz.dirZ;
+    return FACE_MIN + (1 - FACE_MIN) * (0.5 + 0.5 * d);
+  }
+
+  // fire: { amount, color, dirX, dirY, dirZ } - a luz local naquele ponto do
+  // mundo, e de que direção ela chega. A direção é calculada pelo tema, que é
+  // quem conhece o plano; aqui só se faz o produto escalar.
+  Common.shade = function (hex, palette, depth, fire, normal) {
+    return PMV.Engine.Light.shade(hex, palette, depth, fire,
+                                  0.9 * fatorDeFace(normal, fire));
   };
 
   // A chama é EMISSORA, não iluminada: ela não pode escurecer com o
@@ -95,9 +153,11 @@
       _fire: { amount: 0, color: '#ff9838' }
     };
 
-    built.paint = function (el, attr, baseHex) {
-      built._paints.push({ el: el, attr: attr, base: baseHex, emissive: false });
-      el.setAttribute(attr, Common.shade(baseHex, opts.palette, built._depth, built._fire));
+    built.paint = function (el, attr, baseHex, parte) {
+      var normal = Common.normalDe(parte);
+      built._paints.push({ el: el, attr: attr, base: baseHex, emissive: false,
+                           parte: parte || '', normal: normal });
+      el.setAttribute(attr, Common.shade(baseHex, opts.palette, built._depth, built._fire, normal));
       return el;
     };
 
@@ -134,7 +194,7 @@
           continue;
         }
         var local = amostra ? amostra(centroDe(p).cx, p.cy) : built._fire;
-        p.el.setAttribute(p.attr, Common.shade(p.base, palette, built._depth, local));
+        p.el.setAttribute(p.attr, Common.shade(p.base, palette, built._depth, local, p.normal));
       }
     };
 

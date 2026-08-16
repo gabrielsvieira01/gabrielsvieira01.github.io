@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-38 -43 76 46">
+  <g id="pedra-sombra"><path d="M-35,0L-30,-24L-12,-38L14,-40L31,-27L35,-8L28,0Z" fill="#4A5049"></path></g>
+  <g id="pedra-luz"><path d="M-30,-24L-12,-38L14,-40L31,-27L12,-22L-8,-19Z" fill="#7A7F72"></path></g>
+</svg>

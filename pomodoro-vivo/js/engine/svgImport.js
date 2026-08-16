@@ -219,23 +219,45 @@
     };
   }
 
+  // O nome da parte a que um elemento pertence: o id do grupo mais próximo
+  // subindo até a raiz.
+  //
+  // Isto roda ANTES de demoteIds, então o id ainda está no documento - mas
+  // aceitar `data-pmv-part` também deixa a ordem das duas etapas deixar de
+  // ser um detalhe do qual isto depende em silêncio.
+  function parteDe(el, root) {
+    var node = el;
+    while (node && node.getAttribute) {
+      var nome = node.getAttribute('id') || node.getAttribute('data-pmv-part');
+      if (nome) return String(nome).toLowerCase();
+      if (node === root) break;
+      node = node.parentNode;
+    }
+    return '';
+  }
+
   function registerPaints(built, root, isEmissive) {
     var all = [root].concat(Array.prototype.slice.call(root.querySelectorAll('*')));
 
     all.forEach(function (el) {
       var tag = lc(el);
+      // A que face da peça esta forma pertence. É o que permite ao modelo de
+      // luz saber que a empena de trás de uma barraca está de costas pro
+      // fogo - informação que o ilustrador já desenhou e que, até agora, o
+      // importador descartava.
+      var parte = parteDe(el, root);
 
       ['fill', 'stroke'].forEach(function (attr) {
         var raw = el.getAttribute(attr);
         if (raw === null || isNone(raw)) return;
         var hex = toHex(raw);
         if (!hex) return;
-        (isEmissive(el, hex) ? built.paintEmissive : built.paint)(el, attr, hex);
+        (isEmissive(el, hex) ? built.paintEmissive : built.paint)(el, attr, hex, parte);
       });
 
       // Preto implícito: torná-lo explícito é o que devolve a forma ao modelo.
       if (DEFAULT_BLACK_FILL[tag] && !declaredOn(el, 'fill', root)) {
-        built.paint(el, 'fill', '#000000');
+        built.paint(el, 'fill', '#000000', parte);
       }
     });
   }

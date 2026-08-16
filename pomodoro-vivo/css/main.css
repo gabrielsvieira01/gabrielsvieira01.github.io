@@ -33,19 +33,26 @@ html, body {
   background: #132244;
 }
 
-#pmv-canvas,
-#pmv-svg,
-#pmv-canvas-fg {
+/* ---- A pilha de camadas ----
+   A cena não é mais "canvas, SVG, canvas". Ela é uma pilha alternada:
+   fundo, e então, do mais distante ao mais próximo, um par (canvas de
+   espalhado, SVG de peças) por faixa de profundidade, e o primeiro plano
+   por cima de tudo.
+
+   O motivo é a oclusão. Com uma camada de acampamento só, um tufo de mato
+   estava OU atrás de todas as peças OU na frente de todas - não havia
+   terceira gaveta, e a cena não é binária. Intercalando faixas, cada tufo
+   cai entre as peças certas.
+
+   Todas as camadas ocupam a tela inteira e são inertes ao ponteiro; só a
+   peça em colocação reativa o ponteiro, na regra mais abaixo. */
+.pmv-layer {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
   display: block;
-}
-
-#pmv-svg,
-#pmv-canvas-fg {
   pointer-events: none;
 }
 
@@ -60,34 +67,34 @@ html, body {
 
    touch-action: none é o que impede o navegador de tratar o arrasto como
    rolagem no celular; sem isso o primeiro movimento do dedo rouba o gesto. */
-#pmv-svg.pmv-editando {
+#pmv-stage.pmv-editando .pmv-layer-svg {
   touch-action: none;
 }
 
-#pmv-svg.pmv-editando [data-pmv-movel] {
+#pmv-stage.pmv-editando [data-pmv-movel] {
   pointer-events: auto;
   cursor: grab;
 }
 
-#pmv-svg.pmv-editando [data-pmv-movel].pmv-arrastando {
+#pmv-stage.pmv-editando [data-pmv-movel].pmv-arrastando {
   cursor: grabbing;
 }
 
 /* Recusa visível: a peça esmaece quando está sobre um ponto onde não pode
    ficar (a água, por exemplo). Sem retorno, o usuário só descobre que a
    colocação foi recusada quando solta e a peça volta. */
-#pmv-svg.pmv-editando [data-pmv-movel].pmv-invalido {
+#pmv-stage.pmv-editando [data-pmv-movel].pmv-invalido {
   opacity: 0.45;
 }
 
-#pmv-svg.pmv-editando [data-pmv-movel].pmv-selecionado {
+#pmv-stage.pmv-editando [data-pmv-movel].pmv-selecionado {
   outline: 2px dashed var(--pmv-accent-2);
   outline-offset: 4px;
 }
 
 /* Foco de teclado: mais forte que a seleção por clique, e sempre visível.
    Quem chega na peça por Tab não tem cursor pra confirmar onde está. */
-#pmv-svg.pmv-editando [data-pmv-movel]:focus-visible {
+#pmv-stage.pmv-editando [data-pmv-movel]:focus-visible {
   outline: 3px solid var(--pmv-accent);
   outline-offset: 5px;
 }

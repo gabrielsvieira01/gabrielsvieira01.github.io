@@ -7,18 +7,17 @@
 <link rel="stylesheet" href="css/main.css" />
 </head>
 <body>
-  <!-- Ordem de empilhamento: paisagem no canvas de trás, acampamento no SVG,
-       e o primeiro plano num canvas próprio POR CIMA de tudo - é o que está
-       entre a câmera e a clareira, então precisa ocluir o acampamento. -->
   <!-- A cena inteira é canvas + SVG decorativo: sem isto um leitor de tela
        recebe uma página vazia. O texto é atualizado conforme o acampamento
        se monta (ver refresh() em js/demo/harness.js). -->
   <h1 class="pmv-sr-only">Pomodoro Vivo — um acampamento que se monta a cada ciclo de foco</h1>
   <p id="pmv-a11y-status" class="pmv-sr-only" role="status">Clareira no início: nada foi montado ainda.</p>
 
-  <canvas id="pmv-canvas" aria-hidden="true"></canvas>
-  <svg id="pmv-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
-  <canvas id="pmv-canvas-fg" aria-hidden="true"></canvas>
+  <!-- As camadas são construídas por SceneManager, não escritas aqui: a
+       quantidade delas depende de em quantas faixas de profundidade o
+       acampamento é fatiado, e isso é decisão do código, não do documento.
+       Ver a montagem da pilha em js/world/sceneManager.js. -->
+  <div id="pmv-stage" aria-hidden="true"></div>
   <div id="pmv-demo-root"></div>
 
   <script src="js/engine/canvasUtils.js"></script>
@@ -26,6 +25,7 @@
   <script src="js/engine/light.js"></script>
   <script src="js/engine/svgUtils.js"></script>
   <script src="js/engine/svgImport.js"></script>
+  <script src="js/engine/svgPaths.js"></script>
   <script src="js/engine/loop.js"></script>
   <script src="js/camera/camera.js"></script>
   <script src="js/world/inventory.js"></script>
@@ -38,6 +38,7 @@
        apagados - a ilustração autoral substituiu o DESENHO, nunca o modelo:
        plano de chão, modelo de luz e composição continuam os mesmos. -->
   <script src="js/assets/acampamento/pecas.js"></script>
+  <script src="js/assets/acampamento/cenario.js"></script>
   <script src="js/components/importados.js"></script>
   <script src="js/themes/acampamento/background.js"></script>
   <script src="js/themes/acampamento/composition.js"></script>
@@ -45,9 +46,7 @@
   <script src="js/demo/harness.js"></script>
   <script>
     (function () {
-      var canvas = document.getElementById('pmv-canvas');
-      var svg = document.getElementById('pmv-svg');
-      var fgCanvas = document.getElementById('pmv-canvas-fg');
+      var stage = document.getElementById('pmv-stage');
 
       // Seed por sessão: cada carregamento sorteia um padrão novo de serra,
       // mata e chão. A partir daqui tudo é determinístico (mesma seed ->
@@ -61,14 +60,16 @@
 
       var scene = new PMV.World.SceneManager();
       scene.init({
-        canvas: canvas, svg: svg, foregroundCanvas: fgCanvas,
+        stage: stage,
+        // Em quantas faixas o acampamento é fatiado. Ver sceneManager.
+        bands: 4,
         seed: sessionSeed, fps: 30, initialProgress: inventory.progresso
       });
 
       var theme = new PMV.Themes.Acampamento.ThemeModule({ inventory: inventory });
       scene.setTheme(theme);
 
-      var placement = new PMV.World.Placement({ theme: theme, svg: svg });
+      var placement = new PMV.World.Placement({ theme: theme, stage: stage });
 
       var harness = new PMV.Demo.Harness(scene, inventory, placement);
       harness.mount(document.getElementById('pmv-demo-root'));

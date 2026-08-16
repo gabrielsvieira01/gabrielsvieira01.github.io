@@ -27,7 +27,12 @@
 
   function Placement(opts) {
     this.theme = opts.theme;
-    this.svg = opts.svg;
+    // A escuta e a busca por peças móveis são no PALCO, não numa camada: as
+    // peças estão espalhadas por várias raízes SVG e uma delas sozinha não
+    // enxerga as outras. Pro cálculo de coordenadas serve qualquer raiz -
+    // todas compartilham o mesmo viewBox -, e `svgRef` fixa uma.
+    this.stage = opts.stage;
+    this.svgRef = opts.stage.querySelector('.pmv-layer-svg');
     this.onChange = opts.onChange || function () {};
     this.onAnnounce = opts.onAnnounce || function () {};
     // Disparado a cada movimento do ponteiro - é o que deixa a barra de
@@ -61,9 +66,9 @@
   // permitia mexer no que já tinha sido decidido, que é justamente o que a
   // regra do jogo não quer.
   Placement.prototype.ligarEscuta = function () {
-    this.svg.addEventListener('pointerdown', this._onDown);
-    this.svg.addEventListener('keydown', this._onKey);
-    this.svg.addEventListener('focusin', this._onFocus);
+    this.stage.addEventListener('pointerdown', this._onDown);
+    this.stage.addEventListener('keydown', this._onKey);
+    this.stage.addEventListener('focusin', this._onFocus);
     this.sincronizar();
   };
 
@@ -79,11 +84,12 @@
   // Põe a camada em dia depois de qualquer reconstrução: quem é móvel ganha
   // foco de teclado e rótulo, e a peça em colocação vira a selecionada.
   Placement.prototype.sincronizar = function () {
-    var moveis = this.svg.querySelectorAll('[data-pmv-movel]');
+    var moveis = this.stage.querySelectorAll('[data-pmv-movel]');
     // A classe existe só pelas regras de ponteiro e touch-action do CSS, e
     // acompanha a existência de uma peça em colocação - ninguém liga nem
-    // desliga isso à mão.
-    this.svg.classList.toggle('pmv-editando', moveis.length > 0);
+    // desliga isso à mão. Vai no palco porque as regras precisam alcançar a
+    // peça em qualquer uma das camadas.
+    this.stage.classList.toggle('pmv-editando', moveis.length > 0);
     this.enabled = moveis.length > 0;
 
     var slotId = null;
@@ -193,8 +199,8 @@
   // e um dia em que deixe de ser, o arrasto sairia deslizando em relação ao
   // dedo, que é o tipo de bug que se sente antes de se entender.
   Placement.prototype._toScene = function (ev) {
-    var rect = this.svg.getBoundingClientRect();
-    var vb = this.svg.viewBox.baseVal;
+    var rect = this.svgRef.getBoundingClientRect();
+    var vb = this.svgRef.viewBox.baseVal;
     var largura = rect.width || vb.width || 1;
     var altura = rect.height || vb.height || 1;
     return {
