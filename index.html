@@ -196,18 +196,17 @@
 
   const SELF = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
 
-  // ---- 1. Detectar owner / repo (ou via ?owner=&repo=&branch=) ----
+  // ---- 1. Owner / repo fixos (sobrescritos por ?owner=&repo=&branch=) ----
+  const OWNER = 'gabrielsvieira01';
+  const REPO  = 'gabrielsvieira01.github.io';
+
   function detect() {
     const q = new URLSearchParams(location.search);
-    if (q.get('owner') && q.get('repo'))
-      return { owner: q.get('owner'), repo: q.get('repo'), branch: q.get('branch') || null };
-    const host = location.hostname;
-    if (!host.endsWith('.github.io')) return null;
-    const owner = host.split('.')[0];
-    const parts = location.pathname.split('/').filter(Boolean);
-    const firstIsFile = parts.length && parts[0].includes('.');
-    const repo = (parts.length && !firstIsFile) ? parts[0] : host;
-    return { owner, repo, branch: null };
+    return {
+      owner:  q.get('owner')  || OWNER,
+      repo:   q.get('repo')   || REPO,
+      branch: q.get('branch') || null
+    };
   }
   let cfg = detect();
 
@@ -417,7 +416,7 @@ allFiles = rawPaths
   function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
   listEl.style.transition = 'opacity 0.12s';
-  if (cfg) load(cfg); else showError('Esta página não está em um endereço *.github.io.');
+  load(cfg);
 })();
 </script>
 </body>
