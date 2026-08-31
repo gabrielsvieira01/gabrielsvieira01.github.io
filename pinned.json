@@ -3,6 +3,7 @@
     "pinned": [
         { "path": "agenda/horarios-interativos.html", "as": "Horários Interativos" },
         { "path": "pomodoro-vivo/pomodoro.html", "as": "Mundo Vivo - Pomodoro" },
-        { "path": "integradora/integradora7p.html", "as": "Integradora 7o período" }
+        { "path": "integradora/integradora7p.html", "as": "Integradora 7o período" },
+        { "path": "registro-peso/index.html", "as": "Registro de peso" }
     ]
 }

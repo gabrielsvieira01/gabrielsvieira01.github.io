@@ -2,6 +2,7 @@
     "hidden": [
         "agenda/",
         "pomodoro-vivo/",
-        "integradora/"
+        "integradora/",
+        "registro-peso/"
     ]
 }
