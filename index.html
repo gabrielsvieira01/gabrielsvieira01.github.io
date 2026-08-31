@@ -465,8 +465,10 @@ allFiles = rawPaths
     }
   }
 
+  // Pinta a logo no lugar do emoji. Roda tanto com o card já na tela quanto
+  // com ele ainda sendo montado (cache quente), então nada de checar isConnected.
   function applyIcon(el, url) {
-    if (!url || !el.isConnected) return;
+    if (!url) return;
     const img = new Image();
     img.alt = '';
     img.decoding = 'async';
