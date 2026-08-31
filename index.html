@@ -131,6 +131,10 @@
   .ico { flex: none; width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 1.2rem; }
   .ico.folder { background: linear-gradient(135deg, rgba(169,120,255,0.22), rgba(91,140,255,0.22)); }
   .ico.file   { background: linear-gradient(135deg, rgba(70,224,200,0.18), rgba(91,140,255,0.18)); }
+  /* Card com a logo do próprio app no lugar do emoji */
+  .ico.has-logo { background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 1px var(--border); }
+  .ico img { width: 100%; height: 100%; object-fit: contain; padding: 5px; border-radius: 12px; animation: fadeIn 0.35s ease both; }
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.86); } to { opacity: 1; transform: scale(1); } }
   .meta { min-width: 0; flex: 1; }
   .name { font-weight: 600; overflow-wrap: anywhere; word-break: break-word; }
   .desc { font-size: 0.78rem; color: var(--muted); overflow-wrap: anywhere; word-break: break-word; margin-top: 2px; }
@@ -238,6 +242,17 @@ async function load(cfg) {
         console.log("Nenhum pinned.json encontrado.");
     }
 
+    try {
+        const response = await fetch("icons.json");
+
+        if (response.ok) {
+            const data = await response.json();
+            iconOverrides = data.icons || {};
+        }
+    } catch (e) {
+        console.log("Nenhum icons.json encontrado.");
+    }
+
     showState('<div class="spinner"></div>Buscando arquivos…');
     listEl.innerHTML = ''; searchBar.style.display = 'none'; crumbEl.innerHTML = ''; countEl.textContent = '';
     try {
@@ -250,6 +265,12 @@ async function load(cfg) {
       const res = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/git/trees/${branch}?recursive=1`);
       if (!res.ok) throw new Error(`Não consegui ler os arquivos (${res.status})`);
       const tree = await res.json();
+
+      // Guarda TODOS os arquivos do repo (não só .html) para procurar logos por convenção.
+      currentBranch = branch;
+      allPaths = new Set((tree.tree || []).filter(n => n.type === 'blob').map(n => n.path));
+      allPathsLower = new Map([...allPaths].map(p => [p.toLowerCase(), p]));
+
 const rawPaths = (tree.tree || [])
   .filter(n => n.type === 'blob' && /\.html?$/i.test(n.path))
   .filter(n => n.path.toLowerCase() !== SELF)
@@ -281,7 +302,213 @@ allFiles = rawPaths
     } catch (err) { showError(err.message); }
   }
 
-  // ---- 3. Navegação por pastas ----
+  // ---- 3. Logo de cada app ----
+  // Ordem de busca: icons.json → <link rel="icon"> da própria página → ícone do
+  // manifest → arquivo com nome convencional (logo/icon/favicon) na pasta do app.
+  // Se nada aparecer, o card continua com o emoji de sempre.
+  let allPaths = new Set();
+  let allPathsLower = new Map();
+  let iconOverrides = {};
+  let currentBranch = null;
+
+  const ICON_FILES = ['logo.svg','icon.svg','favicon.svg','logo.png','icon.png','favicon.png',
+                      'apple-touch-icon.png','icon-192.png','icon-512.png','logo.webp','icon.webp','favicon.ico'];
+  const ICON_DIRS  = ['', 'assets/', 'assets/img/', 'assets/imgs/', 'assets/images/', 'assets/icons/',
+                      'img/', 'imgs/', 'images/', 'icons/', 'static/', 'public/'];
+
+  // Onde o arquivo mora de verdade: caminho relativo quando é o próprio site,
+  // raw.githubusercontent quando o índice está apontado para outro repositório.
+  function assetURL(path) {
+    const sameSite = cfg.owner === OWNER && cfg.repo === REPO && location.protocol !== 'file:';
+    if (sameSite) return new URL(path, new URL('.', location.href)).href;
+    return `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${currentBranch || 'main'}/${path}`;
+  }
+
+  const dirOf = (path) => path.includes('/') ? path.slice(0, path.lastIndexOf('/') + 1) : '';
+
+  // Só lê o começo do arquivo: para de baixar assim que o <head> termina.
+  async function fetchHead(url, limit = 32768) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(res.status);
+    if (!res.body || !res.body.getReader) return (await res.text()).slice(0, limit);
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let html = '';
+    while (html.length < limit) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      html += dec.decode(value, { stream: true });
+      if (/<\/head>/i.test(html)) break;
+    }
+    try { await reader.cancel(); } catch (e) {}
+    return html;
+  }
+
+  const areaOf = (sizes) => {
+    if (!sizes) return 0;
+    if (/any/i.test(sizes)) return 1e6;
+    const m = String(sizes).match(/(\d+)\s*x\s*(\d+)/i);
+    return m ? (+m[1]) * (+m[2]) : 0;
+  };
+
+  // Lê <link rel="icon"> / apple-touch-icon / manifest do <head> da página.
+  async function iconFromPage(path) {
+    const pageURL = assetURL(path);
+    let doc;
+    try {
+      doc = new DOMParser().parseFromString(await fetchHead(pageURL), 'text/html');
+    } catch (e) { return null; }
+
+    const links = [...doc.querySelectorAll('link[rel]')];
+    const cands = [];
+    for (const l of links) {
+      const rel = (l.getAttribute('rel') || '').toLowerCase();
+      const href = (l.getAttribute('href') || '').trim();
+      if (!href) continue;
+      if (/(^|\s)(icon|shortcut icon|apple-touch-icon(-precomposed)?)(\s|$)/.test(rel)) {
+        const type = (l.getAttribute('type') || '').toLowerCase();
+        let score = 10;
+        if (type.includes('svg') || /\.svg(\?|$)/i.test(href) || href.startsWith('data:image/svg')) score += 100;
+        score += Math.min(areaOf(l.getAttribute('sizes')) / 1000, 60);
+        if (rel.includes('apple-touch-icon')) score -= 5;
+        cands.push({ href, score });
+      }
+    }
+    if (cands.length) {
+      cands.sort((a, b) => b.score - a.score);
+      try { return new URL(cands[0].href, pageURL).href; } catch (e) {}
+    }
+
+    // Sem <link rel="icon">: tenta o manifest do PWA.
+    const man = links.find(l => (l.getAttribute('rel') || '').toLowerCase().includes('manifest'));
+    if (man && man.getAttribute('href')) {
+      try {
+        const manURL = new URL(man.getAttribute('href'), pageURL).href;
+        const res = await fetch(manURL);
+        if (res.ok) {
+          const icons = (await res.json()).icons || [];
+          const best = icons.slice().sort((a, b) => areaOf(b.sizes) - areaOf(a.sizes))[0];
+          if (best && best.src) return new URL(best.src, manURL).href;
+        }
+      } catch (e) {}
+    }
+    return null;
+  }
+
+  // Procura logo.svg, icon.png, etc. dentro da pasta do app (e em assets/, img/…).
+  function iconByConvention(dir) {
+    if (!dir) return null;   // na raiz o logo.svg é do índice, não de um app
+    for (const sub of ICON_DIRS) {
+      for (const file of ICON_FILES) {
+        const hit = allPathsLower.get((dir + sub + file).toLowerCase());
+        if (hit) return assetURL(hit);
+      }
+    }
+    return null;
+  }
+
+  function overrideFor(key) {
+    const v = iconOverrides[key] || iconOverrides[key.replace(/\/$/, '')];
+    if (!v) return null;
+    return /^(https?:|data:|\/)/.test(v) ? v : assetURL(v);
+  }
+
+  // Página "principal" de uma pasta, usada para dar rosto ao card da pasta.
+  function mainPageOf(prefix) {
+    const inside = allFiles.filter(f => f.real.startsWith(prefix));
+    if (!inside.length) return null;
+    const index = inside.find(f => /(^|\/)index\.html?$/i.test(f.real));
+    if (index) return index.real;
+    const shallow = inside.slice().sort((a, b) =>
+      a.real.split('/').length - b.real.split('/').length || a.real.localeCompare(b.real));
+    return shallow[0].real;
+  }
+
+  async function resolveIcon(kind, key) {
+    const direct = overrideFor(key);
+    if (direct) return direct;
+
+    if (kind === 'folder') {
+      const conv = iconByConvention(key);
+      if (conv) return conv;
+      const main = mainPageOf(key);
+      return main ? (overrideFor(main) || await iconFromPage(main)) : null;
+    }
+    return (await iconFromPage(key)) || iconByConvention(dirOf(key));
+  }
+
+  // Cache por sessão + fila com no máximo 4 downloads simultâneos.
+  const iconCache = new Map();
+  function cached(key) {
+    if (iconCache.has(key)) return iconCache.get(key);
+    try {
+      const v = sessionStorage.getItem('ico:' + key);
+      if (v !== null) { iconCache.set(key, v); return v; }
+    } catch (e) {}
+    return undefined;
+  }
+  function remember(key, url) {
+    iconCache.set(key, url || '');
+    try { sessionStorage.setItem('ico:' + key, url || ''); } catch (e) {}
+  }
+
+  let running = 0; const queue = [];
+  function schedule(job) {
+    queue.push(job);
+    pump();
+  }
+  function pump() {
+    while (running < 4 && queue.length) {
+      const job = queue.shift();
+      running++;
+      job().catch(() => {}).finally(() => { running--; pump(); });
+    }
+  }
+
+  function applyIcon(el, url) {
+    if (!url || !el.isConnected) return;
+    const img = new Image();
+    img.alt = '';
+    img.decoding = 'async';
+    img.onload = () => { el.textContent = ''; el.classList.add('has-logo'); el.appendChild(img); };
+    img.onerror = () => {};
+    img.src = url;
+  }
+
+  const iconObserver = ('IntersectionObserver' in window)
+    ? new IntersectionObserver((entries, obs) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          obs.unobserve(e.target);
+          loadIcon(e.target);
+        }
+      }, { rootMargin: '250px' })
+    : null;
+
+  function loadIcon(el) {
+    const key = el.dataset.iconKey, kind = el.dataset.iconKind;
+    if (!key) return;
+    const hit = cached(key);
+    if (hit !== undefined) { applyIcon(el, hit); return; }
+    schedule(async () => {
+      let url = null;
+      try { url = await resolveIcon(kind, key); } catch (e) {}
+      remember(key, url);
+      applyIcon(el, url);
+    });
+  }
+
+  const EAGER_ICONS = 30;   // os primeiros cards buscam logo na hora; o resto espera aparecer na tela
+
+  function watchIcon(el, kind, key, i) {
+    el.dataset.iconKind = kind;
+    el.dataset.iconKey = key;
+    const hit = cached(key);
+    if (hit !== undefined) { applyIcon(el, hit); return; }   // já conhecido: pinta na hora
+    if (iconObserver && i >= EAGER_ICONS) iconObserver.observe(el); else loadIcon(el);
+  }
+
+  // ---- 4. Navegação por pastas ----
   let allFiles = [];
   let currentPath = '';   // "" = raiz, ou "pasta/sub/"
 
@@ -360,6 +587,7 @@ allFiles = rawPaths
       <div class="meta"><div class="name">${esc(name)}</div><div class="desc">${qtd} página${qtd===1?'':'s'}</div></div>
       <span class="arrow">›</span>`;
     el.onclick = () => navTo(fullPrefix);
+    watchIcon(el.querySelector('.ico'), 'folder', fullPrefix, i);
     return el;
   }
 
@@ -369,6 +597,7 @@ allFiles = rawPaths
     a.innerHTML = `<div class="ico file">📄</div>
       <div class="meta"><div class="name">${esc(name)}</div><div class="desc">${esc(subtitle || (path.split('/').pop()))}</div></div>
       <span class="arrow">↗</span>`;
+    watchIcon(a.querySelector('.ico'), 'file', path, i);
     return a;
   }
 
@@ -391,7 +620,7 @@ allFiles = rawPaths
     return b;
   }
 
-  // ---- 4. Estados / erro ----
+  // ---- 5. Estados / erro ----
   function showState(html) { stateEl.style.display = 'block'; stateEl.classList.remove('error'); stateEl.innerHTML = html; }
   function showError(msg) {
     subEl.innerHTML = '<span class="dot" style="background:#ff6b6b;box-shadow:0 0 10px #ff6b6b"></span>Detecção falhou';

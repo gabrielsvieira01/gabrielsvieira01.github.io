@@ -1,0 +1,8 @@
+{
+    "_como_usar": "Logo manual de cada card. A chave é o caminho do arquivo .html (ou da pasta, com / no fim) e o valor é o caminho da imagem no repositório — ou uma URL completa / data: URI. Só é necessário quando a página não declara <link rel=\"icon\"> e não existe um logo.svg / icon.png na pasta dela: nesse caso o índice acha a logo sozinho.",
+    "_exemplo": {
+        "pomodoro-vivo/pomodoro.html": "pomodoro-vivo/arte/logo.svg",
+        "osce7p/": "osce7p/icon.png"
+    },
+    "icons": {}
+}
