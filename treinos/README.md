@@ -202,6 +202,22 @@ possibilidade de ele divergir das marcações; derivar torna isso impossível.
 acontecer sem a bike, e o contrário também. Uma marcação só por dia perderia
 essa diferença justamente nos dias em que ela existe.
 
+**O chip mostra pace, não tempo.** Tanto num ritmo (`MT 6:20/km`) quanto num
+tiro (`400 5:38/km`): pace é o número que o relógio mostra enquanto se corre. O
+tempo total do tiro continua existindo, no verbete, a um toque.
+
+**Texto estranho se conserta na planilha, não no app.** O leitor decora e nunca
+reescreve, então a correção tem de vir da fonte. Foi o caso de
+`Tempo curto (ST)`, que punha a tradução e a sigla lado a lado e ainda fazia o
+`Tempo` virar chip de glossário colado num chip de pace — virou `em ST`, a forma
+que o resto do plano já usava. Só as quintas das semanas 4 a 13 tinham isso:
+terça é tiro puro, sem sigla, e sábado já escrevia `X km em MP`.
+
+Cuidado ao mexer nisso: `Tempo` **continua sendo termo de glossário** em todos
+os outros lugares. As 54 ocorrências restantes estão todas na quarta e na sexta
+— os dias de bicicleta, onde não há min/km e a palavra é o único indicador de
+esforço.
+
 **O leitor de siglas decora, nunca reescreve.** O texto do treino é renderizado
 como está na planilha; as siglas reconhecidas viram chips com o pace ao lado. O
 que ele não reconhece aparece intacto, em vez de sumir. Os 280 treinos foram
