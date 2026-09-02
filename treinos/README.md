@@ -83,7 +83,9 @@ node gerar-plano.mjs
 ```
 
 Lê o `.xlsx` e reescreve o bloco `<script id="plano">` dentro do `index.html`.
-É idempotente e não toca em mais nada do arquivo.
+É idempotente e não toca em mais nada do arquivo — inclusive o carimbo
+`geradoEm` só anda quando o conteúdo anda, senão o `index.html` mudaria sozinho
+de um dia para o outro e criaria diferença falsa no git.
 
 Se a planilha mudar de forma — outra quantidade de semanas, coluna fora do
 lugar, sábado vazio, dias da `Rotina` reordenados — o gerador para com erro
@@ -188,6 +190,44 @@ Um efeito colateral bem-vindo: se você usar o app em modo local por um tempo e
 só depois ligar na planilha, a fila acumulada sobe inteira na primeira conexão.
 O histórico local migra sozinho, sem passo de importação.
 
+## Widget na tela de início (iPhone)
+
+[`scriptable/Treinos.js`](scriptable/Treinos.js) é um widget para o app
+**Scriptable**. Mostra o treino de hoje, e só ele — tocar abre o site.
+
+### Instalar
+
+1. Instale o **Scriptable** (App Store, grátis).
+2. Abra o app → **+** no canto superior direito → cole o conteúdo de
+   `scriptable/Treinos.js` → toque no nome do script e chame de **Treinos**.
+3. Toque em ▶ uma vez, ainda dentro do Scriptable, para conferir que carrega.
+4. Na tela de início: segure a tela → **+** → procure **Scriptable** → escolha o
+   tamanho → adicione.
+5. Segure o widget recém-adicionado → **Editar widget** → em *Script* escolha
+   **Treinos**; em *When Interacting* deixe **Run Script**.
+
+### De onde ele tira os dados
+
+As mesmas duas fontes do app: o plano sai do `<script id="plano">` do próprio
+HTML do site, e o progresso vem do Apps Script. A URL do Apps Script **não** é
+escrita no widget — ele a lê do HTML, do mesmo lugar onde o app a guarda. Trocou
+a implantação? Atualize o site e o widget acompanha.
+
+Sem rede, ele mostra o último estado que conseguiu buscar, guardado em cache.
+
+### Por que ele não marca treino
+
+Widget do Scriptable não executa código ao toque — só abre URL. Um botão
+"marcar feito" teria de abrir o site para funcionar, e o site já abre tocando em
+qualquer lugar do widget. O botão não economizaria um toque sequer, e somaria
+uma URL que altera dados. Aqui é leitura; marcar é no site.
+
+O que ele mostra do estado: um **✓ verde** no que já foi feito.
+
+**O widget não atualiza na hora.** Quem decide quando redesenhar é o iOS; o
+script pede a cada 30 minutos. Marcou no site? O widget pode levar alguns
+minutos para acompanhar.
+
 ## Decisões
 
 **O plano vai dentro do `index.html`, não num `.json` ao lado.** Um `fetch`
@@ -269,6 +309,7 @@ transformaria um dia perdido em dívida, que é o oposto disso.
 | `index.html` | o app inteiro — três abas, sem dependências |
 | `gerar-plano.mjs` | lê o `.xlsx` e injeta o plano no `index.html` |
 | `fonte/Treinos.xlsx` | cópia da planilha do Google, para o gerador rodar sem rede |
+| `scriptable/Treinos.js` | widget do iPhone: o treino de hoje na tela de início |
 | `apps-script/Codigo.gs` | servidor opcional: `doGet`, `doPost`, `lerProgresso`, `gravarProgresso` |
 
 ## Juntar com o registro-peso
