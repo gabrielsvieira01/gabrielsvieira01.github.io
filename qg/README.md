@@ -119,3 +119,63 @@ O rótulo no topo direito diz qual dos dois está valendo.
 `scriptable/Treinos.js`, no app Scriptable do iPhone. Mostra o treino de hoje e
 só ele; tocar abre o site. Não marca treino de propósito — widget do Scriptable
 não executa código ao toque, só abre URL.
+
+### Por que ele às vezes não atualiza sozinho
+
+Quem decide quando um widget acorda é o **WidgetKit**, não o script.
+`refreshAfterDate` é uma sugestão, e o iOS mantém um orçamento diário por
+widget. Nenhum app de terceiro consegue intervalo garantido no iOS.
+
+O que **bloqueia por completo**, em ordem de probabilidade:
+
+1. **Modo de Baixo Consumo** — suspende atualização de widget.
+2. **Atualizações em 2º Plano** desligada para o Scriptable, em *Ajustes ›
+   Geral › Atualizações em 2º Plano*.
+3. A execução em segundo plano estar falhando e caindo no cache.
+
+**Como saber qual é, sem tocar em nada:** quando o widget está mostrando dado
+velho, aparece um **`·` extra** no canto superior direito, depois do
+`S8 · Base`. Se o `·` está lá, ele *está* acordando e a rede é que falha
+(caso 3). Se não está e o dado é velho, o iOS não está acordando (casos 1 e 2).
+
+### O modo de execução muda com o contexto
+
+| Contexto | O que faz |
+|---|---|
+| Tela de início (`runsInWidget`) | Cache primeiro. Só vai à rede se o cache estiver frio. |
+| Dentro do Scriptable (`runsInApp`) | Pré-visualização, sempre com dado novo da rede. |
+| **Atalhos / automação** | Vai à rede e **aquece o cache**. Não apresenta nada. |
+
+A terceira linha existe para a automação. Uma pré-visualização modal numa
+automação em segundo plano trava a execução ou escancara o Scriptable — por
+isso esse caminho não desenha nada.
+
+### Automação no app Atalhos
+
+O Atalhos **não repinta o widget** — só o WidgetKit faz isso. O que ele compra
+é que, quando o WidgetKit repintar, o dado já esteja em disco: a acordada passa
+a ser leitura de dois JSON locais em vez de baixar 85 kB de HTML e esperar o
+Apps Script. Ou seja, não aumenta a frequência; faz **toda acordada valer**.
+
+Receita:
+
+1. Atalhos › **Automação** › Nova › **Hora do Dia**.
+2. Escolha o horário (um de manhã já resolve o caso comum; dá para repetir a
+   automação em outros horários).
+3. Ação: **Executar Script** (do Scriptable) › escolha o script na lista. O
+   nome é o que você deu a ele dentro do Scriptable, que não tem relação com o
+   nome do arquivo aqui no repositório.
+4. Deixe **"Executar no app"** desligado e **"Perguntar Antes de Executar"**
+   desligado.
+
+> Se um dia renomear o script no Scriptable, o widget da tela de início
+> **para** — ele aponta para um script pelo nome. Depois de renomear, segure o
+> widget › Editar Widget › e selecione o script de novo. A automação do Atalhos
+> também precisa ser reapontada.
+
+Rodar o script assim é seguro e barato: ele só busca e grava o cache.
+
+O cache tem dois prazos, porque as duas coisas mudam em ritmos muito
+diferentes: **plano 12 h** (só muda quando eu rodo o `gerar-plano.mjs`) e
+**progresso 20 min**. A URL do Apps Script é guardada junto do plano — é o que
+permite pular o download do HTML enquanto o plano estiver fresco.

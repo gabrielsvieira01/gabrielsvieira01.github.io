@@ -50,6 +50,17 @@ const COR = {
    Dados
    ========================================================================== */
 
+/**
+ * Por quanto tempo cada coisa vale sem ir na rede.
+ *
+ * O plano só muda quando eu rodo o gerar-plano.mjs — meses passam sem isso.
+ * O progresso muda todo dia. Daí a diferença de ordem de grandeza: baixar
+ * 85 kB de HTML a cada acordada do widget para reler um plano que não mudou é
+ * o que estoura o orçamento de execução em segundo plano.
+ */
+const FRESCOR_PLANO = 12 * 60 * 60 * 1000;
+const FRESCOR_PROGRESSO = 20 * 60 * 1000;
+
 const CACHE = (() => {
   const fm = FileManager.local();
   const dir = fm.joinPath(fm.documentsDirectory(), "treinos-widget");
@@ -62,6 +73,17 @@ const CACHE = (() => {
     },
     gravar(nome, valor) {
       try { fm.writeString(fm.joinPath(dir, nome), JSON.stringify(valor)); } catch (e) {}
+    },
+    /** Milissegundos desde a última gravação. Infinity se nunca houve. */
+    idade(nome) {
+      const p = fm.joinPath(dir, nome);
+      if (!fm.fileExists(p)) return Infinity;
+      try {
+        const d = fm.modificationDate(p);
+        return d ? Date.now() - d.getTime() : Infinity;
+      } catch (e) {
+        return Infinity;
+      }
     },
   };
 })();
@@ -82,33 +104,77 @@ function extrairUrlDoApp(html) {
 }
 
 /**
+ * Requisição com prazo. Sem isso, uma chamada arrastada ao Apps Script — que é
+ * lento por natureza — consome sozinha o orçamento de execução do widget, e o
+ * iOS mata a atualização inteira. Melhor desistir dela e desenhar com cache.
+ */
+function pedir(url, segundos) {
+  const r = new Request(url);
+  r.timeoutInterval = segundos;
+  return r;
+}
+
+/**
  * Busca plano e progresso, caindo no cache quando a rede falha.
+ *
+ * Duas maneiras de chamar:
+ *
+ *   carregar()                    — vai na rede e reescreve o cache. É o que a
+ *                                   automação do Atalhos faz, sem pressa e sem
+ *                                   o orçamento apertado do widget.
+ *   carregar({ rapido: true })    — modo widget: se o cache está quente, nem
+ *                                   toca na rede e desenha na hora.
  *
  * Widget roda em segundo plano, muitas vezes com rede ruim: mostrar o último
  * estado conhecido é melhor que mostrar erro, desde que se avise.
  */
-async function carregar() {
+async function carregar(opcoes) {
+  const rapido = !!(opcoes && opcoes.rapido);
   let plano = null;
   let progresso = null;
+  let urlDoApp = null;
   let doCache = false;
 
-  try {
-    const html = await new Request(SITE + "?w=" + Date.now()).loadString();
-    plano = extrairPlano(html);
-    CACHE.gravar("plano.json", plano);
-
-    const urlDoApp = extrairUrlDoApp(html);
-    if (urlDoApp) {
-      try {
-        progresso = await new Request(urlDoApp + "?api=1&t=" + Date.now()).loadJSON();
-        if (progresso && progresso.feitos) CACHE.gravar("progresso.json", progresso);
-        else progresso = null;
-      } catch (e) {
-        progresso = null;
-      }
-    }
-  } catch (e) {
+  // 1. Cache quente e modo rápido: desenha sem rede nenhuma. É o caminho que
+  //    a automação do Atalhos torna comum — e o que faz a acordada do widget
+  //    ser instantânea em vez de uma aposta na rede.
+  if (rapido && CACHE.idade("progresso.json") < FRESCOR_PROGRESSO) {
+    plano = CACHE.ler("plano.json");
+    progresso = CACHE.ler("progresso.json");
+    if (plano && progresso) return { plano, progresso, doCache: false };
     plano = null;
+    progresso = null;
+  }
+
+  // 2. O plano quase nunca muda: enquanto o cache dele estiver fresco, o
+  //    download de 85 kB do site é pulado e sobra tempo para o que importa.
+  const planoFresco = CACHE.idade("plano.json") < FRESCOR_PLANO;
+  if (planoFresco) {
+    plano = CACHE.ler("plano.json");
+    urlDoApp = CACHE.ler("url.json");
+  }
+
+  if (!plano || !urlDoApp) {
+    try {
+      const html = await pedir(SITE + "?w=" + Date.now(), 20).loadString();
+      plano = extrairPlano(html);
+      CACHE.gravar("plano.json", plano);
+      urlDoApp = extrairUrlDoApp(html);
+      // Guardada junto do plano: é o que permite pular o HTML na próxima vez.
+      if (urlDoApp) CACHE.gravar("url.json", urlDoApp);
+    } catch (e) {
+      plano = null;
+    }
+  }
+
+  if (urlDoApp) {
+    try {
+      progresso = await pedir(urlDoApp + "?api=1&t=" + Date.now(), 20).loadJSON();
+      if (progresso && progresso.feitos) CACHE.gravar("progresso.json", progresso);
+      else progresso = null;
+    } catch (e) {
+      progresso = null;
+    }
   }
 
   if (!plano) { plano = CACHE.ler("plano.json"); doCache = true; }
@@ -412,7 +478,9 @@ function desenhar(M, familia) {
   const w = new ListWidget();
   w.url = SITE;
   w.setPadding(13, 14, 13, 14);
-  w.refreshAfterDate = new Date(Date.now() + 30 * 60 * 1000);
+  // 15 min agora que a acordada é barata (lê cache, não baixa 85 kB). Continua
+  // sendo só uma sugestão: quem decide a hora é o WidgetKit.
+  w.refreshAfterDate = new Date(Date.now() + 15 * 60 * 1000);
 
   /* Gradiente quase imperceptível: é a diferença entre um retângulo preto
      chapado e algo que parece iluminado de cima. */
@@ -473,17 +541,34 @@ function desenhar(M, familia) {
    Execução
    ========================================================================== */
 
-const familia = (typeof config !== "undefined" && config.widgetFamily) || "medium";
-const M = montarModelo(await carregar());
-const widget = desenhar(M, familia);
+const cfg = typeof config !== "undefined" ? config : {};
+const familia = cfg.widgetFamily || "medium";
 
-if (typeof config !== "undefined" && config.runsInWidget) {
-  Script.setWidget(widget);
-} else if (familia === "small") {
-  await widget.presentSmall();
-} else if (familia === "large") {
-  await widget.presentLarge();
+if (cfg.runsInWidget) {
+  // Na tela de início: cache primeiro, rede só se ele estiver frio.
+  Script.setWidget(desenhar(montarModelo(await carregar({ rapido: true })), familia));
+
+} else if (cfg.runsInApp) {
+  // Aberto à mão dentro do Scriptable: pré-visualização, sempre com dado novo.
+  const widget = desenhar(montarModelo(await carregar()), familia);
+  if (familia === "small") await widget.presentSmall();
+  else if (familia === "large") await widget.presentLarge();
+  else await widget.presentMedium();
+
 } else {
-  await widget.presentMedium();
+  /**
+   * Atalhos, automação, Siri — qualquer execução que não é widget nem app.
+   *
+   * Aqui NÃO se apresenta nada: uma pré-visualização modal numa automação em
+   * segundo plano trava a execução ou escancara o Scriptable na cara de quem
+   * só queria que o dado ficasse pronto. O trabalho é ir na rede sem pressa e
+   * deixar o cache quente para a próxima vez que o iOS acordar o widget.
+   *
+   * O Atalhos não repinta o widget — só o WidgetKit faz isso. O que esta
+   * execução compra é que, quando ele repintar, o dado já esteja em disco e o
+   * desenho seja instantâneo em vez de uma aposta na rede.
+   */
+  await carregar();
 }
+
 Script.complete();
