@@ -1,0 +1,1861 @@
+<!-- GERADO por sincronizar.mjs a partir de index.html. Não edite aqui: as mudanças voltam a ser sobrescritas. -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<style>html{background:#0C0C0E;color:#E6E3DC}</style>
+<title>QG</title>
+<meta name="description" content="Central de treino e peso: o treino de hoje do plano de 40 semanas, os ritmos-alvo e a evolução do peso, tudo na mesma planilha.">
+<meta name="theme-color" content="#0C0C0E">
+<!-- O favicon vai embutido, e não como href para logo.svg, porque esta mesma
+     página também é servida pelo doGet do Apps Script, onde caminho relativo
+     não resolve. O logo.svg da pasta existe para o card do índice do site. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230C0C0E'/%3E%3Cg fill='none' stroke='%23FFB000' stroke-width='4' stroke-linecap='square' stroke-linejoin='miter'%3E%3Ccircle cx='32' cy='36' r='18'/%3E%3Cpath d='M26 13 H38'/%3E%3Cpath d='M32 13 V18'/%3E%3Cpath d='M32 36 L43 27'/%3E%3Cpath d='M45 49 L56 60'/%3E%3C/g%3E%3C/svg%3E">
+<style>
+:root{
+  --bg-base:#0C0C0E; --bg-raised:#141417; --bg-high:#1C1C20;
+  --ink:#E6E3DC; --ink-2:rgba(230,227,220,.60); --ink-3:rgba(230,227,220,.38);
+  --rule:rgba(230,227,220,.12); --rule-soft:rgba(230,227,220,.06); --rule-hard:rgba(230,227,220,.24);
+  --accent:#FFB000; --accent-ink:#0C0C0E; --error:#E5484D; --ok:#3DD68C;
+  --ff-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --ff-display:system-ui,-apple-system,"Segoe UI",sans-serif;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s6:24px; --s8:32px; --s12:48px; --s16:64px;
+  --dur:140ms; --ease:cubic-bezier(.2,0,0,1);
+  --hair:1px;
+}
+@media (min-resolution:2dppx){ :root{ --hair:.5px } }
+
+*,*::before,*::after{ box-sizing:border-box; border-radius:0 }
+html{ background:var(--bg-base); -webkit-text-size-adjust:100% }
+body{
+  margin:0; background:var(--bg-base); color:var(--ink);
+  font-family:var(--ff-mono); font-size:14px; line-height:1.55;
+  font-variant-numeric:tabular-nums; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,p,figure,dl,dd{ margin:0 }
+ul{ margin:0; padding:0; list-style:none }
+button,input,select{ font:inherit; color:inherit }
+svg{ display:block }
+a{ color:inherit }
+:focus-visible{ outline:2px solid var(--accent); outline-offset:2px }
+:focus:not(:focus-visible){ outline:none }
+.sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap }
+
+.app{ max-width:760px; margin:0 auto; padding:var(--s6) var(--s4) var(--s16) }
+.rotulo{ font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3) }
+
+/* ---- topo ---- */
+.topbar{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--s4);
+  padding-bottom:var(--s3); border-bottom:var(--hair) solid var(--rule) }
+.brand{ font-family:var(--ff-display); font-weight:600; letter-spacing:-.02em; font-size:18px }
+.origem{ font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3) }
+
+.abas{ display:flex; gap:var(--hair); background:var(--rule-soft); margin:var(--s4) 0 var(--s8) }
+.abas button{
+  flex:1; border:none; background:var(--bg-raised); color:var(--ink-3); cursor:pointer;
+  padding:var(--s2) var(--s3); font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  transition:color var(--dur) var(--ease),background var(--dur) var(--ease);
+}
+.abas button:hover{ color:var(--ink-2) }
+.abas button[aria-selected="true"]{ background:var(--bg-high); color:var(--accent) }
+
+[hidden]{ display:none !important }
+
+/* ---- aviso de configuracao ---- */
+.setup{ border:var(--hair) solid var(--accent); background:rgba(255,176,0,.06);
+  padding:var(--s4); margin-bottom:var(--s8); font-size:13px; line-height:1.6 }
+.setup b{ color:var(--accent); display:block; font-family:var(--ff-display); margin-bottom:var(--s2) }
+.setup code{ background:var(--bg-high); padding:1px 5px; font-size:12px; word-break:break-all }
+.setup button{ margin-top:var(--s3); background:none; border:var(--hair) solid var(--rule-hard);
+  color:var(--ink-2); padding:var(--s1) var(--s3); font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; cursor:pointer }
+.setup button:hover{ color:var(--ink); border-color:var(--ink-3) }
+
+/* ---- cabecalho da semana ---- */
+.semana-topo{ display:flex; align-items:baseline; justify-content:space-between;
+  gap:var(--s3); flex-wrap:wrap; margin-bottom:var(--s6) }
+.semana-topo .n{ font-family:var(--ff-display); font-weight:600; letter-spacing:-.03em;
+  font-size:clamp(30px,9vw,42px); line-height:1 }
+.semana-topo .fase{ color:var(--ink-2) }
+.progresso{ flex:1 1 100%; height:2px; background:var(--rule-soft); margin-top:var(--s2) }
+.progresso i{ display:block; height:100%; background:var(--accent) }
+
+.hoje-dia{ font-family:var(--ff-display); font-size:15px; color:var(--ink-2); margin-bottom:var(--s3) }
+.hoje-dia b{ color:var(--ink); font-weight:600 }
+
+/* ---- cartoes ---- */
+.cartao{ background:var(--bg-raised); border:var(--hair) solid var(--rule);
+  padding:var(--s4); margin-bottom:var(--s3) }
+.cartao--feito{ border-color:rgba(61,214,140,.4); background:rgba(61,214,140,.05) }
+.cartao--menor{ background:none }
+.cartao-topo{ display:flex; align-items:baseline; justify-content:space-between;
+  gap:var(--s3); flex-wrap:wrap; margin-bottom:var(--s3) }
+.modal{ font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent) }
+.cartao--feito .modal{ color:var(--ok) }
+.alvo{ font-size:12px; color:var(--ink-3) }
+.treino{ white-space:pre-line; line-height:1.7 }
+.longao{ margin-top:var(--s3); font-size:12px; color:var(--ink-3) }
+
+.acoes{ display:flex; gap:var(--s2); flex-wrap:wrap; margin-top:var(--s4) }
+.botao{
+  flex:1 1 auto; min-height:52px; padding:0 var(--s4); border:none; cursor:pointer;
+  background:var(--accent); color:var(--accent-ink); font-weight:600;
+  letter-spacing:.06em; text-transform:uppercase; font-size:12px;
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--s2);
+  text-decoration:none; transition:opacity var(--dur) var(--ease);
+}
+.botao:hover{ opacity:.86 }
+.botao--fantasma{ background:none; border:var(--hair) solid var(--rule-hard); color:var(--ink-2) }
+.botao--fantasma:hover{ opacity:1; color:var(--ink); border-color:var(--ink-3) }
+.botao--feito{ background:none; border:var(--hair) solid rgba(61,214,140,.4); color:var(--ok) }
+
+/* ---- tira de peso na aba Hoje ---- */
+/* O número grande de verdade mora na aba Peso; aqui ele é resumo, e por isso
+   fica num corpo intermediário — competir com o cartão do treino tiraria a
+   atenção do que a aba Hoje existe para responder primeiro. */
+.tira{ margin-top:var(--s8); border-top:var(--hair) solid var(--rule); padding-top:var(--s4) }
+.tira-topo{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--s3) }
+.tira-topo h2{ font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-3); font-weight:500 }
+.tira .peso{ font-family:var(--ff-display); font-weight:600; letter-spacing:-.03em;
+  font-size:34px; line-height:1.1; margin-top:var(--s2) }
+.tira .peso .un{ font-size:.4em; font-weight:500; letter-spacing:0; color:var(--ink-3);
+  margin-left:var(--s1) }
+.tira .meta{ color:var(--ink-2); font-size:12px; margin-top:var(--s1) }
+.tira .abrir{ background:none; border:var(--hair) solid var(--rule-hard); color:var(--ink-2);
+  cursor:pointer; padding:var(--s1) var(--s3); font-size:10px; letter-spacing:.1em;
+  text-transform:uppercase }
+.tira .abrir:hover{ color:var(--ink); border-color:var(--ink-3) }
+
+/* ---- resto da semana ---- */
+.resto{ margin-top:var(--s8); border-top:var(--hair) solid var(--rule); padding-top:var(--s4) }
+.resto h2{ font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3);
+  font-weight:500; margin-bottom:var(--s3) }
+.dia{ padding:var(--s3) 0; border-bottom:var(--hair) solid var(--rule-soft) }
+.dia-nome{ font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3);
+  display:block; margin-bottom:var(--s2) }
+.dia--hoje .dia-nome{ color:var(--accent) }
+
+.item{ display:flex; align-items:flex-start; gap:var(--s3); width:100%; text-align:left;
+  background:none; border:none; padding:var(--s2) 0; cursor:pointer; color:var(--ink-2);
+  font-size:13px; line-height:1.6 }
+.item:hover{ color:var(--ink) }
+.caixa{ flex:0 0 auto; width:18px; height:18px; margin-top:3px;
+  border:var(--hair) solid var(--rule-hard); position:relative }
+.item[aria-pressed="true"] .caixa{ background:var(--ok); border-color:var(--ok) }
+.item[aria-pressed="true"] .caixa::after{ content:""; position:absolute; inset:4px 3px 5px;
+  border:solid var(--bg-base); border-width:0 0 2px 2px; transform:rotate(-45deg) }
+.item[aria-pressed="true"] .item-txt{ color:var(--ink-3); text-decoration:line-through;
+  text-decoration-color:var(--rule-hard) }
+.item-txt em{ font-style:normal; color:var(--ink-3); font-size:10px; letter-spacing:.14em;
+  text-transform:uppercase; display:block }
+
+/* ---- chips de sigla ---- */
+.chip{ background:var(--bg-high); border:none; border-bottom:var(--hair) solid var(--rule-hard);
+  color:var(--ink); padding:0 4px; font:inherit; cursor:pointer; white-space:nowrap }
+.chip:hover{ background:var(--rule); border-bottom-color:var(--accent) }
+.chip b{ color:var(--accent); font-weight:600 }
+.item .chip{ font-size:inherit }
+
+.verbete{ position:fixed; left:0; right:0; bottom:0; z-index:9;
+  background:var(--bg-high); border-top:var(--hair) solid var(--rule-hard);
+  padding:var(--s4) var(--s4) calc(var(--s4) + env(safe-area-inset-bottom));
+  box-shadow:0 -12px 32px rgba(0,0,0,.45) }
+.verbete .sigla{ color:var(--accent); font-weight:600; display:block; margin-bottom:var(--s1) }
+.verbete p{ color:var(--ink-2); max-width:600px }
+.verbete .fechar{ position:absolute; top:var(--s2); right:var(--s3); background:none; border:none;
+  color:var(--ink-3); cursor:pointer; font-size:18px; line-height:1; padding:var(--s2) }
+
+/* ---- aba plano ---- */
+.semana{ border-bottom:var(--hair) solid var(--rule-soft) }
+.semana > summary{ cursor:pointer; list-style:none; padding:var(--s3) 0;
+  display:flex; align-items:baseline; gap:var(--s3) }
+.semana > summary::-webkit-details-marker{ display:none }
+.semana .num{ font-family:var(--ff-display); font-weight:600; font-size:16px; min-width:2.2em }
+.semana .fase{ color:var(--ink-3); font-size:12px; flex:1 }
+.semana .km{ color:var(--ink-2); font-size:12px }
+.semana--feita .num, .semana--feita .km{ color:var(--ok) }
+.semana--atual .num{ color:var(--accent) }
+.estado{ background:none; border:var(--hair) solid var(--rule); color:var(--ink-3); cursor:pointer;
+  font-size:10px; letter-spacing:.1em; text-transform:uppercase; padding:2px var(--s2) }
+.estado:hover{ color:var(--ink); border-color:var(--rule-hard) }
+.semana--feita .estado{ color:var(--ok); border-color:rgba(61,214,140,.35) }
+.semana-corpo{ padding:0 0 var(--s4) }
+.semana-corpo .dia{ border-bottom:none; padding:var(--s2) 0 }
+.semana-corpo .treino{ font-size:13px; color:var(--ink-2) }
+
+/* ---- aba peso: numero grande ---- */
+.atual{ margin-bottom:var(--s8) }
+.atual .rotulo{ display:block; margin-bottom:var(--s2) }
+.atual .valor{ font-family:var(--ff-display); font-weight:600; letter-spacing:-.03em;
+  font-size:clamp(52px,17vw,92px); line-height:.92; display:flex; align-items:baseline; gap:var(--s3) }
+.atual .valor .un{ font-size:.3em; font-weight:500; letter-spacing:0; color:var(--ink-3) }
+.atual .quando{ color:var(--ink-2); margin-top:var(--s2); font-size:13px }
+.delta{ color:var(--ink-3) }
+.delta.sobe{ color:var(--error) }
+.delta.desce{ color:var(--ok) }
+
+/* ---- campos ----
+   `.campo` é a base comum. O modificador existe porque os dois campos herdados
+   discordam: o de peso é flexível e alto dentro de um form em linha, o de tempo
+   dos ritmos é estreito e centralizado. Sem os modificadores, um sobrescrevia
+   o outro conforme a ordem no arquivo. */
+.campo{ position:relative }
+.campo input:focus{ border-color:var(--rule-hard) }
+.campo .un{ position:absolute; right:var(--s3); top:50%; transform:translateY(-50%);
+  color:var(--ink-3); font-size:13px; pointer-events:none }
+
+.campo--peso{ flex:1 1 130px; min-width:0 }
+.campo--peso input{
+  width:100%; height:56px; padding:0 34px 0 var(--s4);
+  background:var(--bg-raised); border:var(--hair) solid var(--rule); color:var(--ink);
+  font-size:22px; -moz-appearance:textfield;
+}
+.campo--peso input::-webkit-outer-spin-button,
+.campo--peso input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
+.campo--data{ flex:0 1 168px }
+.campo--data input{
+  width:100%; height:56px; padding:0 var(--s3);
+  background:var(--bg-raised); border:var(--hair) solid var(--rule); color:var(--ink);
+  font-size:14px;
+}
+.campo--data input::-webkit-calendar-picker-indicator{ filter:invert(.8); cursor:pointer }
+
+.campo--tempo{ max-width:220px }
+.campo--tempo input{
+  width:100%; height:56px; padding:0 var(--s4);
+  background:var(--bg-raised); border:var(--hair) solid var(--rule); color:var(--ink);
+  font-size:22px; text-align:center; letter-spacing:.04em;
+}
+
+/* ---- formulario de peso ---- */
+.form-peso{ display:flex; flex-wrap:wrap; gap:var(--s2); align-items:stretch; margin-bottom:var(--s3) }
+button.enviar{
+  flex:0 0 auto; height:56px; padding:0 var(--s6); border:none; cursor:pointer;
+  background:var(--accent); color:var(--accent-ink); font-weight:600;
+  letter-spacing:.06em; text-transform:uppercase; font-size:12px;
+  transition:opacity var(--dur) var(--ease);
+}
+button.enviar:hover{ opacity:.86 }
+button.enviar[disabled]{ opacity:.4; cursor:default }
+
+.status{ min-height:20px; font-size:12px; color:var(--ink-3); margin-bottom:var(--s8) }
+.status.erro{ color:var(--error) }
+.status.ok{ color:var(--ok) }
+.status.salvando::after{ content:""; display:inline-block; width:5px; height:5px; margin-left:var(--s2);
+  background:var(--accent); vertical-align:middle; animation:pulso 900ms var(--ease) infinite }
+@keyframes pulso{ 0%,100%{ opacity:.25 } 50%{ opacity:1 } }
+
+/* ---- grafico ---- */
+.grafico{ border-top:var(--hair) solid var(--rule); padding-top:var(--s4) }
+.cabeca{ display:flex; align-items:center; justify-content:space-between; gap:var(--s4); margin-bottom:var(--s4) }
+.cabeca h2{ font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); font-weight:500 }
+.periodos{ display:flex; gap:var(--hair); background:var(--rule-soft) }
+.periodos button{
+  border:none; background:var(--bg-raised); color:var(--ink-3); cursor:pointer;
+  padding:var(--s1) var(--s3); font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  transition:color var(--dur) var(--ease),background var(--dur) var(--ease);
+}
+.periodos button:hover{ color:var(--ink-2) }
+.periodos button[aria-pressed="true"]{ background:var(--bg-high); color:var(--accent) }
+
+.plot{ position:relative; touch-action:pan-y }
+.plot svg{ width:100%; height:auto; overflow:visible }
+.grade{ stroke:var(--rule-soft); stroke-width:1 }
+.eixo{ fill:var(--ink-3); font-size:10px; font-family:var(--ff-mono) }
+.linha-dia{ fill:none; stroke:var(--rule-hard); stroke-width:1.5; stroke-linejoin:round; stroke-linecap:round }
+.pontos circle{ fill:var(--ink-3) }
+.linha-media{ fill:none; stroke:var(--accent); stroke-width:2; stroke-linejoin:round; stroke-linecap:round }
+.pendente{ fill:var(--accent); opacity:.55 }
+.mira{ stroke:var(--rule-hard); stroke-width:1; stroke-dasharray:2 3 }
+.mira-ponto{ fill:var(--accent); stroke:var(--bg-base); stroke-width:2 }
+
+.dica{
+  position:absolute; pointer-events:none; z-index:2; transform:translate(-50%,-100%);
+  background:var(--bg-high); border:var(--hair) solid var(--rule); padding:var(--s2) var(--s3);
+  font-size:12px; white-space:nowrap; line-height:1.35; margin-top:-8px;
+}
+.dica b{ color:var(--accent); font-weight:600 }
+.dica span{ display:block; color:var(--ink-3); font-size:10px; letter-spacing:.08em; text-transform:uppercase }
+
+.resumo{ display:flex; flex-wrap:wrap; gap:var(--s6); margin-top:var(--s6);
+  border-top:var(--hair) solid var(--rule); padding-top:var(--s4) }
+.resumo div{ min-width:88px }
+.resumo dt{ font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3) }
+.resumo dd{ margin:var(--s1) 0 0; font-size:19px; font-family:var(--ff-display); font-weight:600 }
+
+.vazio{ padding:var(--s12) 0; color:var(--ink-3); text-align:center; font-size:13px }
+
+/* ---- aba ritmos ---- */
+.bloco{ margin-bottom:var(--s8) }
+.bloco h2{ font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3);
+  font-weight:500; margin-bottom:var(--s3) }
+.ajuda{ color:var(--ink-3); font-size:12px; margin-top:var(--s2) }
+.ajuda.erro{ color:var(--error) }
+
+table{ width:100%; border-collapse:collapse; font-size:13px }
+th,td{ text-align:right; padding:var(--s2) 0; border-bottom:var(--hair) solid var(--rule-soft) }
+th:first-child,td:first-child{ text-align:left }
+thead th{ font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
+  font-weight:500; border-bottom-color:var(--rule) }
+tbody td:first-child{ color:var(--ink-2) }
+td.destaque{ color:var(--accent) }
+
+.conversor{ display:flex; gap:var(--s2); flex-wrap:wrap }
+.conversor label{ flex:1 1 130px }
+.conversor .rotulo{ display:block; margin-bottom:var(--s1) }
+.conversor input{ width:100%; height:48px; padding:0 var(--s3); background:var(--bg-raised);
+  border:var(--hair) solid var(--rule); color:var(--ink); font-size:16px }
+.conversor input.calculado{ color:var(--accent); background:var(--bg-high) }
+
+.glossario div{ padding:var(--s2) 0; border-bottom:var(--hair) solid var(--rule-soft) }
+.glossario dt{ color:var(--accent); font-size:12px }
+.glossario dd{ color:var(--ink-2); font-size:13px }
+
+.foot{ margin-top:var(--s16); padding-top:var(--s4); border-top:var(--hair) solid var(--rule);
+  font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3);
+  display:flex; justify-content:space-between; gap:var(--s4); flex-wrap:wrap }
+
+@media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important } }
+</style>
+</head>
+<body>
+
+<script type="application/json" id="plano">{"geradoEm":"2026-09-01","dias":["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"],"rotina":[{"dia":"Segunda","musc":true,"cardio":null,"pace":false},{"dia":"Terça","musc":false,"cardio":"Corrida · rua","pace":true},{"dia":"Quarta","musc":true,"cardio":"Bicicleta","pace":false},{"dia":"Quinta","musc":true,"cardio":"Corrida · esteira","pace":true},{"dia":"Sexta","musc":true,"cardio":"Bicicleta","pace":false},{"dia":"Sábado","musc":false,"cardio":"Corrida · longão","pace":true},{"dia":"Domingo","musc":false,"cardio":null,"pace":false}],"semanas":[{"n":1,"fase":"Adaptação","treinos":["","~35 min W:10min R:3K W:5min","10 min Leve\n8 min Tempo\n7 min Leve","~35 min W:10min R:3K W:5min","10 min Leve\n10 min Tempo\n5 min Leve","~40 min W:10min R:4K W:5min","Descanso"],"longao":4,"feitaNaPlanilha":true},{"n":2,"fase":"Adaptação","treinos":["","~40 min W:10min R:3K W:10min","10 min Leve\n2 x (2 min Forte, 2 min Leve)\n5 min Leve","~40 min W:10min R:3K W:10min","10 min Leve\n14 min Tempo\n6 min Leve","~45 min W:10min R:5K W:5min","Descanso"],"longao":5,"feitaNaPlanilha":true},{"n":3,"fase":"Adaptação","treinos":["","~40 min W:10min R:3K W:10min","20 min Tempo, aumentando o esforço gradualmente do min 5 ao min 20","~40 min W:10min R:3K W:10min","5 min Leve\n15 min Tempo\n5 min Leve","~45 min W:10min R:5K W:5min","Descanso"],"longao":5,"feitaNaPlanilha":true},{"n":4,"fase":"Base","treinos":["","Aquecimento 10 min\n2 x 400 (RI)\nDesaquecimento 10 min","10 min Leve\n2 x (1 min Forte, 3 min Leve)\n5 min Leve","1,5 km aquecimento\n1,5 km em ST\n1,5 km desaquecimento","10 min Leve\n5 min Tempo\n5 min Leve\n5 min Forte\n5 min Leve","5 km em MT","Descanso"],"longao":5,"feitaNaPlanilha":true},{"n":5,"fase":"Base","treinos":["","Aquecimento 10 min\n3 x 400 (RI)\nDesaquecimento 10 min","8 min Leve\n15 min Tempo\n7 min Leve","1,5 km aquecimento\n1,5 km em ST\n1,5 km desaquecimento","10 min Leve\n5 x (1 min Forte, 4 min Leve)\n5 min Leve","5 km em MT","Descanso"],"longao":5,"feitaNaPlanilha":true},{"n":6,"fase":"Base","treinos":["","Aquecimento 10 min\n4 x 400 (RI)\nDesaquecimento 10 min","10 min Leve\n10 min Tempo\n5 min Leve\n10 min Tempo\n5 min Leve","1,5 km aquecimento\n1,5 km em ST\n1,5 km desaquecimento","10 min Leve\n8 min Forte\n5 min Leve\n7 min Forte\n5 min Leve","6 km em MT","Descanso"],"longao":6,"feitaNaPlanilha":true},{"n":7,"fase":"Base","treinos":["","Aquecimento 10 min\n2 x 400, 1 x 800 (RI)\nDesaquecimento 10 min","10 min Leve\n2 x (10 min Tempo, ~800 m em MP)\n5 min Leve","1,5 km aquecimento\n2 km em ST\n1,5 km desaquecimento","25 min Tempo, aumentando o esforço gradualmente do min 5 ao min 20","6 km em MT","Descanso"],"longao":6,"feitaNaPlanilha":true},{"n":8,"fase":"Base","treinos":["","Aquecimento 10 min\n400, 600, 800 (RI)\nDesaquecimento 10 min","10 min Leve\n6 x (1 min Forte, 4 min Leve)\n5 min Leve","1,5 km aquecimento\n2 km em ST\n1,5 km desaquecimento","10 min Leve\n10 min Tempo\n10 min Leve\n5 min Forte\n5 min Leve","7 km em MT","Descanso"],"longao":7,"feitaNaPlanilha":false},{"n":9,"fase":"Base","treinos":["","Aquecimento 10 min\n5 x 400 (RI)\nDesaquecimento 10 min","10 min Leve\n30 min Tempo, seguido imediatamente de 10 min Leve","1,5 km aquecimento\n1,5 km em ST\n1,5 km desaquecimento","30 min Leve","7 km em MT","Descanso"],"longao":7,"feitaNaPlanilha":false},{"n":10,"fase":"Base","treinos":["","Aquecimento 10 min\n400, 2 x 800 (RI)\nDesaquecimento 10 min","10 min Leve\n30 min Tempo\n5 min Leve","1,5 km aquecimento\n2 km em ST\n1,5 km desaquecimento","10 min Leve\n2 x (2 min Tempo, 2 min Leve)\n5 min Leve","7,5 km em MT","Descanso"],"longao":7.5,"feitaNaPlanilha":false},{"n":11,"fase":"Base","treinos":["","Aquecimento 10 min\n2 x 1000 (RI)\nDesaquecimento 10 min","10 min Leve\n20 min Tempo\n10 min Leve","1,5 km aquecimento\n3 km em ST\n1,5 km desaquecimento","30 min Leve","7,5 km em MT","Descanso"],"longao":7.5,"feitaNaPlanilha":false},{"n":12,"fase":"Base","treinos":["","Aquecimento 10 min\n6 x 400 (RI)\nDesaquecimento 10 min","10 min Leve\n8 min Tempo\n7 min Leve","1,5 km aquecimento\n3 km em ST\n1,5 km desaquecimento","10 min Leve\n10 min Tempo\n5 min Leve","8 km em LT","Descanso"],"longao":8,"feitaNaPlanilha":false},{"n":13,"fase":"Base","treinos":["","Aquecimento 10 min\n3 x 800 (RI)\nDesaquecimento 10 min","10 min Leve\n2 x (2 min Forte, 2 min Leve)\n5 min Leve","1,5 km aquecimento\n3 km em ST\n1,5 km desaquecimento","10 min Leve\n14 min Tempo\n6 min Leve","8 km em LT","Descanso"],"longao":8,"feitaNaPlanilha":false},{"n":14,"fase":"Desenvolvimento","treinos":["","5 x 800 (400 RI)","20 min Tempo, aumentando o esforço gradualmente do min 5 ao min 20","5 km em ST","5 min Leve\n15 min Tempo\n5 min Leve","10 km em LT","Descanso"],"longao":10,"feitaNaPlanilha":false},{"n":15,"fase":"Desenvolvimento","treinos":["","2 x 1600 (400 RI), 1 x 800 (400 RI)","10 min Leve\n2 x (1 min Forte, 3 min Leve)\n5 min Leve","3 km ST, 1,5 km Leve, 3 km ST","10 min Leve\n5 min Tempo\n5 min Leve\n5 min Forte\n5 min Leve","8 km em LT","Descanso"],"longao":8,"feitaNaPlanilha":false},{"n":16,"fase":"Desenvolvimento","treinos":["","400, 600, 800, 800, 600, 400 (400 RI)","8 min Leve\n15 min Tempo\n7 min Leve","6,5 km em MT","10 min Leve\n5 x (1 min Forte, 4 min Leve)\n5 min Leve","10 km em LT","Descanso"],"longao":10,"feitaNaPlanilha":false},{"n":17,"fase":"Desenvolvimento","treinos":["","4 x 1000 (400 RI)","10 min Leve\n10 min Tempo\n5 min Leve\n10 min Tempo\n5 min Leve","5 km em ST","10 min Leve\n8 min Forte\n5 min Leve\n7 min Forte\n5 min Leve","11 km em LT","Descanso"],"longao":11,"feitaNaPlanilha":false},{"n":18,"fase":"Desenvolvimento","treinos":["","1600, 1200, 800, 400 (400 RI)","10 min Leve\n2 x (10 min Tempo, ~800 m em MP)\n5 min Leve","1,5 km ST, 1,5 km Leve, 1,5 km ST, 1,5 km Leve, 1,5 km ST","25 min Tempo, aumentando o esforço gradualmente do min 5 ao min 20","10 km em LT","Descanso"],"longao":10,"feitaNaPlanilha":false},{"n":19,"fase":"Desenvolvimento","treinos":["","10 x 400 (90 s RI)","10 min Leve\n6 x (1 min Forte, 4 min Leve)\n5 min Leve","7 km em MT","10 min Leve\n10 min Tempo\n10 min Leve\n5 min Forte\n5 min Leve","13 km em LT","Descanso"],"longao":13,"feitaNaPlanilha":false},{"n":20,"fase":"Desenvolvimento","treinos":["","6 x 800 (90 s RI)","10 min Leve\n30 min Tempo, seguido imediatamente de 10 min Leve","3 km ST, 1,5 km Leve, 3 km ST","30 min Leve","11 km em LT","Descanso"],"longao":11,"feitaNaPlanilha":false},{"n":21,"fase":"Desenvolvimento","treinos":["","4 x 1200 (400 RI)","10 min Leve\n30 min Tempo\n5 min Leve","5 km em ST","10 min Leve\n2 x (2 min Tempo, 2 min Leve)\n5 min Leve","11 km em LT","Descanso"],"longao":11,"feitaNaPlanilha":false},{"n":22,"fase":"Desenvolvimento","treinos":["","5 x 1000 (400 RI)","10 min Leve\n20 min Tempo\n10 min Leve","3 km ST, 1,5 km Leve, 1,5 km ST, 1,5 km Leve, 3 km ST","30 min Leve","11 km em LT","Descanso"],"longao":11,"feitaNaPlanilha":false},{"n":23,"fase":"Desenvolvimento","treinos":["","3 x 1600 (400 RI)","10 min Leve\n20 min Tempo\n10 min Leve","5 km em ST","30 min Leve","10 km em LT","Descanso"],"longao":10,"feitaNaPlanilha":false},{"n":24,"fase":"Prova 5 km","treinos":["","6 x 400 (60 s RI)","—","5 km Leve (sem aquecimento nem desaquecimento)","—","PROVA 5 km","Descanso"],"longao":5,"feitaNaPlanilha":false},{"n":25,"fase":"Construção","treinos":["","3 x 1600 (400 RI)","10 min Leve\n10 min Tempo\n10 min Leve","3 km Leve, 3 km em ST, 3 km Leve","10 min Leve\n3 x (2 min Forte, 2 min Leve)\n10 min Leve","13 km em MP + 19","Descanso"],"longao":13,"feitaNaPlanilha":false},{"n":26,"fase":"Construção","treinos":["","4 x 800 (2 min RI)","10 min Leve\n10 min Tempo\n2 min Leve\n3 min Forte\n5 min Leve","1,5 km Leve, 8 km em MP, 1,5 km Leve","10 min Leve\n2 x (1 min Forte, 3 min Leve)\n5 min Leve","14 km em MP + 28","Descanso"],"longao":14,"feitaNaPlanilha":false},{"n":27,"fase":"Construção","treinos":["","1200, 1000, 800, 600, 400 (200 RI)","10 min Leve\n20 min Tempo\n10 min Leve","1,5 km Leve, 8 km em LT, 1,5 km Leve","10 min Leve\n5 x (1 min Forte, 1 min Leve)\n10 min Leve","16 km em MP + 28","Descanso"],"longao":16,"feitaNaPlanilha":false},{"n":28,"fase":"Construção","treinos":["","5 x 1000 (400 RI)","10 min Leve\n8 min Forte\n2 min Leve\n8 min Forte\n10 min Leve","1,5 km Leve, 7 km em MT, 1,5 km Leve","30 min Leve","18 km em MP + 28","Descanso"],"longao":18,"feitaNaPlanilha":false},{"n":29,"fase":"Construção","treinos":["","3 x 1600 (400 RI)","10 min Leve\n30 min Tempo","3 km Leve, 5 km em ST, 1,5 km Leve","5 min Leve\n3 x (5 min Tempo, 1 min Leve)\n5 min Leve","19 km em MP + 28","Descanso"],"longao":19,"feitaNaPlanilha":false},{"n":30,"fase":"Construção","treinos":["","2 x 1200 (2 min RI), 4 x 800 (2 min RI)","10 min Leve\n15 min Tempo\n5 min Leve\n10 min Tempo\n5 min Leve","1,5 km Leve, 8 km em MT, 1,5 km Leve","35 min Leve","22 km em MP + 28","Descanso"],"longao":22,"feitaNaPlanilha":false},{"n":31,"fase":"Construção","treinos":["","6 x 800 (90 s RI)","10 min Leve\n20 min Tempo\n5 min Leve\n10 min Tempo\n5 min Leve","1,5 km Leve, 10 km em LT, 1,5 km Leve","5 min Leve\n1 min Forte, 1 min Leve\n2 min Forte, 1 min Leve\n3 min Forte, 1 min Leve\n4 min Forte, 1 min Leve\n3 min Forte, 1 min Leve\n2 min Forte, 1 min Leve\n1 min Forte, 3 min Leve","16 km em MP + 9","Descanso"],"longao":16,"feitaNaPlanilha":false},{"n":32,"fase":"Construção","treinos":["","2 x (6 x 400) (90 s RI) (2 min 30 s RI entre as séries)","10 min Leve\n6 x (2 min Forte, 3 min Leve)\n10 min Leve","3 km Leve, 5 km em ST, 1,5 km Leve","20 min Leve\n10 min Tempo\n10 min Leve","24 km em MP + 19","Descanso"],"longao":24,"feitaNaPlanilha":false},{"n":33,"fase":"Construção","treinos":["","2 x 1600 (60 s RI), 2 x 800 (60 s RI)","10 min Leve\n1 min Forte, 1 min Leve\n2 min Forte, 1 min Leve\n3 min Forte, 1 min Leve\n3 min Forte, 1 min Leve\n2 min Forte, 1 min Leve\n1 min Forte, 3 min Leve","1,5 km Leve, 7 km em MT, 1,5 km Leve","20 min Leve\n5 min Tempo\n15 min Leve","26 km em MP + 19","Descanso"],"longao":26,"feitaNaPlanilha":false},{"n":34,"fase":"Construção","treinos":["","4 x 1200 (2 min RI)","10 min Leve\n15 min Tempo\n5 min Leve\n10 min Tempo\n5 min Leve","16 km em MP","10 min Leve\n5 x (2 min Forte, 3 min Leve)\n10 min Leve","19 km em MP + 12","Descanso"],"longao":19,"feitaNaPlanilha":false},{"n":35,"fase":"Construção","treinos":["","1 km, 2 km, 1 km, 1 km (400 RI)","8 min Leve\n7 x (1 min Forte, 2 min Leve)\n8 min Leve","1,5 km Leve, 8 km em MP, 1,5 km Leve","15 min Leve\n10 min Tempo\n15 min Leve","29 km em MP + 28","Descanso"],"longao":29,"feitaNaPlanilha":false},{"n":36,"fase":"Construção","treinos":["","3 x 1600 (400 RI)","5 min Leve\n15 min Tempo\n5 min Leve\n10 min Tempo\n10 min Leve","16 km em MP","10 min Leve\n8 x (1 min Forte, 4 min Leve)\n5 min Leve","21 km em MP + 9","Descanso"],"longao":21,"feitaNaPlanilha":false},{"n":37,"fase":"Pico","treinos":["","10 x 400 (400 RI)","10 min Leve\n20 min Tempo\n10 min Leve","Aquecimento 10 min, 13 km em MP, Desaquecimento 10 min","20 min Leve\n5 min Tempo\n15 min Leve","32 km em MP + 19","Descanso"],"longao":32,"feitaNaPlanilha":false},{"n":38,"fase":"Polimento","treinos":["","8 x 800 (90 s RI)","10 min Leve\n30 min Tempo\n5 min Leve","1,5 km Leve, 8 km em MT, 1,5 km Leve","10 min Leve\n3 x (2 min Forte, 3 min Leve)\n10 min Leve","21 km em MP","Descanso"],"longao":21,"feitaNaPlanilha":false},{"n":39,"fase":"Polimento","treinos":["","5 x 1000 (400 RI)","15 min Leve\n15 min Tempo\n5 min Forte\n10 min Leve","3 km Leve, 5 km em ST, 1,5 km Leve","10 min Leve\n3 x (2 min Tempo, 2 min Leve)\n10 min Leve","13 km em MP","Descanso"],"longao":13,"feitaNaPlanilha":false},{"n":40,"fase":"Semana da maratona","treinos":["","6 x 400 (400 RI)","—","Aquecimento 10 min, 5 km em MP, Desaquecimento 10 min","—","42,2 km em MP","Descanso"],"longao":42.2,"feitaNaPlanilha":false}],"ritmos":{"tempo5kPadrao":1800,"ajustesTiros":{"400":-9,"600":-12,"800":-14,"1000":-16,"1200":-16,"1600":-13,"2000":-11},"ajustesRitmos":{"ST":10,"MT":10,"LT":9,"MP":23,"HMP":4}},"glossario":[{"sigla":"Leve","texto":"Ritmo confortável, dá para conversar. Mais lento que o pace de 5 km."},{"sigla":"Tempo","texto":"Esforço controlado e sustentado, na faixa ST–LT da aba Ritmos."},{"sigla":"Forte","texto":"Trecho curto e intenso, acima do ritmo de prova."},{"sigla":"RI","texto":"Intervalo de recuperação entre os tiros (trote leve ou caminhada)."},{"sigla":"ST","texto":"Short Tempo — ritmo de tempo curto."},{"sigla":"MT","texto":"Mid Tempo — ritmo de tempo médio."},{"sigla":"LT","texto":"Long Tempo — ritmo de tempo longo."},{"sigla":"MP","texto":"Marathon Pace — ritmo-alvo de maratona."},{"sigla":"HMP","texto":"Half Marathon Pace — ritmo-alvo de meia maratona."},{"sigla":"MP + 9 / + 19 / + 28","texto":"MP acrescido desses segundos por km — longão mais lento que o ritmo de prova."},{"sigla":"W: / R:","texto":"Notação das semanas 1 a 3. Interpretação: W = caminhada, R = corrida (ex.: \"W:10min R:3K W:5min\")."},{"sigla":"Aquecimento / Desaquecimento","texto":"Trote leve antes e depois da parte principal do treino."}]}</script>
+
+<div class="app">
+
+  <header class="topbar">
+    <span class="brand">QG</span>
+    <span class="origem" id="origem"></span>
+  </header>
+
+  <nav class="abas" role="tablist" aria-label="Seções">
+    <button type="button" role="tab" id="aba-hoje" aria-controls="painel-hoje" aria-selected="true">Hoje</button>
+    <button type="button" role="tab" id="aba-plano" aria-controls="painel-plano" aria-selected="false">Plano</button>
+    <button type="button" role="tab" id="aba-peso" aria-controls="painel-peso" aria-selected="false">Peso</button>
+    <button type="button" role="tab" id="aba-ritmos" aria-controls="painel-ritmos" aria-selected="false">Ritmos</button>
+  </nav>
+
+  <div class="setup" id="setup" hidden>
+    <b>Ainda não está ligado na planilha</b>
+    As marcações e as pesagens ficam só neste navegador. Limpar os dados do site
+    apaga tudo, e celular e PC não se falam. Publique o Apps Script e cole a URL
+    aqui no <code>index.html</code> — o passo a passo está no <code>README.md</code>.
+    <button type="button" id="setup-ok">Entendi</button>
+  </div>
+
+  <!-- ================= HOJE ================= -->
+  <section role="tabpanel" id="painel-hoje" aria-labelledby="aba-hoje">
+    <div class="semana-topo">
+      <span class="n" id="semana-n">—</span>
+      <span class="fase" id="semana-fase"></span>
+      <span class="progresso"><i id="semana-barra" style="width:0"></i></span>
+    </div>
+
+    <p class="hoje-dia" id="hoje-dia"></p>
+    <div id="hoje-cartoes"></div>
+
+    <section class="tira">
+      <div class="tira-topo">
+        <h2>Peso</h2>
+        <button type="button" class="abrir" id="ir-para-peso">Registrar</button>
+      </div>
+      <p class="peso"><span id="tira-valor">—</span><span class="un">kg</span></p>
+      <p class="meta" id="tira-meta">carregando…</p>
+    </section>
+
+    <section class="resto">
+      <h2 id="resto-titulo">Resto da semana</h2>
+      <ul id="resto-lista"></ul>
+      <div class="acoes">
+        <button type="button" class="botao botao--fantasma" id="fechar-semana">Fechar semana</button>
+      </div>
+      <p class="ajuda" id="fechar-ajuda"></p>
+    </section>
+  </section>
+
+  <!-- ================= PLANO ================= -->
+  <section role="tabpanel" id="painel-plano" aria-labelledby="aba-plano" hidden>
+    <div id="lista-semanas"></div>
+  </section>
+
+  <!-- ================= PESO ================= -->
+  <section role="tabpanel" id="painel-peso" aria-labelledby="aba-peso" hidden>
+    <section class="atual">
+      <span class="rotulo">Último registro</span>
+      <p class="valor"><span id="valor-atual">—</span><span class="un">kg</span></p>
+      <p class="quando" id="quando">carregando…</p>
+    </section>
+
+    <form class="form-peso" id="form-peso" autocomplete="off">
+      <label class="sr" for="peso">Peso em quilos</label>
+      <div class="campo campo--peso">
+        <input id="peso" type="number" inputmode="decimal" step="0.1" min="20" max="400" placeholder="0,0" required>
+        <span class="un">kg</span>
+      </div>
+      <label class="sr" for="data">Data do registro</label>
+      <div class="campo campo--data">
+        <input id="data" type="date" required>
+      </div>
+      <button class="enviar" type="submit" id="enviar">Registrar</button>
+    </form>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+
+    <section class="grafico">
+      <div class="cabeca">
+        <h2>Evolução</h2>
+        <div class="periodos" id="periodos" role="group" aria-label="Período do gráfico">
+          <button type="button" data-dias="30" aria-pressed="false">30d</button>
+          <button type="button" data-dias="90" aria-pressed="false">90d</button>
+          <button type="button" data-dias="0" aria-pressed="true">tudo</button>
+        </div>
+      </div>
+
+      <div class="plot" id="plot">
+        <div class="vazio" id="vazio">Sem registros ainda. O primeiro peso lançado aparece aqui.</div>
+      </div>
+
+      <dl class="resumo" id="resumo" hidden>
+        <div><dt>Variação</dt><dd id="r-var">—</dd></div>
+        <div><dt>Média 7d</dt><dd id="r-media">—</dd></div>
+        <div><dt>Mínimo</dt><dd id="r-min">—</dd></div>
+        <div><dt>Registros</dt><dd id="r-n">—</dd></div>
+      </dl>
+    </section>
+  </section>
+
+  <!-- ================= RITMOS ================= -->
+  <section role="tabpanel" id="painel-ritmos" aria-labelledby="aba-ritmos" hidden>
+    <div class="bloco">
+      <h2>Tempo nos 5 km</h2>
+      <label class="sr" for="tempo5k">Seu tempo nos 5 km, em minutos e segundos</label>
+      <div class="campo campo--tempo">
+        <input id="tempo5k" type="text" inputmode="numeric" placeholder="30:00" autocomplete="off">
+      </div>
+      <p class="ajuda" id="tempo5k-ajuda">Todo o resto desta aba sai daqui.</p>
+    </div>
+
+    <div class="bloco">
+      <h2>Ritmos</h2>
+      <table>
+        <thead><tr><th>Ritmo</th><th>Pace</th></tr></thead>
+        <tbody id="tabela-ritmos"></tbody>
+      </table>
+    </div>
+
+    <div class="bloco">
+      <h2>Tiros</h2>
+      <table>
+        <thead><tr><th>Distância</th><th>Tempo</th><th>Pace</th></tr></thead>
+        <tbody id="tabela-tiros"></tbody>
+      </table>
+    </div>
+
+    <div class="bloco">
+      <h2>Tempos previstos</h2>
+      <table>
+        <thead><tr><th>Prova</th><th>Ritmo</th><th>Tempo</th></tr></thead>
+        <tbody id="tabela-provas"></tbody>
+      </table>
+    </div>
+
+    <div class="bloco">
+      <h2>Conversor</h2>
+      <div class="conversor">
+        <label><span class="rotulo">Distância (km)</span>
+          <input id="c-dist" type="text" inputmode="decimal" placeholder="10" autocomplete="off"></label>
+        <label><span class="rotulo">Tempo</span>
+          <input id="c-tempo" type="text" inputmode="numeric" placeholder="1:00:00" autocomplete="off"></label>
+        <label><span class="rotulo">Pace (min/km)</span>
+          <input id="c-pace" type="text" inputmode="numeric" placeholder="6:00" autocomplete="off"></label>
+      </div>
+      <p class="ajuda">Preencha dois campos; o terceiro é calculado.</p>
+    </div>
+
+    <div class="bloco">
+      <h2>Glossário</h2>
+      <dl class="glossario" id="glossario"></dl>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>Planilha: <span id="rodape-fonte">Treinos</span></span>
+    <span id="rodape-estado">—</span>
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+
+/* ==========================================================================
+   QG — treino e peso na mesma planilha.
+
+   Nasceu da fusão de dois apps irmãos (`treinos/` e `registro-peso/`), que já
+   tinham sido escritos com os mesmos tokens de CSS e a mesma convenção de
+   armazenamento justamente para poderem virar um só.
+
+   Fonte dos treinos: fonte/Treinos.xlsx, injetado acima por gerar-plano.mjs.
+   ========================================================================== */
+
+/**
+ * URL do web app do Apps Script. Enquanto estiver com o texto de fábrica, o app
+ * roda 100% local. Ver README.md.
+ *
+ * ATENÇÃO: o widget do Scriptable extrai a linha abaixo do HTML por expressão
+ * regular, procurando a declaração desta variável seguida de uma URL https
+ * entre aspas. Mudar o formato dela quebra o widget do celular em silêncio —
+ * sem erro, ele só para de atualizar.
+ *
+ * Por isso este comentário descreve o padrão em vez de reproduzi-lo: uma
+ * segunda linha com a mesma forma seria uma isca, e quem raspa o HTML pega a
+ * primeira que casar.
+ */
+var URL_DO_APP = "https://script.google.com/macros/s/AKfycbxfIEfnRK7r49DzQcKrgUb-n1dckBUd8DQIanVyEpUrBnwlRoljQ3chpLevkVuMySoxeg/exec";
+
+/** Esquema do Treino.io, confirmado no iPhone. */
+var LINK_TREINO_IO = "treinoio://";
+
+/**
+ * Duas chaves, e não uma. O estado do treino é autoritativo até sincronizar
+ * (é ele que guarda a fila de saída); o histórico de peso é só cache do que a
+ * planilha já confirmou. Num blob único, uma leitura de peso passaria por cima
+ * de marcações de treino ainda não enviadas.
+ */
+var CHAVE_ESTADO = "qg:estado:v1";
+var CHAVE_PESO = "qg:peso:v1";
+
+/** Chaves dos apps antigos, lidas uma única vez na primeira abertura do QG. */
+var CHAVE_ANTIGA_ESTADO = "treinos:v1";
+var CHAVE_ANTIGA_PESO = "registro-peso:historico";
+
+var JANELA_MEDIA = 7;
+
+var DADOS = JSON.parse(document.getElementById("plano").textContent);
+var $ = function (id) { return document.getElementById(id); };
+
+/**
+ * A rotina da semana, vinda da aba Rotina da planilha: em que modalidade cada
+ * treino é cumprido e em que dias tem musculação. `cardio` nulo é dia sem
+ * cardio; `pace` decide se os números em min/km aparecem — na bicicleta eles
+ * mentiriam, então lá ficam só os nomes de esforço.
+ *
+ * Mudou a rotina? Edite a aba Rotina e rode `node gerar-plano.mjs`.
+ */
+var MODALIDADES = DADOS.rotina;
+
+/**
+ * O dia que fecha a semana é o último com cardio — hoje o sábado, o longão.
+ * Derivado da rotina em vez de fixo, para acompanhar quem mudar a planilha.
+ */
+var DIA_QUE_FECHA = (function () {
+  for (var i = MODALIDADES.length - 1; i >= 0; i--) {
+    if (MODALIDADES[i].cardio) return i;
+  }
+  return 5;
+})();
+
+/* ==========================================================================
+   Datas
+
+   Vêm inteiras do registro-peso, que tinha o conjunto completo; o app de
+   treinos só precisava saber o dia da semana.
+   ========================================================================== */
+
+/* ISO local (não UTC): toISOString() volta um dia atrás à noite no Brasil. */
+function isoLocal(d){
+  var m = String(d.getMonth() + 1).padStart(2, "0");
+  var dia = String(d.getDate()).padStart(2, "0");
+  return d.getFullYear() + "-" + m + "-" + dia;
+}
+function deIso(iso){
+  var p = iso.split("-");
+  return new Date(+p[0], +p[1] - 1, +p[2]);
+}
+function diasEntre(isoA, isoB){
+  return Math.round((deIso(isoB) - deIso(isoA)) / 86400000);
+}
+function porExtenso(iso){
+  var hoje = isoLocal(new Date());
+  var d = diasEntre(iso, hoje);
+  if (d === 0) return "hoje";
+  if (d === 1) return "ontem";
+  if (d < 0) return "em " + formatarData(iso);
+  if (d < 7) return "há " + d + " dias";
+  return formatarData(iso);
+}
+function formatarData(iso){
+  var d = deIso(iso);
+  /* pt-BR devolve "29 de jun." conforme a versão do ICU: tira o "de" e o ponto */
+  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })
+    .replace(/\sde\s/g, " ").replace(/\./g, "");
+}
+function nKg(v){
+  return v.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+function nDelta(v){
+  var s = v > 0 ? "+" : v < 0 ? "−" : "";
+  return s + Math.abs(v).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+/** Índice do dia na semana, com segunda em 0 — a ordem das colunas da planilha. */
+function diaDeHoje() {
+  var d = new Date().getDay(); // 0 = domingo
+  return (d + 6) % 7;
+}
+
+function escapar(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/* ==========================================================================
+   Estado do treino
+   ========================================================================== */
+
+/**
+ * Uma chave só. `feitos` é indexado por "semana:dia:tipo" (tipo = musc|cardio),
+ * porque numa quarta a musculação pode acontecer sem a bike e vice-versa.
+ *
+ * `semanaAtual` não é guardado: é derivado das semanas fechadas, e assim não
+ * tem como divergir das marcações.
+ *
+ * `fila` é a fila de saída do app inteiro — carrega tanto marcações de treino
+ * quanto pesagens.
+ */
+var estado = carregar();
+
+function carregar() {
+  var vazio = {
+    versao: 1, tempo5k: DADOS.ritmos.tempo5kPadrao,
+    feitos: {}, semanasFeitas: {}, fila: [], avisoLido: false
+  };
+  var cru = null;
+  try {
+    cru = localStorage.getItem(CHAVE_ESTADO) || localStorage.getItem(CHAVE_ANTIGA_ESTADO);
+  } catch (e) { /* modo privativo */ }
+
+  if (!cru) {
+    // Primeira abertura sem planilha ligada: a coluna "Feita?" do plano
+    // embutido diz onde paramos. Com a planilha ligada, puxar() sobrepõe.
+    DADOS.semanas.forEach(function (s) {
+      if (s.feitaNaPlanilha) vazio.semanasFeitas[s.n] = true;
+    });
+    return vazio;
+  }
+
+  try {
+    var lido = JSON.parse(cru);
+    return {
+      versao: 1,
+      tempo5k: Number(lido.tempo5k) || DADOS.ritmos.tempo5kPadrao,
+      feitos: lido.feitos || {},
+      semanasFeitas: lido.semanasFeitas || {},
+      fila: lido.fila || [],
+      avisoLido: !!lido.avisoLido
+    };
+  } catch (e) {
+    return vazio;
+  }
+}
+
+function salvar() {
+  try { localStorage.setItem(CHAVE_ESTADO, JSON.stringify(estado)); } catch (e) { /* sem espaço, ou privativo */ }
+}
+
+/** Guarda a mudança e manda para a planilha. Toda escrita passa por aqui. */
+function registrar(op) {
+  op.quando = new Date().toISOString();
+  estado.fila.push(op);
+  salvar();
+  nuvem.agendar();
+}
+
+/** A semana atual é a primeira que ainda não foi fechada. */
+function semanaAtual() {
+  for (var i = 0; i < DADOS.semanas.length; i++) {
+    if (!estado.semanasFeitas[DADOS.semanas[i].n]) return DADOS.semanas[i];
+  }
+  return DADOS.semanas[DADOS.semanas.length - 1]; // plano cumprido: fica na última
+}
+
+function chave(semana, dia, tipo) { return semana + ":" + dia + ":" + tipo; }
+function feito(semana, dia, tipo) { return !!estado.feitos[chave(semana, dia, tipo)]; }
+
+function alternar(semana, dia, tipo) {
+  var k = chave(semana, dia, tipo);
+  var marcando = !estado.feitos[k];
+
+  if (marcando) estado.feitos[k] = new Date().toISOString();
+  else delete estado.feitos[k];
+  registrar({ t: "marca", k: k, feito: marcando });
+
+  // Desmarcar o sábado reabre a semana: o gatilho vale nos dois sentidos.
+  if (dia === DIA_QUE_FECHA && tipo === "cardio") definirSemana(semana, marcando);
+
+  desenhar();
+}
+
+function alternarSemana(n) {
+  definirSemana(n, !estado.semanasFeitas[n]);
+  desenhar();
+}
+
+function definirSemana(n, feita) {
+  if (!!estado.semanasFeitas[n] === feita) return;
+  if (feita) estado.semanasFeitas[n] = true;
+  else delete estado.semanasFeitas[n];
+  registrar({ t: "semana", n: n, feita: feita });
+}
+
+/* ==========================================================================
+   Estado do peso
+   ========================================================================== */
+
+var registros = [];      /* [{data:"2026-08-31", peso:82.4}] ordenado por data */
+var pendentes = {};      /* datas ainda na fila: pinta diferente no gráfico    */
+var janela = 0;          /* 0 = tudo                                           */
+
+function ordenar(lista){
+  return lista.slice().sort(function(a, b){ return a.data < b.data ? -1 : a.data > b.data ? 1 : 0; });
+}
+
+/** Troca a lista inteira pela que veio da planilha. Não desenha. */
+function aplicarLista(lista){
+  registros = ordenar(lista.filter(function(r){
+    return r && typeof r.data === "string" && isFinite(r.peso);
+  }).map(function(r){
+    return { data: r.data, peso: Number(r.peso) };
+  }));
+}
+
+/** Insere ou corrige um registro em memória. Não desenha. */
+function inserirRegistro(data, peso){
+  var i = -1;
+  for (var k = 0; k < registros.length; k++) if (registros[k].data === data) { i = k; break; }
+  if (i >= 0) registros[i] = { data: data, peso: peso };
+  else registros = ordenar(registros.concat([{ data: data, peso: peso }]));
+}
+
+/* Cache: só para a página abrir com algo na tela. A planilha sobrescreve sempre. */
+function lerCachePeso(){
+  try {
+    var cru = localStorage.getItem(CHAVE_PESO) || localStorage.getItem(CHAVE_ANTIGA_PESO);
+    if (!cru) return null;
+    var j = JSON.parse(cru);
+    return Array.isArray(j) ? j : null;
+  } catch (e) { return null; }
+}
+function salvarCachePeso(){
+  try { localStorage.setItem(CHAVE_PESO, JSON.stringify(registros)); } catch (e) {}
+}
+
+/* Média por dias de calendário, não por linhas: com buracos no histórico, as
+   últimas 7 linhas podem cobrir um mês e a curva mentiria. */
+function mediaMovel(lista){
+  return lista.map(function(r){
+    var limite = isoLocal(new Date(deIso(r.data).getTime() - (JANELA_MEDIA - 1) * 86400000));
+    var soma = 0, n = 0;
+    for (var i = 0; i < lista.length; i++){
+      if (lista[i].data > r.data) break;
+      if (lista[i].data >= limite){ soma += lista[i].peso; n++; }
+    }
+    return { data: r.data, peso: soma / n, n: n };
+  });
+}
+
+/* ==========================================================================
+   Ritmos
+   ========================================================================== */
+
+/**
+ * Cada ritmo parte do anterior, como na aba Ritmos da planilha:
+ * ST = pace de 5 km + 10 s · MT = ST + 10 · LT = MT + 9 · MP = LT + 23 · HMP = LT + 4.
+ * Os ajustes vêm da planilha e não são editáveis na tela — são calibração do
+ * plano, não preferência de uso.
+ */
+function ritmos(tempo5k) {
+  var aj = DADOS.ritmos.ajustesRitmos;
+  var p5 = tempo5k / 5;
+  var st = p5 + aj.ST;
+  var mt = st + aj.MT;
+  var lt = mt + aj.LT;
+  return { p5: p5, ST: st, MT: mt, LT: lt, MP: lt + aj.MP, HMP: lt + aj.HMP };
+}
+
+/** Tempo total de um tiro, em segundos: pace de 5 km x distância + ajuste. */
+function tiro(distancia, tempo5k) {
+  var ajuste = DADOS.ritmos.ajustesTiros[distancia];
+  if (ajuste === undefined) return null;
+  return (tempo5k / 5) * (distancia / 1000) + ajuste;
+}
+
+function mmss(s) {
+  s = Math.round(s);
+  return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+}
+
+function hms(s) {
+  s = Math.round(s);
+  var h = Math.floor(s / 3600);
+  var m = Math.floor((s % 3600) / 60);
+  var seg = s % 60;
+  if (h) return h + ":" + String(m).padStart(2, "0") + ":" + String(seg).padStart(2, "0");
+  return m + ":" + String(seg).padStart(2, "0");
+}
+
+/** Aceita "30:00", "3000" e "30". Devolve segundos, ou null. */
+function lerTempo(txt) {
+  var s = String(txt).trim().replace(/[.,]/g, ":");
+  if (!s) return null;
+
+  if (s.indexOf(":") >= 0) {
+    var partes = s.split(":");
+    if (partes.length > 3) return null;
+    var total = 0;
+    for (var i = 0; i < partes.length; i++) {
+      if (!/^\d+$/.test(partes[i])) return null;
+      total = total * 60 + Number(partes[i]);
+    }
+    return total;
+  }
+
+  if (!/^\d+$/.test(s)) return null;
+  // "3000" é 30:00; "30" é 30 minutos, que é o jeito de digitar com pressa.
+  if (s.length <= 2) return Number(s) * 60;
+  return Number(s.slice(0, -2)) * 60 + Number(s.slice(-2));
+}
+
+/* ==========================================================================
+   Leitor de siglas: decora o texto do treino sem reescrevê-lo
+   ========================================================================== */
+
+var SIGLAS = ["ST", "MT", "LT", "MP", "HMP"];
+var DISTANCIAS_DE_TIRO = [400, 600, 800, 1000, 1200, 1600, 2000];
+
+/**
+ * Devolve HTML com trechos reconhecidos virando chips clicáveis. O texto
+ * original nunca é reescrito: uma sigla desconhecida simplesmente não vira
+ * chip e aparece intacta.
+ *
+ * `mostrarNumeros` é falso nos dias de bicicleta — lá o chip fica só com o
+ * nome do esforço, porque min/km na bike não corresponde a nada.
+ */
+function decorar(texto, mostrarNumeros) {
+  var r = ritmos(estado.tempo5k);
+  var guardados = [];
+  function guardar(html) {
+    guardados.push(html);
+    return "\u0000" + (guardados.length - 1) + "\u0000";
+  }
+  function chip(verbete, rotulo, valor) {
+    var extra = mostrarNumeros && valor ? ' <b>' + escapar(valor) + "</b>" : "";
+    return '<button type="button" class="chip" data-verbete="' + escapar(verbete) + '">' +
+      escapar(rotulo) + extra + "</button>";
+  }
+
+  var s = escapar(texto);
+
+  /* 1. Parênteses de recuperação primeiro. Sem isso, o "400" de "(400 RI)" —
+        que é o trote de volta, não o tiro — ganharia um tempo-alvo errado. */
+  s = s.replace(/\(([^)]*\bRI\b[^)]*)\)/g, function (m) {
+    return guardar(chip("RI", m, ""));
+  });
+
+  /* 2. Distâncias de tiro que sobraram. O que vem depois só invalida o número
+        se for parte dele: um dígito, ou uma vírgula decimal. A vírgula de lista
+        em "400, 600, 800" tem de passar. */
+  var alvo = DISTANCIAS_DE_TIRO.join("|");
+  s = s.replace(new RegExp("(^|[^\\d])(" + alvo + ")(?!\\d)(?![.,]\\d)", "g"), function (m, antes, d) {
+    var t = tiro(Number(d), estado.tempo5k);
+    // Pace, não o tempo do tiro: é o número que o relógio mostra enquanto se
+    // corre. O tempo total do tiro fica no verbete, a um toque.
+    var pace = t ? mmss(t / (Number(d) / 1000)) + "/km" : "";
+    return antes + guardar(chip("tiro:" + d, d, pace));
+  });
+
+  /* 3. Ritmos-alvo, incluindo o "MP + 28" dos longões. */
+  s = s.replace(new RegExp("\\b(" + SIGLAS.join("|") + ")\\b(\\s*\\+\\s*(\\d+))?", "g"),
+    function (m, sigla, _mais, n) {
+      var pace = r[sigla] + (n ? Number(n) : 0);
+      return guardar(chip(n ? "MP+" : sigla, m, mmss(pace) + "/km"));
+    });
+
+  /* 4. Termos qualitativos — só a primeira aparição de cada um, senão o
+        parágrafo inteiro vira botão. */
+  var jaUsados = {};
+  s = s.replace(/\b(Leve|Tempo|Forte|Aquecimento|Desaquecimento|aquecimento|desaquecimento|RI)\b/g,
+    function (m) {
+      var termo = m.charAt(0).toUpperCase() + m.slice(1);
+      if (jaUsados[termo.toLowerCase()]) return m;
+      jaUsados[termo.toLowerCase()] = true;
+      return guardar(chip(termo, m, ""));
+    });
+
+  /* 5. A notação W:/R: das semanas 1 a 3. */
+  s = s.replace(/\bW:/, function (m) { return guardar(chip("W:", m, "")); });
+
+  return s.replace(/\u0000(\d+)\u0000/g, function (_, i) { return guardados[Number(i)]; });
+}
+
+/** A linha-resumo acima do treino: os ritmos-alvo do dia, sem repetição. */
+function resumoDePace(texto) {
+  var r = ritmos(estado.tempo5k);
+  var vistos = [];
+  var re = new RegExp("\\b(" + SIGLAS.join("|") + ")\\b(\\s*\\+\\s*(\\d+))?", "g");
+  var m;
+  while ((m = re.exec(texto))) {
+    var nome = m[0].replace(/\s+/g, " ");
+    if (vistos.indexOf(nome) < 0) vistos.push(nome);
+  }
+  return vistos.map(function (nome) {
+    var sigla = nome.split(/\s*\+\s*/)[0];
+    var mais = Number(nome.split(/\s*\+\s*/)[1] || 0);
+    return nome + " " + mmss(r[sigla] + mais);
+  }).join(" · ");
+}
+
+/* ==========================================================================
+   Verbetes
+   ========================================================================== */
+
+var GLOSSARIO = {};
+DADOS.glossario.forEach(function (g) { GLOSSARIO[g.sigla] = g.texto; });
+
+function verbete(chaveDoChip) {
+  if (chaveDoChip.indexOf("tiro:") === 0) {
+    var d = Number(chaveDoChip.slice(5));
+    var t = tiro(d, estado.tempo5k);
+    return {
+      sigla: "Tiro de " + d + " m",
+      texto: t
+        ? "Pace-alvo " + mmss(t / (d / 1000)) + " por km, o que dá " + mmss(t) + " no tiro."
+        : "Distância de tiro."
+    };
+  }
+  if (chaveDoChip === "MP+") {
+    return { sigla: "MP + N", texto: GLOSSARIO["MP + 9 / + 19 / + 28"] || "MP acrescido de N segundos por km." };
+  }
+  if (chaveDoChip === "W:") {
+    return { sigla: "W: / R:", texto: GLOSSARIO["W: / R:"] || "" };
+  }
+  if (chaveDoChip === "Aquecimento" || chaveDoChip === "Desaquecimento") {
+    return { sigla: chaveDoChip, texto: GLOSSARIO["Aquecimento / Desaquecimento"] || "" };
+  }
+  return { sigla: chaveDoChip, texto: GLOSSARIO[chaveDoChip] || "Sem verbete na planilha." };
+}
+
+var caixaVerbete = null;
+
+function mostrarVerbete(chaveDoChip) {
+  var v = verbete(chaveDoChip);
+  esconderVerbete();
+  caixaVerbete = document.createElement("aside");
+  caixaVerbete.className = "verbete";
+  caixaVerbete.setAttribute("role", "status");
+  caixaVerbete.innerHTML =
+    '<button type="button" class="fechar" aria-label="Fechar">&times;</button>' +
+    '<span class="sigla"></span><p></p>';
+  caixaVerbete.querySelector(".sigla").textContent = v.sigla;
+  caixaVerbete.querySelector("p").textContent = v.texto;
+  document.body.appendChild(caixaVerbete);
+}
+
+function esconderVerbete() {
+  if (caixaVerbete) { caixaVerbete.remove(); caixaVerbete = null; }
+}
+
+document.addEventListener("click", function (ev) {
+  var chip = ev.target.closest ? ev.target.closest(".chip") : null;
+  if (chip) { mostrarVerbete(chip.dataset.verbete); return; }
+  if (caixaVerbete && !ev.target.closest(".verbete")) esconderVerbete();
+  else if (ev.target.closest(".verbete .fechar")) esconderVerbete();
+});
+document.addEventListener("keydown", function (ev) {
+  if (ev.key === "Escape") esconderVerbete();
+});
+
+/* ==========================================================================
+   Desenho do treino
+   ========================================================================== */
+
+function temTreino(txt) {
+  return !!txt && !/^(descanso|—|-|–)$/i.test(txt.trim());
+}
+
+/**
+ * Os itens de um dia: no máximo um de cardio e um de musculação, na ordem em
+ * que fazem sentido na tela. Um dia pode legitimamente não ter nenhum.
+ */
+function itensDoDia(semana, dia) {
+  var m = MODALIDADES[dia];
+  var txt = semana.treinos[dia];
+  var itens = [];
+
+  if (temTreino(txt)) {
+    // Se o Plano puser treino num dia que a Rotina diz não ter cardio, ele
+    // aparece mesmo assim: perder treino em silêncio seria pior que um rótulo
+    // genérico.
+    itens.push({
+      tipo: "cardio",
+      rotulo: m.cardio || "Treino da planilha",
+      texto: txt,
+      pace: m.pace
+    });
+  }
+  if (m.musc) itens.push({ tipo: "musc", rotulo: "Musculação", texto: "", pace: false });
+  return itens;
+}
+
+function desenhar() {
+  var semana = semanaAtual();
+  var hoje = diaDeHoje();
+
+  /* --- cabeçalho --- */
+  $("semana-n").textContent = "Semana " + semana.n;
+  $("semana-fase").textContent = semana.fase;
+  $("semana-barra").style.width = ((semana.n - 1) / DADOS.semanas.length * 100).toFixed(1) + "%";
+
+  /* --- hoje --- */
+  var nomeDoDia = DADOS.dias[hoje];
+  $("hoje-dia").innerHTML = "<b>" + escapar(nomeDoDia) + "</b>";
+
+  var caixa = $("hoje-cartoes");
+  caixa.textContent = "";
+  var itens = itensDoDia(semana, hoje);
+
+  if (!itens.length) {
+    var proximo = proximoDiaComTreino(semana, hoje);
+    caixa.appendChild(cartaoDescanso(semana, proximo));
+  } else {
+    itens.forEach(function (item) {
+      caixa.appendChild(cartaoDeHoje(semana, hoje, item));
+    });
+  }
+
+  /* --- resto da semana --- */
+  $("resto-titulo").textContent = "Resto da semana " + semana.n;
+  var lista = $("resto-lista");
+  lista.textContent = "";
+  for (var d = 0; d < 7; d++) {
+    if (d === hoje) continue;
+    var li = linhaDeDia(semana, d, false);
+    if (li) lista.appendChild(li);
+  }
+
+  var fechada = !!estado.semanasFeitas[semana.n];
+  $("fechar-semana").textContent = fechada ? "Reabrir semana " + semana.n : "Fechar semana " + semana.n;
+  $("fechar-ajuda").textContent = feito(semana.n, DIA_QUE_FECHA, "cardio")
+    ? "O longão de sábado fecha a semana sozinho."
+    : "A semana fecha ao marcar o longão de sábado — ou por aqui, se você fez o resto.";
+
+  desenharPlano(semana);
+  desenharRitmos();
+  $("rodape-estado").textContent = "semana " + semana.n + " de " + DADOS.semanas.length;
+}
+
+function cartaoDescanso(semana, proximo) {
+  var caixa = document.createElement("section");
+  caixa.className = "cartao";
+  var html = '<div class="cartao-topo"><span class="modal">Descanso</span></div>' +
+    '<p class="treino">Hoje não tem nada marcado. Bom descanso.</p>';
+
+  if (proximo) {
+    var item = itensDoDia(semana, proximo.dia)[0];
+    html += '<div class="longao">A seguir · ' + escapar(DADOS.dias[proximo.dia]) + " · " +
+      escapar(item.rotulo) + "</div>" +
+      '<p class="treino" style="color:var(--ink-2);font-size:13px;margin-top:var(--s2)">' +
+      decorar(item.texto || "Musculação", item.pace) + "</p>";
+  }
+  caixa.innerHTML = html;
+  return caixa;
+}
+
+function proximoDiaComTreino(semana, apartirDe) {
+  for (var i = 1; i <= 7; i++) {
+    var d = (apartirDe + i) % 7;
+    if (itensDoDia(semana, d).length) return { dia: d };
+  }
+  return null;
+}
+
+function cartaoDeHoje(semana, dia, item) {
+  var jaFeito = feito(semana.n, dia, item.tipo);
+  var caixa = document.createElement("section");
+  caixa.className = "cartao" + (jaFeito ? " cartao--feito" : "") + (item.tipo === "musc" ? " cartao--menor" : "");
+
+  var resumo = item.pace && item.texto ? resumoDePace(item.texto) : "";
+  var html = '<div class="cartao-topo"><span class="modal">' + escapar(item.rotulo) + "</span>" +
+    (resumo ? '<span class="alvo">' + escapar(resumo) + "</span>" : "") + "</div>";
+
+  if (item.texto) html += '<p class="treino">' + decorar(item.texto, item.pace) + "</p>";
+  if (item.tipo === "cardio" && dia === DIA_QUE_FECHA && semana.longao) {
+    html += '<p class="longao">Longão de ' + String(semana.longao).replace(".", ",") + " km</p>";
+  }
+  if (item.tipo === "musc") {
+    html += '<p class="treino" style="color:var(--ink-2)">O treino de hoje está no Treino.io.</p>';
+  }
+
+  html += '<div class="acoes">';
+  if (item.tipo === "musc") {
+    html += '<a class="botao botao--fantasma" href="' + LINK_TREINO_IO + '">Abrir Treino.io</a>';
+  }
+  html += '<button type="button" class="botao' + (jaFeito ? " botao--feito" : "") + '" data-marcar="1">' +
+    (jaFeito ? "Feito" : "Marcar como feito") + "</button></div>";
+
+  caixa.innerHTML = html;
+  caixa.querySelector("[data-marcar]").addEventListener("click", function () {
+    alternar(semana.n, dia, item.tipo);
+  });
+  return caixa;
+}
+
+function linhaDeDia(semana, dia, mostrarTextoCompleto) {
+  var itens = itensDoDia(semana, dia);
+  if (!itens.length) return null;
+
+  var li = document.createElement("li");
+  li.className = "dia" + (dia === diaDeHoje() ? " dia--hoje" : "");
+  var cabeca = document.createElement("span");
+  cabeca.className = "dia-nome";
+  cabeca.textContent = DADOS.dias[dia];
+  li.appendChild(cabeca);
+
+  itens.forEach(function (item) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "item";
+    b.setAttribute("aria-pressed", feito(semana.n, dia, item.tipo) ? "true" : "false");
+
+    var texto = item.texto || "Treino no Treino.io";
+    if (!mostrarTextoCompleto) texto = texto.replace(/\n+/g, " · ");
+
+    b.innerHTML = '<span class="caixa"></span><span class="item-txt' +
+      (mostrarTextoCompleto ? " treino" : "") + '"><em>' + escapar(item.rotulo) + "</em>" +
+      decorar(texto, item.pace) + "</span>";
+
+    b.addEventListener("click", function (ev) {
+      // Um chip dentro do item abre o verbete; não marca o treino sem querer.
+      if (ev.target.closest(".chip")) return;
+      alternar(semana.n, dia, item.tipo);
+    });
+    li.appendChild(b);
+  });
+  return li;
+}
+
+/* ---- aba Plano ---- */
+
+function desenharPlano(atual) {
+  var caixa = $("lista-semanas");
+  var abertas = {};
+  caixa.querySelectorAll("details[open]").forEach(function (d) { abertas[d.dataset.semana] = true; });
+  // Primeiro desenho: a semana atual já nasce aberta.
+  if (!caixa.childElementCount) abertas[atual.n] = true;
+  caixa.textContent = "";
+
+  DADOS.semanas.forEach(function (s) {
+    var fechada = !!estado.semanasFeitas[s.n];
+    var det = document.createElement("details");
+    det.className = "semana" + (fechada ? " semana--feita" : "") + (s.n === atual.n ? " semana--atual" : "");
+    det.dataset.semana = s.n;
+    if (abertas[s.n]) det.open = true;
+
+    var sum = document.createElement("summary");
+    sum.innerHTML = '<span class="num">' + s.n + "</span>" +
+      '<span class="fase">' + escapar(s.fase) + "</span>" +
+      '<span class="km">' + String(s.longao).replace(".", ",") + " km</span>" +
+      '<button type="button" class="estado">' + (fechada ? "feita" : "aberta") + "</button>";
+    sum.querySelector(".estado").addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      alternarSemana(s.n);
+    });
+    det.appendChild(sum);
+
+    var corpo = document.createElement("ul");
+    corpo.className = "semana-corpo";
+    for (var d = 0; d < 7; d++) {
+      var li = linhaDeDia(s, d, true);
+      if (li) corpo.appendChild(li);
+    }
+    det.appendChild(corpo);
+    caixa.appendChild(det);
+  });
+}
+
+/* ---- aba Ritmos ---- */
+
+var NOMES_DE_RITMO = {
+  ST: "Short Tempo (ST)", MT: "Mid Tempo (MT)", LT: "Long Tempo (LT)",
+  MP: "Marathon Pace (MP)", HMP: "Half Marathon Pace (HMP)"
+};
+
+function desenharRitmos() {
+  var r = ritmos(estado.tempo5k);
+
+  var linhas = ['<tr><td>Pace de 5 km</td><td class="destaque">' + mmss(r.p5) + "</td></tr>"];
+  ["ST", "MT", "LT", "MP", "HMP"].forEach(function (k) {
+    linhas.push("<tr><td>" + NOMES_DE_RITMO[k] + '</td><td class="destaque">' + mmss(r[k]) + "</td></tr>");
+  });
+  $("tabela-ritmos").innerHTML = linhas.join("");
+
+  $("tabela-tiros").innerHTML = DISTANCIAS_DE_TIRO.map(function (d) {
+    var t = tiro(d, estado.tempo5k);
+    return "<tr><td>" + d + " m</td><td>" + mmss(t) + '</td><td class="destaque">' +
+      mmss(t / (d / 1000)) + "</td></tr>";
+  }).join("");
+
+  var provas = [
+    ["5 km", 5, r.p5, "pace de 5 km"],
+    ["10 km", 10, r.ST, "ST"],
+    ["Meia maratona", 21.0975, r.HMP, "HMP"],
+    ["Maratona", 42.195, r.MP, "MP"]
+  ];
+  $("tabela-provas").innerHTML = provas.map(function (p) {
+    return "<tr><td>" + p[0] + "</td><td>" + p[3] + '</td><td class="destaque">' +
+      hms(p[2] * p[1]) + "</td></tr>";
+  }).join("");
+}
+
+function desenharGlossario() {
+  $("glossario").innerHTML = DADOS.glossario.map(function (g) {
+    return "<div><dt>" + escapar(g.sigla) + "</dt><dd>" + escapar(g.texto) + "</dd></div>";
+  }).join("");
+}
+
+/* ==========================================================================
+   Conversor
+   ========================================================================== */
+
+/**
+ * Preencha dois campos e o terceiro sai. O alvo é sempre o campo que NÃO está
+ * entre os dois últimos que você tocou — assim continuar digitando move o
+ * resultado em vez de travar num campo só.
+ */
+var ordemDeEdicao = [];
+
+function conversor(idEditado) {
+  var campos = ["c-dist", "c-tempo", "c-pace"];
+  ordemDeEdicao = [idEditado].concat(ordemDeEdicao.filter(function (x) { return x !== idEditado; }));
+  var alvo = campos.filter(function (c) { return ordemDeEdicao.indexOf(c) < 0 || ordemDeEdicao.indexOf(c) > 1; })[0];
+  if (!alvo) return;
+
+  campos.forEach(function (c) { $(c).classList.toggle("calculado", c === alvo); });
+
+  var dist = parseFloat(String($("c-dist").value).replace(",", "."));
+  var tempo = lerTempo($("c-tempo").value);
+  var pace = lerTempo($("c-pace").value);
+
+  if (alvo === "c-tempo" && dist > 0 && pace) $("c-tempo").value = hms(dist * pace);
+  else if (alvo === "c-pace" && dist > 0 && tempo) $("c-pace").value = mmss(tempo / dist);
+  else if (alvo === "c-dist" && tempo && pace) $("c-dist").value = (tempo / pace).toFixed(2).replace(".", ",");
+  else $(alvo).value = "";
+}
+
+/* ==========================================================================
+   Desenho do peso
+   ========================================================================== */
+
+/* Chama-se svgEl, e não el, porque várias funções do lado do treino usam uma
+   variável local chamada `el`. Com o nome curto, o helper global ficaria
+   sombreado dentro delas — funciona, mas é uma armadilha esperando alguém. */
+var SVG_NS = "http://www.w3.org/2000/svg";
+function svgEl(nome, attrs){
+  var e = document.createElementNS(SVG_NS, nome);
+  for (var k in attrs) if (attrs[k] !== undefined && attrs[k] !== null) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+var L = { esq: 40, dir: 10, topo: 14, base: 26, alt: 260 };
+var geometria = null;   /* guarda escalas para o toque encontrar o ponto */
+
+function visiveis(){
+  if (!janela) return registros;
+  var corte = isoLocal(new Date(Date.now() - (janela - 1) * 86400000));
+  return registros.filter(function(r){ return r.data >= corte; });
+}
+
+function desenharGrafico(){
+  var plot = $("plot");
+  var antigo = plot.querySelector("svg");
+  if (antigo) antigo.remove();
+
+  var dados = visiveis();
+  var vazio = $("vazio");
+  if (dados.length === 0){
+    vazio.hidden = false;
+    vazio.textContent = registros.length
+      ? "Nenhum registro nesse período."
+      : "Sem registros ainda. O primeiro peso lançado aparece aqui.";
+    geometria = null;
+    return;
+  }
+  vazio.hidden = true;
+
+  var W = Math.max(plot.clientWidth || 0, 320);
+  var H = L.alt;
+  var iw = W - L.esq - L.dir;
+  var ih = H - L.topo - L.base;
+
+  var media = mediaMovel(dados);
+  var todos = dados.map(function(r){ return r.peso; }).concat(media.map(function(r){ return r.peso; }));
+  var min = Math.min.apply(null, todos);
+  var max = Math.max.apply(null, todos);
+  /* nunca deixar a faixa colapsar: um único ponto viraria divisão por zero */
+  var folga = Math.max((max - min) * 0.18, 0.5);
+  var y0 = min - folga, y1 = max + folga;
+
+  var primeiro = dados[0].data;
+  var ultimo = dados[dados.length - 1].data;
+  var vao = Math.max(diasEntre(primeiro, ultimo), 1);
+
+  function X(iso){ return L.esq + (diasEntre(primeiro, iso) / vao) * iw; }
+  function Y(p){ return L.topo + (1 - (p - y0) / (y1 - y0)) * ih; }
+
+  var svg = svgEl("svg", {
+    viewBox: "0 0 " + W + " " + H,
+    role: "img",
+    "aria-label": "Evolução do peso: " + dados.length + " registros, de " +
+      formatarData(primeiro) + " a " + formatarData(ultimo) + "."
+  });
+
+  /* grade e rótulos do eixo vertical */
+  var linhas = 4;
+  for (var i = 0; i <= linhas; i++){
+    var v = y0 + (y1 - y0) * (i / linhas);
+    var y = Y(v);
+    svg.appendChild(svgEl("line", { class: "grade", x1: L.esq, y1: y, x2: W - L.dir, y2: y }));
+    var t = svgEl("text", { class: "eixo", x: L.esq - 8, y: y + 3, "text-anchor": "end" });
+    t.textContent = nKg(v);
+    svg.appendChild(t);
+  }
+
+  /* eixo horizontal: primeira e última data, e o meio quando cabe */
+  var marcas = dados.length > 2 ? [primeiro, dados[Math.floor(dados.length / 2)].data, ultimo] : [primeiro, ultimo];
+  marcas.filter(function(m, k, a){ return a.indexOf(m) === k; }).forEach(function(iso, k, arr){
+    var t = svgEl("text", {
+      class: "eixo", x: X(iso), y: H - 8,
+      "text-anchor": k === 0 ? "start" : k === arr.length - 1 ? "end" : "middle"
+    });
+    t.textContent = formatarData(iso);
+    svg.appendChild(t);
+  });
+
+  function caminho(lista){
+    return lista.map(function(r, k){
+      return (k ? "L" : "M") + X(r.data).toFixed(1) + " " + Y(r.peso).toFixed(1);
+    }).join(" ");
+  }
+
+  if (dados.length > 1){
+    svg.appendChild(svgEl("path", { class: "linha-dia", d: caminho(dados) }));
+  }
+
+  var g = svgEl("g", { class: "pontos" });
+  dados.forEach(function(r){
+    g.appendChild(svgEl("circle", {
+      cx: X(r.data), cy: Y(r.peso), r: dados.length > 90 ? 1.5 : 2.5,
+      class: pendentes[r.data] ? "pendente" : null
+    }));
+  });
+  svg.appendChild(g);
+
+  /* a média só existe de verdade quando há dias suficientes atrás dela */
+  var mediaFirme = media.filter(function(r){ return r.n >= 2; });
+  if (mediaFirme.length > 1){
+    svg.appendChild(svgEl("path", { class: "linha-media", d: caminho(mediaFirme) }));
+  }
+
+  var mira = svgEl("g", { class: "mira-grupo", style: "display:none" });
+  var miraLinha = svgEl("line", { class: "mira", y1: L.topo, y2: H - L.base });
+  var miraPonto = svgEl("circle", { class: "mira-ponto", r: 4.5 });
+  mira.appendChild(miraLinha);
+  mira.appendChild(miraPonto);
+  svg.appendChild(mira);
+
+  plot.insertBefore(svg, $("vazio"));
+
+  geometria = {
+    svg: svg, dados: dados, media: media, W: W, X: X, Y: Y,
+    mira: mira, miraLinha: miraLinha, miraPonto: miraPonto
+  };
+}
+
+/* ---- leitura por toque --------------------------------------------------- */
+
+var dica = null;
+
+function pontoMaisProximo(clienteX){
+  if (!geometria) return null;
+  var caixa = geometria.svg.getBoundingClientRect();
+  var escala = geometria.W / caixa.width;
+  var x = (clienteX - caixa.left) * escala;
+  var melhor = null, dist = Infinity;
+  geometria.dados.forEach(function(r, i){
+    var d = Math.abs(geometria.X(r.data) - x);
+    if (d < dist){ dist = d; melhor = i; }
+  });
+  return melhor;
+}
+
+function mostrarDica(i){
+  if (!geometria || i == null) return;
+  var r = geometria.dados[i];
+  var m = geometria.media[i];
+  var caixa = geometria.svg.getBoundingClientRect();
+  var plotCaixa = $("plot").getBoundingClientRect();
+  var escala = caixa.width / geometria.W;
+
+  geometria.mira.style.display = "";
+  geometria.miraLinha.setAttribute("x1", geometria.X(r.data));
+  geometria.miraLinha.setAttribute("x2", geometria.X(r.data));
+  geometria.miraPonto.setAttribute("cx", geometria.X(r.data));
+  geometria.miraPonto.setAttribute("cy", geometria.Y(r.peso));
+
+  if (!dica){
+    dica = document.createElement("div");
+    dica.className = "dica";
+    $("plot").appendChild(dica);
+  }
+  dica.innerHTML = "";
+  var forte = document.createElement("b");
+  forte.textContent = nKg(r.peso) + " kg";
+  var leg = document.createElement("span");
+  leg.textContent = formatarData(r.data) + (m && m.n >= 2 ? " · média " + nKg(m.peso) : "");
+  dica.appendChild(forte);
+  dica.appendChild(leg);
+
+  var px = (caixa.left - plotCaixa.left) + geometria.X(r.data) * escala;
+  var py = (caixa.top - plotCaixa.top) + geometria.Y(r.peso) * escala;
+
+  /* precisa estar visível para ter largura: a caixa é centrada no ponto
+     (translate -50%), então o limite é meia largura, e ela varia com o texto */
+  dica.hidden = false;
+  var meia = dica.offsetWidth / 2;
+  dica.style.left = Math.max(meia, Math.min(px, plotCaixa.width - meia)) + "px";
+  dica.style.top = py + "px";
+}
+
+function esconderDica(){
+  if (dica) dica.hidden = true;
+  if (geometria) geometria.mira.style.display = "none";
+}
+
+/* ---- painéis do peso ----------------------------------------------------- */
+
+function desenharAtual(){
+  var n = registros.length;
+  if (!n){
+    $("valor-atual").textContent = "—";
+    $("quando").textContent = "nenhum registro na planilha";
+    return;
+  }
+  var ultimo = registros[n - 1];
+  $("valor-atual").textContent = nKg(ultimo.peso);
+
+  var texto = porExtenso(ultimo.data);
+  if (n > 1){
+    var d = ultimo.peso - registros[n - 2].peso;
+    var span = document.createElement("span");
+    span.className = "delta " + (d > 0.049 ? "sobe" : d < -0.049 ? "desce" : "");
+    span.textContent = nDelta(d) + " kg";
+    $("quando").textContent = texto + " · ";
+    $("quando").appendChild(span);
+    $("quando").appendChild(document.createTextNode(" desde " + formatarData(registros[n - 2].data)));
+  } else {
+    $("quando").textContent = texto + " · primeiro registro";
+  }
+}
+
+function desenharResumo(){
+  var dados = visiveis();
+  var caixa = $("resumo");
+  if (dados.length < 1){ caixa.hidden = true; return; }
+  caixa.hidden = false;
+
+  var d = dados[dados.length - 1].peso - dados[0].peso;
+  var alvoVar = $("r-var");
+  alvoVar.textContent = dados.length > 1 ? nDelta(d) + " kg" : "—";
+  alvoVar.className = dados.length > 1 ? "delta " + (d > 0.049 ? "sobe" : d < -0.049 ? "desce" : "") : "";
+
+  var m = mediaMovel(dados);
+  var ultimaMedia = m[m.length - 1];
+  $("r-media").textContent = ultimaMedia.n >= 2 ? nKg(ultimaMedia.peso) + " kg" : "—";
+  $("r-min").textContent = nKg(Math.min.apply(null, dados.map(function(r){ return r.peso; }))) + " kg";
+  $("r-n").textContent = dados.length;
+}
+
+/**
+ * A tira da aba Hoje: o cruzamento que só existe porque os dois apps viraram
+ * um. Mostra o último peso, quanto ele andou desde a pesagem anterior e a média
+ * de 7 dias — que é o número que importa, porque o peso do dia oscila com sal,
+ * água e horário.
+ */
+function desenharTiraPeso(){
+  var n = registros.length;
+  if (!n){
+    $("tira-valor").textContent = "—";
+    $("tira-meta").textContent = "nenhuma pesagem registrada";
+    return;
+  }
+  var ultimo = registros[n - 1];
+  $("tira-valor").textContent = nKg(ultimo.peso);
+
+  var partes = [porExtenso(ultimo.data)];
+  var meta = $("tira-meta");
+  meta.textContent = "";
+
+  if (n > 1){
+    var d = ultimo.peso - registros[n - 2].peso;
+    var span = document.createElement("span");
+    span.className = "delta " + (d > 0.049 ? "sobe" : d < -0.049 ? "desce" : "");
+    span.textContent = nDelta(d) + " kg";
+    meta.appendChild(document.createTextNode(partes[0] + " · "));
+    meta.appendChild(span);
+  } else {
+    meta.appendChild(document.createTextNode(partes[0] + " · primeira pesagem"));
+  }
+
+  var m = mediaMovel(registros);
+  var ultimaMedia = m[m.length - 1];
+  if (ultimaMedia && ultimaMedia.n >= 2){
+    meta.appendChild(document.createTextNode(" · média 7d " + nKg(ultimaMedia.peso)));
+  }
+}
+
+function desenharPeso(){
+  desenharAtual();
+  desenharTiraPeso();
+  desenharGrafico();
+  desenharResumo();
+}
+
+function status(texto, classe){
+  var s = $("status");
+  s.textContent = texto;
+  s.className = "status" + (classe ? " " + classe : "");
+}
+
+/* ==========================================================================
+   Transporte
+   ========================================================================== */
+
+/* Servido pelo Apps Script: o HTML roda num iframe sandbox, então fetch para a
+   própria origem não chega ao doGet. A ponte oficial é google.script.run, que
+   também dispensa qualquer discussão de CORS. */
+var servidoPeloAppsScript =
+  typeof google !== "undefined" && google.script && google.script.run;
+
+function chamar(nome, arg){
+  return new Promise(function(ok, falha){
+    google.script.run.withSuccessHandler(ok).withFailureHandler(falha)[nome](arg);
+  });
+}
+
+function conferir(r){
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.json().then(function(j){
+    if (j && j.erro) throw new Error(j.erro);
+    return j;
+  });
+}
+
+var api = servidoPeloAppsScript ? {
+  rotulo: "apps script",
+  ler: function(){ return chamar("lerTudo"); },
+  enviar: function(ops){ return chamar("aplicarOps", ops); }
+} : {
+  rotulo: "planilha",
+  ler: function(){
+    return fetch(URL_DO_APP + "?api=1&t=" + Date.now(), { redirect: "follow" }).then(conferir);
+  },
+  /* Sem cabeçalho Content-Type: o fetch manda text/plain, que é requisição
+     simples. Qualquer application/json dispararia o preflight OPTIONS, que
+     o Apps Script não responde. */
+  enviar: function(ops){
+    return fetch(URL_DO_APP, {
+      method: "POST",
+      redirect: "follow",
+      body: JSON.stringify({ ops: ops })
+    }).then(conferir);
+  }
+};
+
+/* ==========================================================================
+   Nuvem
+   ========================================================================== */
+
+/**
+ * A planilha é o banco de dados; o localStorage é cache e fila de saída.
+ *
+ * Três decisões sustentam isso:
+ *
+ * 1. **Operações, não estado inteiro.** Cada marcação e cada pesagem vira uma
+ *    op na fila. Mandar o estado completo faria o último aparelho a sincronizar
+ *    apagar o que o outro tinha gravado — marcar no celular sem sinal e depois
+ *    abrir no PC perderia a marcação do celular.
+ * 2. **A fila sobrevive a tudo.** Ela mora no localStorage junto com o estado,
+ *    então fechar o app no meio, ficar sem rede ou o Apps Script cair não
+ *    perdem nada: na próxima chance, a fila escoa.
+ * 3. **Uma fila só para os dois assuntos.** Treino e peso passam pelo mesmo
+ *    `escoar()`, e `puxar()` traz progresso e histórico numa requisição só.
+ *    Antes da fusão o peso gravava de forma síncrona e desfazia na falha; com
+ *    fila, uma pesagem offline fica pendente em vez de virar erro. A validação
+ *    do valor continua acontecendo antes de enfileirar, então número errado
+ *    segue sendo barrado na hora.
+ */
+var nuvem = {
+  enviando: false,
+  timer: null,
+
+  ligada: function () { return !!servidoPeloAppsScript || URL_DO_APP.indexOf("http") === 0; },
+
+  /** Junta toques seguidos numa requisição só. */
+  agendar: function () {
+    if (!this.ligada()) { mostrarEstado(); return; }
+    mostrarEstado();
+    clearTimeout(this.timer);
+    this.timer = setTimeout(function () { nuvem.escoar(); }, 600);
+  },
+
+  /**
+   * Traz o que está na planilha e reaplica por cima o que ainda não subiu.
+   * Sem esse reaplicar, abrir o app engoliria o que foi feito offline.
+   */
+  puxar: function () {
+    if (!this.ligada()) return;
+    api.ler()
+      .then(function (dados) {
+        if (!dados || !dados.feitos) throw new Error("resposta sem progresso");
+        estado.feitos = dados.feitos;
+        estado.semanasFeitas = dados.semanasFeitas || {};
+        aplicarLista(dados.registros || []);
+
+        // O que a planilha confirmou deixa de ser pendente; o que ainda está
+        // na fila volta a ser marcado como tal ao reaplicar as ops.
+        pendentes = {};
+        estado.fila.forEach(aplicarOp);
+
+        salvar();
+        salvarCachePeso();
+        desenhar();
+        desenharPeso();
+        nuvem.escoar();
+      })
+      .catch(function () { mostrarEstado("offline"); });
+  },
+
+  /** Esvazia a fila. */
+  escoar: function () {
+    if (!this.ligada() || this.enviando || !estado.fila.length) return;
+    this.enviando = true;
+    var indo = estado.fila.slice();
+    mostrarEstado();
+
+    api.enviar(indo)
+      .then(function (resposta) {
+        if (resposta && resposta.erro) throw new Error(resposta.erro);
+        // Tira só o que foi enviado: o que entrou na fila durante a viagem fica.
+        estado.fila = estado.fila.slice(indo.length);
+        nuvem.enviando = false;
+
+        // As pesagens que acabaram de subir deixam de ser pendentes.
+        indo.forEach(function (op) {
+          if (op.t === "peso") delete pendentes[op.data];
+        });
+
+        salvar();
+        salvarCachePeso();
+        mostrarEstado();
+        desenharPeso();
+        if (estado.fila.length) nuvem.escoar();
+      })
+      .catch(function () {
+        // A fila fica intacta de propósito: tentamos de novo depois.
+        nuvem.enviando = false;
+        mostrarEstado("offline");
+      });
+  }
+};
+
+/** Reaplica uma operação da fila sobre o estado vindo da planilha. */
+function aplicarOp(op) {
+  if (op.t === "marca") {
+    if (op.feito) estado.feitos[op.k] = op.quando;
+    else delete estado.feitos[op.k];
+  } else if (op.t === "semana") {
+    if (op.feita) estado.semanasFeitas[op.n] = true;
+    else delete estado.semanasFeitas[op.n];
+  } else if (op.t === "peso") {
+    inserirRegistro(op.data, op.peso);
+    pendentes[op.data] = true;
+  }
+}
+
+function mostrarEstado(forcar) {
+  var alvo = $("origem");
+  if (!nuvem.ligada()) { alvo.textContent = "só neste aparelho"; return; }
+  if (forcar === "offline") {
+    alvo.textContent = estado.fila.length
+      ? "offline · " + estado.fila.length + " a enviar"
+      : "offline";
+    return;
+  }
+  if (estado.fila.length) { alvo.textContent = "salvando…"; return; }
+  alvo.textContent = api.rotulo;
+}
+
+/* ==========================================================================
+   Pesagem
+   ========================================================================== */
+
+function enviarPeso(ev){
+  ev.preventDefault();
+  var peso = parseFloat(String($("peso").value).replace(",", "."));
+  var data = $("data").value;
+  if (!isFinite(peso) || !data){ status("preencha peso e data", "erro"); return; }
+  if (peso < 20 || peso > 400){ status("peso fora da faixa (20 a 400 kg)", "erro"); return; }
+
+  var jaTinha = registros.some(function(r){ return r.data === data; });
+
+  pendentes[data] = true;
+  inserirRegistro(data, peso);
+  registrar({ t: "peso", data: data, peso: peso });
+
+  $("peso").value = "";
+  $("peso").blur();
+  salvarCachePeso();
+  desenharPeso();
+
+  status(
+    nuvem.ligada()
+      ? (jaTinha ? "valor de " + formatarData(data) + " corrigido" : "registrado")
+      : "guardado só neste aparelho",
+    "ok"
+  );
+}
+
+/* ==========================================================================
+   Abas
+   ========================================================================== */
+
+var abas = [
+  ["aba-hoje", "painel-hoje"],
+  ["aba-plano", "painel-plano"],
+  ["aba-peso", "painel-peso"],
+  ["aba-ritmos", "painel-ritmos"]
+];
+
+function irPara(idDaAba) {
+  abas.forEach(function (par) {
+    var ativo = par[0] === idDaAba;
+    $(par[0]).setAttribute("aria-selected", ativo ? "true" : "false");
+    $(par[1]).hidden = !ativo;
+  });
+  // O gráfico mede `clientWidth` para escolher o viewBox, e num painel escondido
+  // isso é zero: sem redesenhar ao abrir a aba, ele ficaria preso na largura
+  // mínima de 320 px que o desenho usa como piso.
+  if (idDaAba === "aba-peso") desenharGrafico();
+  window.scrollTo(0, 0);
+}
+
+abas.forEach(function (par) {
+  $(par[0]).addEventListener("click", function () { irPara(par[0]); });
+});
+
+/* ==========================================================================
+   Ligação
+   ========================================================================== */
+
+$("ir-para-peso").addEventListener("click", function () {
+  irPara("aba-peso");
+  $("peso").focus();
+});
+
+$("fechar-semana").addEventListener("click", function () {
+  alternarSemana(semanaAtual().n);
+});
+
+$("tempo5k").addEventListener("input", function () {
+  var s = lerTempo(this.value);
+  var ok = s !== null && s >= 600 && s <= 5400;
+  $("tempo5k-ajuda").classList.toggle("erro", this.value !== "" && !ok);
+  $("tempo5k-ajuda").textContent = this.value !== "" && !ok
+    ? "Use mm:ss, entre 10:00 e 90:00."
+    : "Todo o resto desta aba sai daqui.";
+  if (!ok) return;
+  estado.tempo5k = s;
+  salvar();
+  desenhar();
+});
+$("tempo5k").addEventListener("blur", function () { this.value = mmss(estado.tempo5k); });
+
+["c-dist", "c-tempo", "c-pace"].forEach(function (id) {
+  $(id).addEventListener("input", function () { conversor(id); });
+});
+
+$("setup-ok").addEventListener("click", function () {
+  estado.avisoLido = true;
+  salvar();
+  $("setup").hidden = true;
+});
+
+$("form-peso").addEventListener("submit", enviarPeso);
+
+$("periodos").addEventListener("click", function (ev) {
+  var b = ev.target.closest("button[data-dias]");
+  if (!b) return;
+  janela = Number(b.dataset.dias);
+  Array.prototype.forEach.call(this.querySelectorAll("button"), function (o) {
+    o.setAttribute("aria-pressed", String(o === b));
+  });
+  esconderDica();
+  desenharGrafico();
+  desenharResumo();
+});
+
+var plot = $("plot");
+plot.addEventListener("pointermove", function (e) { mostrarDica(pontoMaisProximo(e.clientX)); });
+plot.addEventListener("pointerdown", function (e) { mostrarDica(pontoMaisProximo(e.clientX)); });
+plot.addEventListener("pointerleave", esconderDica);
+
+var reflow;
+window.addEventListener("resize", function () {
+  clearTimeout(reflow);
+  reflow = setTimeout(function () { esconderDica(); desenharGrafico(); }, 120);
+});
+
+/* ==========================================================================
+   Partida
+   ========================================================================== */
+
+$("setup").hidden = nuvem.ligada() || estado.avisoLido;
+$("rodape-fonte").textContent = "Treinos · " + DADOS.geradoEm;
+$("tempo5k").value = mmss(estado.tempo5k);
+$("data").value = isoLocal(new Date());
+$("data").max = isoLocal(new Date());
+
+var cachePeso = lerCachePeso();
+if (cachePeso && cachePeso.length) aplicarLista(cachePeso);
+// A fila é reaplicada por cima do cache pelo mesmo motivo de puxar(): o que foi
+// feito offline tem de continuar visível antes da planilha responder.
+estado.fila.forEach(aplicarOp);
+
+desenharGlossario();
+desenhar();
+desenharPeso();
+mostrarEstado();
+nuvem.puxar();
+
+// Voltar para a aba depois de um dia inteiro deve mostrar o dia certo — e é a
+// deixa mais confiável que existe no celular para escoar a fila.
+document.addEventListener("visibilitychange", function () {
+  if (!document.hidden) { desenhar(); nuvem.puxar(); }
+});
+window.addEventListener("online", function () { nuvem.puxar(); });
+</script>
+</body>
+</html>

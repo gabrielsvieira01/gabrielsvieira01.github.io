@@ -1,0 +1,21 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="QG">
+  <!--
+    "Q cronômetro" — a marca do QG.
+
+    O Q já é a silhueta de um cronômetro: círculo mais haste. Aqui a haste vira
+    coroa, e o ponteiro aponta para as duas horas.
+
+    Sem canto arredondado de propósito: `*{border-radius:0}` vale em todo o app,
+    e linecap/linejoin redondos aqui brigariam com isso. A cor sai do token
+    --accent (#FFB000); o traço é grosso o bastante para sobreviver aos 16px do
+    favicon, onde fio de 0,5px desaparece.
+  -->
+  <g fill="none" stroke="#FFB000" stroke-width="4"
+     stroke-linecap="square" stroke-linejoin="miter">
+    <circle cx="32" cy="36" r="18"/>
+    <path d="M26 13 H38"/>
+    <path d="M32 13 V18"/>
+    <path d="M32 36 L43 27"/>
+    <path d="M45 49 L56 60"/>
+  </g>
+</svg>

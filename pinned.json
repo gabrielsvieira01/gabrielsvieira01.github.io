@@ -14,12 +14,8 @@
             "as": "Integradora 7o período"
         },
         {
-            "path": "registro-peso/index.html",
-            "as": "Registro de peso"
-        },
-        {
-            "path": "treinos/index.html",
-            "as": "Treinos"
+            "path": "qg/index.html",
+            "as": "QG"
         }
     ]
 }
