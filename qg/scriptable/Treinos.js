@@ -564,11 +564,34 @@ if (cfg.runsInWidget) {
    * só queria que o dado ficasse pronto. O trabalho é ir na rede sem pressa e
    * deixar o cache quente para a próxima vez que o iOS acordar o widget.
    *
-   * O Atalhos não repinta o widget — só o WidgetKit faz isso. O que esta
-   * execução compra é que, quando ele repintar, o dado já esteja em disco e o
-   * desenho seja instantâneo em vez de uma aposta na rede.
+   * Esta execução não repinta o widget — quem repinta é o WidgetKit, e no
+   * Atalhos isso é a ação "Refresh All Widgets", que deve vir DEPOIS desta.
+   * O que se compra aqui é que, quando a repintura vier, o dado já esteja em
+   * disco e o desenho seja instantâneo em vez de uma aposta na rede.
    */
-  await carregar();
+  let resumo;
+  try {
+    const dados = await carregar();
+    const s = semanaAtual(dados.plano, dados.progresso);
+    resumo = dados.doCache
+      ? "QG: rede falhou, cache anterior mantido"
+      : "QG: cache aquecido · semana " + s.n + " · " +
+        Object.keys(dados.progresso.feitos).length + " marcações";
+  } catch (erro) {
+    // Uma manhã sem sinal não pode fazer a automação falhar todo dia: melhor
+    // devolver o motivo e deixar o widget seguir com o cache que já tinha.
+    resumo = "QG: não atualizou — " + ((erro && erro.message) || erro);
+  }
+
+  /**
+   * O Atalhos espera um valor de volta desta ação. Sem isso ele acusa
+   * "Script completed without presenting UI... or outputting a value" e trata
+   * a execução como falha, mesmo com o Script.complete() logo abaixo.
+   *
+   * De brinde, o texto é diagnóstico: dá para pendurar uma notificação nele no
+   * Atalhos e ver se o aquecimento está mesmo acontecendo.
+   */
+  Script.setShortcutOutput(resumo);
 }
 
 Script.complete();
