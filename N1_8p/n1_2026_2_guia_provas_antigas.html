@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>N1 2026.2 · Guia pelas provas antigas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b1f; --card:rgba(255,255,255,.045); --card2:rgba(255,255,255,.07);
+  --line:rgba(167,139,250,.20); --text:#e8eaf8; --muted:#a4aacd; --soft:#c9cdea;
+  --ci:#b99cff; --ham:#ff9d5c; --iesc:#5ee6d0; --ok:#4ade80; --warn:#fbbf24; --err:#ff6b8b;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; color:var(--text); font:16px/1.6 "IBM Plex Sans",system-ui,sans-serif;
+  background:
+    radial-gradient(900px 520px at 0% -8%, rgba(98,54,214,.45), transparent 62%),
+    radial-gradient(760px 480px at 100% 4%, rgba(20,110,160,.30), transparent 60%),
+    radial-gradient(700px 600px at 50% 110%, rgba(120,40,160,.25), transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+}
+.wrap{max-width:880px; margin:0 auto; padding:28px 16px 80px}
+h1,h2,h3,summary{font-family:Outfit,system-ui,sans-serif}
+h1{
+  font-size:clamp(2rem,7vw,3.1rem); line-height:1.05; margin:.2em 0 .3em; font-weight:800; letter-spacing:-.02em;
+  background:linear-gradient(95deg,#d9c9ff 0%,#9f7bff 45%,#5ee6d0 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.lede{color:var(--soft); max-width:62ch; margin:0 0 18px}
+h2{
+  font-size:1.55rem; margin:46px 0 14px; font-weight:700; letter-spacing:-.01em;
+  display:flex; align-items:center; gap:12px;
+}
+h2::before{content:""; width:10px; height:26px; border-radius:6px; background:var(--accent,#9f7bff); box-shadow:0 0 18px var(--accent,#9f7bff)}
+h3{font-size:1.02rem; margin:20px 0 8px; color:#fff; font-weight:600}
+p{margin:.5em 0}
+.muted{color:var(--muted)}
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px 18px;
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 12px 40px rgba(6,0,30,.35);
+}
+.stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:18px 0}
+.stat{padding:12px 14px}
+.stat b{display:block; font-family:Outfit,system-ui,sans-serif; font-size:1.6rem; line-height:1.1}
+.stat span{font-size:.85rem; color:var(--muted)}
+.tbl{overflow-x:auto; -webkit-overflow-scrolling:touch; margin:10px 0; border-radius:12px; border:1px solid var(--line)}
+table{border-collapse:collapse; width:100%; min-width:540px; font-size:.92rem}
+th,td{text-align:left; vertical-align:top; padding:9px 11px; border-bottom:1px solid rgba(167,139,250,.12)}
+th{font-family:Outfit,system-ui,sans-serif; font-weight:600; color:#fff; background:rgba(159,123,255,.12); white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600; color:#fff}
+.chip{display:inline-block; font-size:.76rem; font-weight:600; padding:2px 9px; border-radius:999px; border:1px solid currentColor; white-space:nowrap; line-height:1.5}
+.c-ci{color:var(--ci)} .c-ham{color:var(--ham)} .c-iesc{color:var(--iesc)}
+.c-ok{color:var(--ok)} .c-warn{color:var(--warn)} .c-err{color:var(--err)} .c-gap{color:#93a4ff}
+.ref{font-size:.78rem; color:var(--muted); background:rgba(255,255,255,.06); border-radius:6px; padding:1px 6px; white-space:nowrap}
+ul{padding-left:1.15em; margin:.4em 0} li{margin:.25em 0}
+li::marker{color:var(--accent,#9f7bff)}
+strong{color:#fff}
+.callout{border-left:4px solid var(--c,var(--accent,#9f7bff)); background:var(--card2); border-radius:12px; padding:12px 14px; margin:12px 0}
+.callout.err{--c:var(--err)} .callout.warn{--c:var(--warn)} .callout.gap{--c:#93a4ff} .callout.ok{--c:var(--ok)}
+.callout h3{margin-top:0}
+details.topic{margin:10px 0; padding:0; overflow:hidden}
+details.topic > summary{
+  list-style:none; cursor:pointer; padding:14px 46px 14px 18px; position:relative;
+  display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px; font-size:1.08rem; font-weight:600;
+}
+details.topic > summary::-webkit-details-marker{display:none}
+details.topic > summary::after{
+  content:""; position:absolute; right:18px; top:50%; width:10px; height:10px; margin-top:-7px;
+  border-right:2px solid var(--accent); border-bottom:2px solid var(--accent); transform:rotate(45deg); transition:transform .2s;
+}
+details.topic[open] > summary::after{transform:rotate(225deg); margin-top:-2px}
+details.topic > summary .t{flex:1 1 100%}
+
+details.topic > summary:focus-visible{outline:2px solid var(--accent); outline-offset:-2px; border-radius:18px}
+.body{padding:2px 18px 18px; border-top:1px solid var(--line)}
+section{--accent:#9f7bff}
+section.ci{--accent:var(--ci)} section.ham{--accent:var(--ham)} section.iesc{--accent:var(--iesc)}
+.grid2{display:grid; gap:10px} @media (min-width:700px){.grid2{grid-template-columns:1fr 1fr}}
+.mini{padding:12px 14px} .mini h3{margin:0 0 6px}
+.flow{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:8px 0}
+.flow span{background:rgba(159,123,255,.14); border:1px solid var(--line); border-radius:10px; padding:4px 10px; font-size:.9rem}
+.flow i{font-style:normal; color:var(--muted)}
+footer{margin-top:50px; color:var(--muted); font-size:.85rem}
+@media (max-width:520px){ .stats{gap:8px} .stat{padding:10px 12px} .stat b{font-size:1.45rem} body{font-size:15.5px} }
+@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+@media print{
+  body{background:#0b0f26; -webkit-print-color-adjust:exact; print-color-adjust:exact}
+  details::details-content{content-visibility:visible; block-size:auto}
+  .card{backdrop-filter:none}
+}
+
+.nav{position:sticky; top:0; z-index:5; display:flex; gap:8px; flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; padding:10px 0; margin:0 0 6px;
+  background:linear-gradient(180deg,rgba(7,11,31,.92),rgba(7,11,31,.75)); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px)}
+.nav::-webkit-scrollbar{display:none}
+.nav a{flex:0 0 auto; color:var(--text); text-decoration:none; font-size:.88rem; font-weight:600; padding:5px 12px; border-radius:999px; border:1px solid var(--line); background:var(--card)}
+.nav a:focus-visible,.nav a:hover{border-color:#9f7bff; outline:none}
+.stats{grid-template-columns:repeat(4,1fr)}
+@media (max-width:700px){ .stats{grid-template-columns:repeat(2,1fr)} }
+.src{font-size:.74rem; color:var(--muted); border:1px dashed rgba(164,170,205,.45); border-radius:999px; padding:1px 8px; white-space:nowrap}
+.wk{font-family:Outfit,system-ui,sans-serif; font-size:.8rem; color:var(--accent); letter-spacing:.02em}
+h2 small{font-size:.9rem; font-weight:500; color:var(--muted); margin-left:auto}
+section{scroll-margin-top:60px}
+.num td:first-child{white-space:nowrap}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>N1 2026.2, pelas provas antigas</h1>
+<p class="lede">Guia de todos os temas das semanas 02 a 07, construído a partir das 95 questões das provas N1 de 2024.2, 2025.1 e 2025.2 e revisado contra ATLS 11, diretrizes brasileiras e normas do SUS. Cada tema mostra como cai, o que separa a alternativa certa das erradas, as pegadinhas e o que ainda não foi cobrado.</p>
+
+<nav class="nav" aria-label="Seções">
+<a href="#prova">A prova</a><a href="#erros">Gabaritos errados</a><a href="#ci">CI</a><a href="#ham">HAM</a><a href="#iesc">IESC</a><a href="#vespera">Véspera</a>
+</nav>
+
+<div class="stats">
+  <div class="card stat"><b class="c-ci">8</b><span>questões de CI</span></div>
+  <div class="card stat"><b class="c-ham">6</b><span>questões de HAM</span></div>
+  <div class="card stat"><b class="c-iesc">6</b><span>questões de IESC</span></div>
+  <div class="card stat"><b>20</b><span>todas objetivas, 1 ponto cada</span></div>
+</div>
+
+<section id="prova">
+<h2>Como a prova deve se distribuir</h2>
+<p>HAM e IESC têm <strong>6 questões para 6 semanas</strong>: o padrão mais provável é uma questão por semana, então nenhum tema desses blocos pode ficar de fora. CI tem <strong>8 questões para 6 semanas</strong>: provavelmente uma por tema do MARC e cerca de duas vindas das palestras. É uma estimativa, não informação oficial.</p>
+<div class="tbl"><table>
+<thead><tr><th>Sem.</th><th><span class="c-ci">CI</span> (MARC + palestras)</th><th><span class="c-ham">HAM</span></th><th><span class="c-iesc">IESC</span></th></tr></thead>
+<tbody>
+<tr><td>02</td><td>Espondiloartrites e dor lombar; fraturas, entorses e luxações <span class="ref">caiu 8</span></td><td>Física do trauma <span class="ref">nunca</span></td><td>Origens e estruturação do SUS <span class="ref">caiu 2</span></td></tr>
+<tr><td>03</td><td>Neoplasias na infância; sinais do câncer infantojuvenil <span class="ref">caiu 5</span></td><td>Atendimento inicial <span class="ref">caiu 5</span></td><td>Gestão e administração pública <span class="ref">caiu 7</span></td></tr>
+<tr><td>04</td><td>TOC e ansiedade; queimaduras superficiais e avaliação nutricional <span class="ref">caiu 7</span></td><td>Via aérea e ventilação <span class="ref">caiu 3</span></td><td>Gerenciamento da unidade <span class="ref">caiu 4</span></td></tr>
+<tr><td>05</td><td>Sangramento 1ª metade e mola; disfonia e disfagia; HPB e próstata <span class="ref">caiu 7</span></td><td>Choque <span class="ref">caiu 4</span></td><td>Gestão privada e empreendedorismo <span class="ref">caiu 4</span></td></tr>
+<tr><td>06</td><td>Demências e Alzheimer; síndrome parkinsoniana <span class="ref">caiu 7</span></td><td>Queimaduras, calor e frio <span class="ref">caiu 4</span></td><td>Financiamento da APS <span class="ref">caiu 1</span></td></tr>
+<tr><td>07</td><td>Icterícia e eritroblastose; neoplasias pulmonares <span class="ref">caiu 7</span></td><td>Submersão, raio, mergulho, altitude <span class="ref">caiu 3</span></td><td>Regulação em saúde <span class="ref">caiu 2</span></td></tr>
+</tbody></table></div>
+<p class="muted">"Caiu" conta questões das 8 provas antigas. 80 das 95 batem com a lista; ficaram de fora vascular e urologia da antiga CC (10), bipolar e borderline (4) e triagem START (1). As antigas tinham 2 discursivas por prova; aqui esse conteúdo foi reescrito como ele apareceria numa alternativa.</p>
+
+<div class="callout"><h3>Padrões das alternativas erradas nas provas antigas</h3><ul>
+<li><strong>Atrasar conduta para pedir exame</strong> em paciente instável (ectópica rota, choque, via aérea).</li>
+<li><strong>Sintomático como primeira linha</strong>: benzodiazepínico no TOC, antibiótico em HPB, corticoide na lesão inalatória, memantina no Alzheimer leve.</li>
+<li>No IESC, alternativas com <strong>"sem necessidade", "exclusivamente", "sem consultar", "apenas"</strong> ou que negam direito do usuário foram sempre as erradas. Itens que descrevem boa prática de gestão costumam estar todos certos.</li>
+<li>No HAM, a certa segue a <strong>ordem xABCDE</strong> e prioriza oxigenação e controle de sangramento.</li>
+</ul></div>
+</section>
+
+<section id="erros">
+<h2>Gabaritos das provas antigas com erro</h2>
+<div class="callout err">
+<h3>1. Disfonia <span class="ref">CI 25.2 Q5</span></h3>
+<p>Professor com lesões bilaterais, simétricas, no terço médio das pregas vocais. O relatório marcou carcinoma espinocelular, mas o próprio comentário justifica <strong>nódulos vocais</strong>, que é a resposta certa.</p>
+</div>
+<div class="callout err">
+<h3>2. Grau de afogamento <span class="ref">HAM 25.1 Q10</span></h3>
+<p>Consciente, muita espuma, PA 86x51 e sem pulso radial. O relatório marcou grau 5 com uma tabela de Szpilman errada. O correto é <strong>grau 4</strong> (edema pulmonar com hipotensão). Grau 5 é parada respiratória com pulso, como na HAM 24.2 Q2, que está certa.</p>
+</div>
+<div class="callout warn">
+<h3>3. Hidratação do queimado mudou <span class="ref">CI 25.1 Q13 × CI 25.2 Q14</span></h3>
+<p>2025.1 usou 50% em 8 h e 50% em 16 h (ATLS 10). 2025.2 já cobrou o <strong>ATLS 11</strong>: 2 mL × kg × %SCQ dividido por 16 dá o ritmo inicial por hora, reajustado de hora em hora pelo débito urinário.</p>
+</div>
+<div class="callout warn">
+<h3>4. Sequência rápida <span class="ref">HAM 25.1 Q5</span></h3>
+<p>A alternativa correta fala em "agente de indução, sedativo e bloqueador". Indução e sedação são a mesma etapa; o conceito cobrado é <strong>sedar antes de paralisar</strong>.</p>
+</div>
+<div class="callout warn">
+<h3>5. Zona de Kramer <span class="ref">CI 24.2 Q6</span></h3>
+<p>"Face e tronco até o umbigo" é zona 2, não 3. A conduta do gabarito (dosar bilirrubina) continua certa.</p>
+</div>
+<div class="callout warn">
+<h3>6. Rivastigmina e TOC <span class="ref">CI 24.2 Q7</span> <span class="ref">CI 25.1 Q11</span></h3>
+<p>O comentário cita rivastigmina 1,2 mg; a dose oral inicial é <strong>1,5 mg de 12/12 h</strong>. Outro comentário sugere benzodiazepínico inicial no TOC grave; <strong>benzodiazepínico não trata TOC</strong> e foi alternativa errada nas outras duas questões.</p>
+</div>
+</section>
+
+<section class="ci" id="ci">
+<h2>CI <small>8 questões</small></h2>
+
+<details class="topic card">
+<summary><span class="t">Espondiloartrites e dor lombar</span><span class="chip c-ci">Sem. 02</span><span class="src">MARC + palestra</span><span class="ref">caiu 6 (artropatias)</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Nas provas antigas o tema se chamava "artropatias" e caíram 5 questões de <strong>osteoartrite</strong> (diagnóstico clínico, radiografia, tratamento com exercício + analgésico) <span class="ref">CI 24.2 Q5, Q10, Q11</span> <span class="ref">CI 25.1 Q6</span> <span class="ref">CI 25.2 Q10</span> e uma de <strong>artrite idiopática juvenil</strong> <span class="ref">CI 25.1 Q4</span>. O título novo desloca o foco para espondiloartrite e lombalgia, que ainda não foram cobradas: espere caso de lombalgia inflamatória em adulto jovem.</p></div>
+
+<h3>Lombalgia: primeiro separar o tipo</h3>
+<div class="tbl"><table>
+<thead><tr><th>Tipo</th><th>Pista</th><th>Conduta</th></tr></thead>
+<tbody>
+<tr><td>Mecânica inespecífica</td><td>Piora com esforço, melhora com repouso, sem alarme; a grande maioria</td><td>Manter-se ativo, calor local, AINE por curto prazo; <strong>sem imagem nas primeiras 6 semanas</strong>; repouso no leito piora</td></tr>
+<tr><td>Radiculopatia (ciática)</td><td>Dor abaixo do joelho em dermátomo, Lasègue positivo</td><td>Conservador por ~6 semanas; RM se déficit progressivo, refratária ou candidata a cirurgia</td></tr>
+<tr><td>Estenose de canal</td><td>Idoso; claudicação neurogênica que piora em pé e melhora sentado ou inclinado para frente; pulsos normais</td><td>Fisioterapia, analgesia; cirurgia se incapacitante</td></tr>
+<tr><td>Inflamatória</td><td>Início antes dos 40, insidiosa, <strong>melhora com exercício e não com repouso</strong>, dor noturna, rigidez matinal longa, dor alternante nas nádegas</td><td>Investigar espondiloartrite</td></tr>
+<tr><td>Com sinal de alarme</td><td>Febre, perda de peso, câncer prévio, imunossupressão, trauma, déficit neurológico progressivo</td><td>Investigar já (infecção, tumor, fratura)</td></tr>
+<tr><td>Síndrome da cauda equina</td><td>Anestesia em sela, retenção ou incontinência urinária, fraqueza bilateral</td><td><strong>Emergência</strong>: RM e descompressão cirúrgica</td></tr>
+</tbody></table></div>
+<div class="tbl"><table>
+<thead><tr><th>Hérnia</th><th>Raiz</th><th>Força</th><th>Reflexo</th><th>Sensibilidade</th></tr></thead>
+<tbody>
+<tr><td>L3–L4</td><td>L4</td><td>Extensão do joelho</td><td>Patelar</td><td>Face medial da perna</td></tr>
+<tr><td>L4–L5</td><td>L5</td><td>Dorsiflexão do hálux</td><td>Nenhum confiável</td><td>Dorso do pé</td></tr>
+<tr><td>L5–S1</td><td>S1</td><td>Flexão plantar</td><td>Aquileu</td><td>Borda lateral e planta</td></tr>
+</tbody></table></div>
+<p class="muted">L4–L5 e L5–S1 concentram a grande maioria das hérnias lombares.</p>
+
+<h3>Espondiloartrites</h3>
+<p>Grupo com <strong>HLA-B27</strong>, fator reumatoide negativo, sacroiliíte, <strong>entesite</strong> (Aquiles, fáscia plantar), <strong>dactilite</strong> ("dedo em salsicha"), oligoartrite assimétrica de membros inferiores e <strong>uveíte anterior aguda</strong> unilateral. Inclui espondiloartrite axial (espondilite anquilosante), artrite psoriásica, artrite reativa e artrite da doença inflamatória intestinal.</p>
+<div class="callout ok"><h3>Critério ASAS para espondiloartrite axial</h3>
+<p>Lombalgia há <strong>3 meses ou mais</strong> com início <strong>antes dos 45 anos</strong>, e:</p>
+<ul>
+<li><strong>Braço de imagem</strong>: sacroiliíte na RM (edema ósseo) ou na radiografia + pelo menos 1 característica</li>
+<li><strong>Braço clínico</strong>: HLA-B27 + pelo menos 2 características</li>
+</ul>
+<p class="muted">Características: lombalgia inflamatória, artrite, entesite de calcâneo, uveíte, dactilite, psoríase, Crohn ou retocolite, boa resposta a AINE, história familiar, HLA-B27, PCR elevada.</p></div>
+<div class="tbl"><table>
+<thead><tr><th>Doença</th><th>O que diferencia</th></tr></thead>
+<tbody>
+<tr><td>Espondiloartrite axial</td><td>Homem jovem, lombalgia inflamatória; RM mostra sacroiliíte precoce; tardiamente sacroiliíte bilateral simétrica, sindesmófitos e coluna em "bambu"; Schober e expansão torácica reduzidos</td></tr>
+<tr><td>Artrite psoriásica</td><td>Interfalangeanas distais, dactilite, alteração ungueal (depressões, onicólise), sacroiliíte assimétrica; radiografia "lápis na xícara"</td></tr>
+<tr><td>Artrite reativa</td><td>1–4 semanas após diarreia (Shigella, Salmonella, Yersinia, Campylobacter) ou uretrite (Chlamydia); oligoartrite + uretrite + conjuntivite; balanite circinada, ceratodermia; geralmente autolimitada</td></tr>
+<tr><td>Doença inflamatória intestinal</td><td>Artrite periférica acompanha a atividade intestinal; a axial é independente</td></tr>
+</tbody></table></div>
+<h3>Tratamento (ASAS-EULAR 2022)</h3>
+<ul>
+<li>Base: educação, <strong>exercício e fisioterapia</strong>, parar de fumar.</li>
+<li>Primeira linha: <strong>AINE em dose plena</strong>; considerar falha após 2 AINEs em cerca de 4 semanas.</li>
+<li><strong>Corticoide sistêmico e DMARD convencional</strong> (metotrexato, sulfassalazina) <strong>não tratam doença axial</strong>; sulfassalazina pode ser usada na artrite periférica.</li>
+<li>Falha: biológico anti-TNF (adalimumabe, infliximabe, etanercepte), anti-IL-17 (secuquinumabe, ixequizumabe) ou inibidor de JAK. Uveíte recorrente ou doença intestinal: preferir anticorpo monoclonal anti-TNF.</li>
+</ul>
+
+<h3>Diferenciais que já caíram</h3>
+<div class="tbl"><table>
+<thead><tr><th></th><th>Osteoartrite</th><th>Artrite reumatoide</th><th>Espondiloartrite</th></tr></thead>
+<tbody>
+<tr><td>Rigidez matinal</td><td>Menos de 30 min</td><td>Mais de 1 h</td><td>Longa, melhora com movimento</td></tr>
+<tr><td>Articulações</td><td>Joelhos, quadris, interfalangeanas distais (Heberden) e proximais (Bouchard), base do polegar</td><td>Pequenas das mãos simétricas (metacarpofalangeanas, proximais, punhos); poupa distais</td><td>Coluna, sacroilíacas, oligoartrite assimétrica de membros inferiores, ênteses</td></tr>
+<tr><td>Laboratório</td><td>Normal</td><td>FR e anti-CCP</td><td>HLA-B27, PCR</td></tr>
+<tr><td>Radiografia</td><td>Redução assimétrica do espaço, osteófitos, esclerose e cistos subcondrais</td><td>Erosões marginais, osteopenia periarticular</td><td>Sacroiliíte, sindesmófitos</td></tr>
+</tbody></table></div>
+<ul>
+<li>Osteoartrite: diagnóstico clínico, radiografia é o exame de imagem padrão. Tratamento: exercício, perda de peso, educação; AINE tópico (joelho e mãos) ou oral na menor dose e tempo; paracetamol com efeito pequeno; infiltração com corticoide em crises; evitar opioide; artroplastia em fase avançada.</li>
+<li>Artrite idiopática juvenil: artrite antes dos 16 anos por mais de 6 semanas, após excluir outras causas. Na oligoarticular com FAN positivo, rastrear uveíte silenciosa com lâmpada de fenda. Dor noturna desproporcional e citopenias apontam para leucemia.</li>
+</ul>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Fraturas, entorses e luxações</span><span class="chip c-ci">Sem. 02</span><span class="src">palestra</span><span class="ref">caiu 2</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Entorse de tornozelo com <strong>regra de Ottawa</strong>: sem critério → tratamento sintomático sem imagem <span class="ref">CI 25.1 Q14</span>; dor no maléolo lateral e incapacidade de dar 4 passos → radiografia <span class="ref">CI 25.2 Q3</span>.</p></div>
+<div class="grid2">
+<div class="card mini"><h3>Ottawa tornozelo</h3><p>Radiografia se dor na região maleolar <strong>e</strong> um destes:</p><ul>
+<li>Dor à palpação da borda posterior ou ponta dos 6 cm distais do maléolo lateral ou medial</li>
+<li>Incapacidade de dar 4 passos logo após o trauma e no exame</li></ul></div>
+<div class="card mini"><h3>Ottawa pé e joelho</h3><ul>
+<li>Pé: dor no mediopé + dor na base do 5º metatarso ou no navicular, ou incapacidade de 4 passos</li>
+<li>Joelho: 55 anos ou mais, dor isolada na patela, dor na cabeça da fíbula, não flete a 90° ou não dá 4 passos</li></ul></div>
+</div>
+<h3>Entorse</h3>
+<ul>
+<li>Inversão com pé em flexão plantar lesa primeiro o <strong>ligamento talofibular anterior</strong>, depois o calcaneofibular.</li>
+<li>Graus: I estiramento; II ruptura parcial; III ruptura completa com instabilidade.</li>
+<li>Tratamento funcional: proteção, repouso relativo, gelo, compressão e elevação nas primeiras 48–72 h, analgesia, carga precoce conforme dor, órtese nas lesões II e III, fisioterapia proprioceptiva. Gesso prolongado não é rotina.</li>
+</ul>
+<h3>Fratura: princípios</h3>
+<ul>
+<li>Exame <strong>neurovascular distal antes e depois</strong> de qualquer manipulação ou imobilização.</li>
+<li>Radiografia em 2 incidências ortogonais, incluindo a articulação acima e abaixo.</li>
+<li><strong>Fratura exposta</strong> é emergência: antibiótico o mais cedo possível (cefazolina; somar gentamicina nas contaminadas graves), antitetânica, curativo estéril, alinhar e imobilizar, desbridamento e lavagem cirúrgica, estabilização.</li>
+</ul>
+<div class="tbl"><table>
+<thead><tr><th>Gustilo-Anderson</th><th>Definição</th></tr></thead>
+<tbody>
+<tr><td>I</td><td>Ferida menor que 1 cm, limpa</td></tr>
+<tr><td>II</td><td>1–10 cm, lesão moderada de partes moles</td></tr>
+<tr><td>IIIA</td><td>Lesão extensa, mas com cobertura óssea possível</td></tr>
+<tr><td>IIIB</td><td>Perda de cobertura, precisa de retalho</td></tr>
+<tr><td>IIIC</td><td>Lesão arterial que exige reparo</td></tr>
+</tbody></table></div>
+<div class="callout warn"><h3>Síndrome compartimental</h3>
+<p>Dor desproporcional e <strong>dor ao estiramento passivo</strong> são os sinais precoces; ausência de pulso é tardia. Mais comum em fratura de tíbia e antebraço. Conduta: abrir gesso e curativos, membro na altura do coração (não elevar) e <strong>fasciotomia</strong> de urgência.</p></div>
+<h3>Luxações</h3>
+<div class="tbl"><table>
+<thead><tr><th>Luxação</th><th>Pista</th><th>Cuidado</th></tr></thead>
+<tbody>
+<tr><td>Ombro anterior (~95%)</td><td>Braço em abdução e rotação externa, sinal da dragona</td><td>Testar nervo axilar (sensibilidade da face lateral do ombro) antes e depois de reduzir</td></tr>
+<tr><td>Ombro posterior</td><td>Convulsão ou choque elétrico; braço em adução e rotação interna</td><td>Frequentemente perdida no raio-x AP; pedir perfil</td></tr>
+<tr><td>Quadril posterior</td><td>Joelho no painel; membro encurtado, fletido, aduzido e em rotação interna</td><td>Nervo ciático; reduzir em até ~6 h (risco de necrose da cabeça femoral)</td></tr>
+<tr><td>Cotovelo posterior</td><td>Queda sobre a mão espalmada</td><td>Artéria braquial e nervos</td></tr>
+</tbody></table></div>
+<h3>Fraturas clássicas</h3>
+<ul>
+<li><strong>Colles</strong>: rádio distal com desvio dorsal ("dorso de garfo"), idosa com queda sobre a mão.</li>
+<li><strong>Escafoide</strong>: dor na tabaqueira anatômica; radiografia inicial pode ser normal → imobilizar e repetir em 10–14 dias ou RM; risco de necrose e pseudartrose.</li>
+<li><strong>Colo do fêmur</strong> em idoso: membro encurtado e em rotação externa; cirurgia precoce.</li>
+<li><strong>Supracondiliana do úmero</strong> na criança: risco de lesão da artéria braquial e síndrome de Volkmann.</li>
+<li>Fise na criança: classificação de Salter-Harris. Fraturas em estágios diferentes, metafisárias em "canto" ou de costelas posteriores sugerem maus-tratos.</li>
+</ul>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Neoplasias na infância e sinais do câncer infantojuvenil</span><span class="chip c-ci">Sem. 03</span><span class="src">MARC + palestra</span><span class="ref">caiu 5</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Duas de <strong>linfonodo cervical reacional</strong> após amigdalite com hemograma normal <span class="ref">CI 24.2 Q2</span> <span class="ref">CI 25.1 Q5</span>, duas de <strong>LLA → mielograma</strong> <span class="ref">CI 25.1 Q1</span> <span class="ref">CI 25.2 Q12</span> e uma de <strong>mononucleose</strong> (hemograma + sorologia para Epstein-Barr) <span class="ref">CI 24.2 Q13</span>. Tumores sólidos ainda não caíram.</p></div>
+<ul>
+<li>Câncer é a principal causa de morte por doença entre 1 e 19 anos. Mais comuns: <strong>leucemias</strong> (LLA à frente), <strong>tumores do SNC</strong> (tumor sólido mais comum) e <strong>linfomas</strong>.</li>
+<li>Sinais de alerta: palidez, febre prolongada sem foco, perda de peso, petéquias e sangramentos, <strong>dor óssea que acorda à noite</strong> ou claudicação, linfonodo persistente, massa abdominal, cefaleia matinal com vômitos, alteração de marcha, <strong>leucocoria</strong>, estrabismo novo, proptose.</li>
+</ul>
+<h3>Linfonodo: reacional ou suspeito?</h3>
+<div class="tbl"><table>
+<thead><tr><th>Reacional</th><th>Suspeito</th></tr></thead>
+<tbody><tr>
+<td>Após infecção, doloroso, móvel, menor que 2 cm, hemograma normal → observar 2–4 semanas</td>
+<td>Maior que 2 cm, <strong>supraclavicular</strong> em qualquer tamanho, endurecido, aderido, indolor, crescendo, persistente, sintomas B, hepatoesplenomegalia, citopenias, massa mediastinal → biópsia excisional</td>
+</tr></tbody></table></div>
+<h3>Leucemia linfoblástica aguda</h3>
+<ul>
+<li>Pico entre 2 e 5 anos. Febre, palidez, petéquias, <strong>dor óssea</strong> (pode impedir a marcha), hepatoesplenomegalia, linfonodomegalia.</li>
+<li>Hemograma com citopenias e/ou blastos → <strong>mielograma</strong> (a partir de 20–25% de linfoblastos confirma) e imunofenotipagem. USG abdominal avalia vísceras.</li>
+<li><strong>Não dar corticoide antes do diagnóstico</strong>: mascara a leucemia.</li>
+<li>Emergências: <strong>neutropenia febril</strong> (neutrófilos abaixo de 500 + febre) → antibiótico de amplo espectro em até 1 h; síndrome de lise tumoral (hiperpotassemia, hiperuricemia, hiperfosfatemia, hipocalcemia → hidratação e alopurinol ou rasburicase); massa mediastinal comprimindo via aérea.</li>
+</ul>
+<div class="tbl"><table>
+<thead><tr><th>Tumor</th><th>Pista</th></tr></thead>
+<tbody>
+<tr><td>Tumores do SNC</td><td>Maioria na fossa posterior; cefaleia matinal, vômitos, ataxia (meduloblastoma); craniofaringioma com alteração visual, baixa estatura e diabetes insípido</td></tr>
+<tr><td>Neuroblastoma</td><td>Menor de 2 anos, criança "doente", massa abdominal endurecida que <strong>cruza a linha média</strong>, calcificações, equimose periorbital, opsoclonia-mioclonia; catecolaminas urinárias elevadas</td></tr>
+<tr><td>Wilms</td><td>2–5 anos, bom estado geral, massa lisa que <strong>não cruza a linha média</strong>, hematúria, hipertensão; não palpar repetidamente</td></tr>
+<tr><td>Retinoblastoma</td><td>Leucocoria no teste do reflexo vermelho, estrabismo; bilateral é hereditário</td></tr>
+<tr><td>Linfoma de Hodgkin</td><td>Adolescente, linfonodo cervical indolor, massa mediastinal, febre, sudorese noturna, perda de peso</td></tr>
+<tr><td>Linfoma de Burkitt</td><td>Massa abdominal de crescimento muito rápido; alto risco de lise tumoral</td></tr>
+<tr><td>Osteossarcoma</td><td>Adolescente, metáfise ao redor do joelho; "raios de sol" e triângulo de Codman; metástase pulmonar</td></tr>
+<tr><td>Ewing</td><td>Diáfise e pelve, febre (confunde com osteomielite), reação periosteal em "casca de cebola"</td></tr>
+<tr><td>Rabdomiossarcoma</td><td>Sarcoma de partes moles mais comum; órbita, cabeça e pescoço, geniturinário</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>Mononucleose</strong>: febre, faringite com exsudato, linfonodos cervicais posteriores, esplenomegalia, linfócitos atípicos; teste heterófilo falha em menores de 4 anos → sorologia; exantema com amoxicilina; evitar esporte de contato.</li>
+<li>Na APS, suspeita de câncer = encaminhamento rápido a serviço de oncologia pediátrica.</li>
+</ul>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">TOC e transtornos de ansiedade</span><span class="chip c-ci">Sem. 04</span><span class="src">MARC + palestra APS</span><span class="ref">caiu 4</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Três das quatro são o <strong>mesmo caso</strong>: adolescente de 15 anos lavando as mãos por medo de germes → primeira linha é <strong>TCC + ISRS</strong> (sertralina) <span class="ref">CI 24.2 Q12</span> <span class="ref">CI 25.1 Q11</span> <span class="ref">CI 25.2 Q4</span>. A quarta é pânico contra TAG, fobia social e TEPT <span class="ref">CI 25.1 Q15</span>.</p></div>
+<div class="tbl"><table>
+<thead><tr><th>Transtorno</th><th>Chave diagnóstica</th><th>Tratamento</th></tr></thead>
+<tbody>
+<tr><td>TOC</td><td>Obsessões intrusivas e indesejadas + compulsões para aliviar a ansiedade; mais de 1 h/dia ou prejuízo; crítica preservada ("sei que não faz sentido")</td><td>TCC com exposição e prevenção de resposta + ISRS (sertralina, fluoxetina, fluvoxamina) em dose mais alta e resposta em 8–12 semanas; manter 1–2 anos. 2ª linha: clomipramina. Refratário: associar risperidona ou aripiprazol</td></tr>
+<tr><td>Pânico</td><td>Ataques inesperados e recorrentes, pico em minutos, sintomas autonômicos e medo de morrer + 1 mês de preocupação com novas crises</td><td>ISRS + TCC; benzodiazepínico só como ponte curta</td></tr>
+<tr><td>TAG</td><td>Preocupação excessiva com vários temas, maioria dos dias, ≥6 meses, com inquietação, fadiga, irritabilidade, tensão muscular, sono ruim</td><td>ISRS ou venlafaxina + TCC</td></tr>
+<tr><td>Ansiedade social</td><td>Medo de avaliação negativa em situações sociais ou de desempenho, com evitação</td><td>ISRS + TCC; propranolol para desempenho pontual</td></tr>
+<tr><td>TEPT</td><td>Trauma + revivescência, evitação, humor negativo e hiperexcitação por mais de 1 mês (menos de 1 mês = estresse agudo)</td><td>TCC focada no trauma + ISRS</td></tr>
+</tbody></table></div>
+<h3>Na APS</h3>
+<ul>
+<li>Excluir causa orgânica: hipertireoidismo, arritmia, cafeína, drogas, abstinência.</li>
+<li>ISRS começa em dose baixa (piora inicial da ansiedade) e leva 2–4 semanas para agir.</li>
+<li>Manter 6–12 meses após a remissão na ansiedade; 1–2 anos no TOC.</li>
+</ul>
+<div class="callout warn"><h3>Pegadinhas</h3><ul>
+<li>Benzodiazepínico isolado nunca é 1ª linha; no TOC não trata obsessões.</li>
+<li>Psicoestimulante, psicanálise e neurocirurgia são distratores do TOC.</li>
+<li>Crise abrupta que resolve em ~20 min sem gatilho = pânico, não TAG.</li>
+</ul></div>
+<div class="callout gap"><h3>Ainda não caiu</h3><p>Agorafobia, fobia específica, estresse agudo × TEPT, ansiedade de separação na infância.</p></div>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Queimaduras superficiais e avaliação nutricional cirúrgica</span><span class="chip c-ci">Sem. 04</span><span class="src">palestra CC</span><span class="ref">caiu 3 (+4 no HAM)</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Duas de <strong>%SCQ e hidratação</strong> (eram discursivas; na objetiva viram escolher %SCQ, volume ou ritmo) <span class="ref">CI 25.1 Q13</span> <span class="ref">CI 25.2 Q14</span> e uma de <strong>marcadores nutricionais</strong> no queimado <span class="ref">CI 25.2 Q7</span>. Via aérea e inalação estão no bloco HAM.</p></div>
+
+<h3>Profundidade</h3>
+<div class="tbl"><table>
+<thead><tr><th>Grau</th><th>Aspecto</th><th>Dor</th><th>Evolução</th></tr></thead>
+<tbody>
+<tr><td>1º (epiderme)</td><td>Eritema, sem bolha</td><td>Sim</td><td>Cura em dias; <strong>não entra no %SCQ</strong></td></tr>
+<tr><td>2º superficial</td><td>Bolhas, leito rosado e úmido, enchimento capilar presente</td><td>Muita</td><td>Cura em 2–3 semanas</td></tr>
+<tr><td>2º profundo</td><td>Pálido ou mosqueado, bolhas rotas</td><td>Menor</td><td>Mais de 3 semanas; pode precisar de enxerto</td></tr>
+<tr><td>3º</td><td>Branco nacarado ou couro, vasos trombosados</td><td>Indolor</td><td>Enxerto</td></tr>
+</tbody></table></div>
+
+<h3>Regra dos 9 (adulto)</h3>
+<div class="tbl"><table>
+<thead><tr><th>Região</th><th>%</th><th>Detalhe</th></tr></thead>
+<tbody>
+<tr><td>Cabeça e pescoço</td><td>9</td><td>Criança pequena: ~18% (usar Lund-Browder)</td></tr>
+<tr><td>Cada membro superior</td><td>9</td><td>Face anterior 4,5 + posterior 4,5</td></tr>
+<tr><td>Tronco anterior</td><td>18</td><td>Tórax + abdome juntos</td></tr>
+<tr><td>Tronco posterior</td><td>18</td><td></td></tr>
+<tr><td>Cada membro inferior</td><td>18</td><td>Face anterior 9 + posterior 9</td></tr>
+<tr><td>Genitália / períneo</td><td>1</td><td>Palma do paciente com dedos ≈ 1% para áreas irregulares</td></tr>
+</tbody></table></div>
+<p class="muted">Treino da CI 25.1: membro superior inteiro (9) + genitália (1) = 10%. Treino da CI 25.2: tronco anterior (18) + face anterior dos dois braços (4,5 + 4,5) + face anterior das duas pernas (9 + 9) = 45%.</p>
+
+<h3>Reposição volêmica pelo ATLS 11</h3>
+<ul>
+<li>Indicada nas queimaduras de 2º e 3º grau extensas (a partir de ~20% SCQ no adulto). <strong>Ringer lactato</strong>, preferido ao soro fisiológico (acidose hiperclorêmica).</li>
+<li>Antes do cálculo (pré-hospitalar e avaliação primária): até 5 anos 125 mL/h; 6–13 anos 250 mL/h; 14 anos ou mais 500 mL/h.</li>
+<li>Volume estimado: <strong>2 mL × kg × %SCQ</strong> no adolescente e adulto; 3 mL na criança; 4 mL na queimadura elétrica. <strong>Dividir por 16</strong> para achar o ritmo inicial em mL/h. Tempo contado <strong>da hora da queimadura</strong>.</li>
+<li>Acabou a regra 50% em 8 h + 50% em 16 h. O ritmo é reavaliado <strong>de hora em hora</strong>: diurese abaixo da meta → aumentar; acima → reduzir (resumos do ATLS 11 citam ajustes de até cerca de 30%).</li>
+<li>Meta de diurese: adulto 0,5 mL/kg/h; criança até 30 kg 1 mL/kg/h (com soro glicosado de manutenção); elétrica com mioglobinúria 1–1,5 mL/kg/h até a urina clarear.</li>
+</ul>
+<div class="callout ok"><h3>Exemplo cobrado: 70 kg, 45%</h3>
+<p>2 × 70 × 45 = <strong>6.300 mL</strong> ÷ 16 ≈ <strong>394 mL/h</strong> de ritmo inicial, ajustado pela diurese (gabarito de 2025.2). No ATLS 10 seriam 3.150 mL nas primeiras 8 h e 3.150 mL nas 16 h seguintes; alternativas com essa divisão estão desatualizadas.</p></div>
+
+<h3>Queimadura pequena e superficial (palestra da CC)</h3>
+<ul>
+<li>Parar o processo: retirar roupas e anéis, <strong>resfriar com água corrente</strong> (nunca gelo), cobrir e evitar hipotermia.</li>
+<li>Analgesia, limpeza com água e sabão neutro, curativo (sulfadiazina de prata 1% é o mais usado no SUS; evitar na face), profilaxia antitetânica, sem antibiótico sistêmico profilático, reavaliar em 24–48 h.</li>
+<li>Bolhas: o ATLS 11 passou a orientar a <strong>remoção das bolhas</strong> em ambiente limpo para avaliar a profundidade, abandonando a conduta conservadora antiga.</li>
+<li>Encaminhar para centro de queimados: 2º grau acima de 10% SCQ, qualquer 3º grau, face, mãos, pés, genitália, períneo ou grandes articulações, elétrica, química, inalatória, comorbidades ou trauma associado.</li>
+<li>Queimadura circunferencial profunda em tórax ou membro com isquemia → escarotomia.</li>
+</ul>
+
+<h3>Avaliação nutricional</h3>
+<ul>
+<li>Queimado grave vive hipermetabolismo e catabolismo prolongados: perde massa magra, cicatriza pior e infecta mais.</li>
+<li>Triagem: NRS-2002 (≥3 indica risco), avaliação subjetiva global, perda de peso involuntária acima de 10% em 6 meses.</li>
+</ul>
+<div class="tbl"><table>
+<thead><tr><th>Marcador</th><th>Meia-vida</th><th>Uso</th><th>Caso da prova</th></tr></thead>
+<tbody>
+<tr><td>Albumina</td><td>~20 dias</td><td>Prognóstico; cai também com inflamação e hemodiluição (normal ≥3,5 g/dL)</td><td>2,6 → reduzida</td></tr>
+<tr><td>Transferrina</td><td>~8 dias</td><td>Depleção intermediária (normal ≥200 mg/dL)</td><td>140 → reduzida</td></tr>
+<tr><td>Pré-albumina</td><td>~2 dias</td><td>Melhor para acompanhar resposta à terapia nutricional</td><td>10 → reduzida</td></tr>
+<tr><td>Linfócitos totais</td><td>—</td><td>Imunocompetência (abaixo de 1.500 = depleção; abaixo de 800 = grave)</td><td>850 → imunossupressão</td></tr>
+</tbody></table></div>
+<p><strong>Na questão cobrada:</strong> todos reduzidos + perda de peso = desnutrição significativa com hipoproteinemia e imunossupressão, útil para acompanhar risco de infecção e atraso de cicatrização. Inflamação e desnutrição coexistem; não dá para descartar os exames.</p>
+<ul>
+<li>Conduta: via oral ou enteral precoce (24–48 h) em vez de parenteral; proteína ~1,5–2 g/kg/dia no queimado.</li>
+<li>Cirurgia eletiva em desnutrido grave: terapia nutricional por 7–14 dias antes. Projeto ACERTO: abreviar jejum (líquido claro com carboidrato até 2 h antes) e realimentar cedo.</li>
+</ul>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Sangramentos na 1ª metade e doença trofoblástica</span><span class="chip c-ci">Sem. 05</span><span class="src">MARC + palestra</span><span class="ref">caiu 5</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Três questões pedem a <strong>forma de abortamento pelo colo</strong> <span class="ref">CI 24.2 Q9</span> <span class="ref">CI 25.1 Q10</span> <span class="ref">CI 25.2 Q6</span>. Uma é ectópica rota instável → laparotomia <span class="ref">CI 24.2 Q4</span>. Uma de <strong>abortamento infectado</strong> <span class="ref">CI 25.1 Q2</span>. Doença trofoblástica apareceu só como distrator.</p></div>
+
+<h3>Abortamento: o colo decide</h3>
+<div class="tbl"><table>
+<thead><tr><th>Forma</th><th>Colo</th><th>Clínica e USG</th><th>Conduta</th></tr></thead>
+<tbody>
+<tr><td>Ameaça</td><td>Fechado</td><td>Sangramento leve, cólica leve, útero compatível, embrião vivo</td><td>USG transvaginal, repouso relativo, analgesia, sinais de alerta; ambulatorial</td></tr>
+<tr><td>Inevitável / em curso</td><td>Aberto</td><td>Sangramento moderado a intenso, cólica forte, restos no canal</td><td>Esvaziamento uterino; estabilizar se instável</td></tr>
+<tr><td>Incompleto</td><td>Aberto</td><td>Restos ovulares; eco endometrial acima de 15 mm</td><td>AMIU (até 12 semanas), curetagem ou misoprostol</td></tr>
+<tr><td>Completo</td><td>Fecha em horas</td><td>Sangramento e cólica diminuem; endométrio abaixo de 15 mm</td><td>Observação</td></tr>
+<tr><td>Retido</td><td>Fechado</td><td>Embrião com CCN ≥7 mm sem batimento ou saco ≥25 mm vazio</td><td>Misoprostol ou esvaziamento</td></tr>
+<tr><td>Infectado</td><td>Pérvio</td><td>Febre, secreção purulenta, útero doloroso, laceração cervical (manipulação)</td><td>Ver abaixo</td></tr>
+</tbody></table></div>
+
+<div class="callout ok"><h3>Abortamento infectado: a alternativa certa tem os quatro pilares</h3>
+<p><strong>Estabilização clínica</strong> + <strong>antibiótico de amplo espectro</strong> (clindamicina + gentamicina, ou ampicilina-sulbactam) + <strong>USG</strong> para restos + <strong>tratamento cirúrgico</strong> (esvaziamento uterino após iniciar antibiótico e sutura da laceração). Infecção polimicrobiana, de flora intestinal e genital. Casos graves evoluem com peritonite, sepse e coagulopatia.</p></div>
+
+<h3>Gravidez ectópica</h3>
+<ul>
+<li>Atraso menstrual + dor + sangramento. β-hCG positivo sem saco gestacional intrauterino na USG transvaginal.</li>
+<li><strong>Instável</strong> (hipotensão, taquicardia, culdocentese com sangue) → cirurgia imediata, sem esperar exame de imagem.</li>
+<li>Estável: expectante (β-hCG baixo e em queda, sem batimento), <strong>metotrexato</strong> (íntegra, β-hCG abaixo de 5.000, massa menor que 3,5 cm, sem batimento; controle no dia 4 e 7 com queda ≥15%) ou cirurgia (salpingostomia ou salpingectomia).</li>
+</ul>
+
+<h3>Doença trofoblástica gestacional</h3>
+<div class="tbl"><table>
+<thead><tr><th></th><th>Mola completa</th><th>Mola parcial</th></tr></thead>
+<tbody>
+<tr><td>Cariótipo</td><td>46,XX diploide, só material paterno</td><td>69,XXY triploide</td></tr>
+<tr><td>Feto</td><td>Ausente</td><td>Presente, malformado</td></tr>
+<tr><td>β-hCG</td><td>Muito alto (frequente acima de 100.000)</td><td>Menos elevado</td></tr>
+<tr><td>Clínica</td><td>Útero maior que a IG, hiperêmese, pré-eclâmpsia antes de 20 semanas, hipertireoidismo, cistos tecaluteínicos; USG em "flocos de neve"</td><td>Parece abortamento retido ou incompleto</td></tr>
+<tr><td>Risco de neoplasia</td><td>~15–20%</td><td>~1–5%</td></tr>
+</tbody></table></div>
+<ul>
+<li>Conduta: <strong>vácuo-aspiração</strong> uterina (preferível à curetagem), histopatológico, anti-D se Rh negativo, radiografia de tórax.</li>
+<li>Seguimento: β-hCG semanal até 3 dosagens negativas seguidas, depois mensal. Contracepção hormonal durante o seguimento.</li>
+<li>Neoplasia trofoblástica: platô (4 valores em 3 semanas com variação menor que 10%) ou aumento (≥10% em 3 valores em 2 semanas), histologia de coriocarcinoma ou metástase (pulmão é a mais comum). Baixo risco: metotrexato.</li>
+</ul>
+<div class="callout warn"><h3>Pegadinhas</h3><ul>
+<li>Colo fechado + sangramento leve = ameaça: não interna nem faz curetagem, e também não libera sem USG.</li>
+<li>Uterotônico é para abortamento, não para ectópica.</li>
+<li>Toda gestante Rh negativo com sangramento, abortamento, ectópica ou mola recebe imunoglobulina anti-D se não sensibilizada.</li>
+</ul></div>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Disfonia, disfagia e videolaringoscopia</span><span class="chip c-ci">Sem. 05</span><span class="src">palestra</span><span class="ref">caiu 1</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3><p>Professor com rouquidão que piora com uso e melhora com repouso, lesões bilaterais simétricas no terço médio → <strong>nódulos vocais</strong> <span class="ref">CI 25.2 Q5</span> (gabarito do relatório está errado).</p></div>
+<div class="tbl"><table>
+<thead><tr><th>Lesão</th><th>Pista</th><th>Conduta</th></tr></thead>
+<tbody>
+<tr><td>Nódulos</td><td>Bilaterais, simétricos, junção terço anterior-médio; abuso vocal (professor, cantor, criança)</td><td>Fonoterapia primeiro</td></tr>
+<tr><td>Pólipo</td><td>Unilateral, pediculado ou séssil, fonotrauma agudo</td><td>Microcirurgia</td></tr>
+<tr><td>Edema de Reinke</td><td>Bilateral difuso, tabagista, voz grave em mulher</td><td>Parar de fumar; cirurgia</td></tr>
+<tr><td>Papilomatose</td><td>HPV 6 e 11, lesões verrucosas múltiplas, criança, recidiva, pode dar estridor</td><td>Exéreses repetidas</td></tr>
+<tr><td>Carcinoma espinocelular</td><td>Tabagista e etilista, lesão unilateral irregular ou leucoplasia, rouquidão persistente, otalgia reflexa, linfonodo</td><td>Laringoscopia + biópsia; glótico dá sintoma cedo e tem melhor prognóstico</td></tr>
+<tr><td>Paralisia de prega vocal</td><td>Voz soprosa; laríngeo recorrente esquerdo (tumor de pulmão ou mediastino, aneurisma de aorta, tireoidectomia)</td><td>Investigar trajeto do nervo</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>Laringoscopia</strong> se rouquidão persiste por mais de 4 semanas, ou antes se houver alarme: tabagismo ou etilismo, estridor, hemoptise, disfagia, odinofagia, otalgia, massa cervical, perda de peso, cirurgia recente de pescoço ou tórax.</li>
+<li>Não tratar empiricamente com antibiótico, corticoide ou antirrefluxo antes de ver a laringe.</li>
+<li>Videolaringoscopia (ambulatorial): endoscópio rígido pela boca ou flexível pelo nariz, gravando as pregas vocais; a estroboscopia avalia a onda mucosa. Não confundir com o videolaringoscópio de intubação do HAM.</li>
+</ul>
+<div class="tbl"><table>
+<thead><tr><th>Disfagia</th><th>Pista</th><th>Exame</th></tr></thead>
+<tbody>
+<tr><td>Orofaríngea</td><td>Dificuldade de iniciar, tosse ou engasgo, regurgitação nasal (AVC, Parkinson, miastenia, ELA)</td><td>Videofluoroscopia ou videoendoscopia da deglutição</td></tr>
+<tr><td>Esofágica mecânica</td><td>Sólidos antes de líquidos, progressiva (câncer se idoso com perda de peso) ou intermitente (anel)</td><td>Endoscopia digestiva alta</td></tr>
+<tr><td>Esofágica motora</td><td>Sólidos e líquidos desde o início (acalasia, espasmo)</td><td>Endoscopia, depois manometria</td></tr>
+</tbody></table></div>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">HPB e câncer de próstata</span><span class="chip c-ci">Sem. 05</span><span class="src">palestra CC</span><span class="ref">caiu 1</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3><p>68 anos, jato fraco, noctúria, próstata lisa e PSA normal → <strong>alfabloqueador</strong>, associando inibidor da 5-alfa-redutase se volumosa <span class="ref">CI 25.2 Q11</span>. Distratores: biópsia, prostatectomia radical, antibiótico.</p></div>
+<div class="grid2">
+<div class="card mini"><h3>HPB</h3><ul>
+<li>Zona de transição; não palpável como nódulo</li>
+<li>Sintomas de esvaziamento (jato fraco, hesitação, gotejamento) e armazenamento (noctúria, urgência)</li>
+<li>IPSS: leve 0–7, moderado 8–19, grave 20–35</li>
+<li>Avaliar: toque retal, urina, PSA se mudar conduta, USG com volume e resíduo</li></ul></div>
+<div class="card mini"><h3>Câncer</h3><ul>
+<li>Adenocarcinoma da zona periférica: nódulo endurecido ao toque</li>
+<li>Assintomático no início; risco maior com idade, raça negra, história familiar</li>
+<li>PSA alto ou toque alterado → RM multiparamétrica → biópsia guiada</li>
+<li>Metástase óssea blástica</li></ul></div>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>Tratamento da HPB</th><th>Quando</th><th>Detalhe cobrável</th></tr></thead>
+<tbody>
+<tr><td>Observação e orientação</td><td>Sintomas leves</td><td>Reduzir líquido à noite, cafeína e álcool</td></tr>
+<tr><td>Alfabloqueador (tansulosina, doxazosina)</td><td>Primeira linha sintomática</td><td>Age em dias; hipotensão postural, ejaculação retrógrada, íris flácida na cirurgia de catarata</td></tr>
+<tr><td>Inibidor da 5-alfa-redutase (finasterida, dutasterida)</td><td>Próstata acima de 30–40 g</td><td>Reduz volume, retenção e cirurgia; demora 3–6 meses; <strong>reduz o PSA pela metade</strong></td></tr>
+<tr><td>Combinação</td><td>Próstata volumosa com sintomas moderados a graves</td><td></td></tr>
+<tr><td>Cirurgia (RTU de próstata)</td><td>Retenção refratária, ITU de repetição, litíase vesical, hematúria recorrente, hidronefrose ou insuficiência renal, falha clínica</td><td></td></tr>
+</tbody></table></div>
+<ul>
+<li>Rastreamento é tema dividido: Ministério da Saúde e INCA não recomendam rastrear homens assintomáticos; a Sociedade Brasileira de Urologia defende discussão individual a partir de 50 anos (45 se negro ou com parente de 1º grau). Na APS, decisão compartilhada.</li>
+<li>Câncer localizado: vigilância ativa (baixo risco), prostatectomia radical ou radioterapia. Metastático: privação androgênica.</li>
+</ul>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Síndromes demenciais e Alzheimer</span><span class="chip c-ci">Sem. 06</span><span class="src">MARC + palestra APS</span><span class="ref">caiu 6</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Sempre um idoso esquecido com MEEM. Metade pergunta <strong>CCL × demência</strong> <span class="ref">CI 24.2 Q15</span> <span class="ref">CI 25.1 Q3</span> <span class="ref">CI 25.2 Q1</span>; a outra metade pede o <strong>tratamento inicial do Alzheimer</strong> <span class="ref">CI 24.2 Q7</span> <span class="ref">CI 25.1 Q7</span> <span class="ref">CI 25.2 Q13</span>.</p></div>
+
+<h3>O que decide a questão</h3>
+<div class="flow"><span>Queixa cognitiva + teste alterado</span><i>+</i><span>funcionalidade preservada</span><i>=</i><span><strong>CCL</strong></span></div>
+<div class="flow"><span>Queixa cognitiva + teste alterado</span><i>+</i><span>perda funcional</span><i>=</i><span><strong>Demência</strong></span></div>
+<ul>
+<li>A perda funcional começa pelas <strong>atividades instrumentais</strong> (finanças, remédios, telefone, eletrônicos, transporte). Atividades básicas (banho, alimentação) só caem nas fases avançadas.</li>
+<li>MEEM sozinho não fecha demência. A nota de corte depende da escolaridade (Brucki: analfabeto 20; 1–4 anos 25; 5–8 anos 26,5; 9–11 anos 28; mais de 11 anos 29). As provas deram o valor de referência no enunciado.</li>
+<li>Antes de rotular: hemograma, TSH, vitamina B12, função renal e hepática, eletrólitos, cálcio, glicemia, sorologia para sífilis e HIV e neuroimagem (TC ou RM). Rastrear depressão, delirium e remédios anticolinérgicos ou benzodiazepínicos.</li>
+<li>Atrofia hipocampal apoia Alzheimer, mas <strong>não tê-la não exclui</strong> (distrator da CI 25.1 Q3).</li>
+</ul>
+
+<div class="tbl"><table>
+<thead><tr><th>Causa</th><th>Pista no enunciado</th><th>Conduta</th></tr></thead>
+<tbody>
+<tr><td>Alzheimer</td><td>Insidioso, progressivo, memória recente primeiro, depois linguagem e orientação</td><td>Inibidor da acetilcolinesterase</td></tr>
+<tr><td>Vascular</td><td>AVC prévio, déficit focal, piora em degraus, lentificação e disfunção executiva</td><td>Controle de fatores de risco cardiovascular</td></tr>
+<tr><td>Corpos de Lewy</td><td>Flutuação da atenção, alucinações visuais bem formadas, parkinsonismo, distúrbio do sono REM</td><td>Rivastigmina; evitar haloperidol (reação grave)</td></tr>
+<tr><td>Frontotemporal</td><td>50–65 anos, desinibição, apatia ou alteração de linguagem precoces; memória relativamente preservada</td><td>Manejo comportamental; inibidor da colinesterase não ajuda</td></tr>
+<tr><td>Hidrocefalia de pressão normal</td><td>Marcha magnética + incontinência urinária + demência; ventrículos dilatados</td><td>Punção lombar de alívio e derivação (reversível)</td></tr>
+<tr><td>Delirium</td><td>Início agudo, flutuante, desatenção, causa orgânica</td><td>Tratar a causa</td></tr>
+<tr><td>Depressão</td><td>Queixa ativa da própria memória, respostas "não sei", humor deprimido</td><td>Antidepressivo</td></tr>
+</tbody></table></div>
+
+<h3>Tratamento farmacológico</h3>
+<div class="tbl"><table>
+<thead><tr><th>Fase</th><th>Fármaco</th><th>Detalhe cobrável</th></tr></thead>
+<tbody>
+<tr><td>Leve a moderada</td><td>Donepezila 5 mg/dia (até 10), rivastigmina 1,5 mg 12/12 h (até 6 mg 12/12 h ou adesivo), galantamina</td><td>Efeitos: náusea, diarreia, bradicardia e síncope</td></tr>
+<tr><td>Moderada a grave</td><td>Memantina (antagonista NMDA), sozinha ou associada a um inibidor da colinesterase</td><td>Memantina na fase leve é distrator clássico</td></tr>
+</tbody></table></div>
+<div class="callout warn"><h3>Pegadinhas</h3><ul>
+<li>Memantina + galantamina na fase inicial está errado pela fase, não por "mesmo mecanismo" (o comentário da CI 24.2 Q7 confunde isso). O que nunca se faz é associar dois inibidores da colinesterase.</li>
+<li>Amantadina é antiparkinsoniano, não trata Alzheimer.</li>
+<li>Antipsicótico e benzodiazepínico só em sintoma neuropsiquiátrico grave e refratário (risco de queda e morte).</li>
+<li>"Esquecimento é da idade" nunca é resposta: toda mudança em relação ao basal é investigada.</li>
+</ul></div>
+<div class="callout gap"><h3>Está na lista e ainda não caiu</h3><p>A palestra "Síndromes demenciais na APS" deve cobrar investigação de causas reversíveis, escalas funcionais (Katz para atividades básicas, Lawton para instrumentais), suporte ao cuidador, segurança domiciliar e diferenciação de corpos de Lewy e frontotemporal.</p></div>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Síndrome parkinsoniana</span><span class="chip c-ci">Sem. 06</span><span class="src">palestra</span><span class="ref">caiu 1</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3><p>Idosa com tremor de repouso unilateral, rigidez plástica e bradicinesia, usando sertralina, sem neurolépticos → <strong>parkinsonismo idiopático</strong> <span class="ref">CI 25.2 Q8</span>.</p></div>
+<ul>
+<li>Síndrome parkinsoniana = <strong>bradicinesia</strong> + tremor de repouso e/ou rigidez.</li>
+<li>Doença de Parkinson: início <strong>assimétrico</strong>, tremor de repouso tipo "contar moedas", rigidez em roda denteada, boa resposta à levodopa. Antes dos sintomas motores: perda de olfato, constipação, depressão, distúrbio do sono REM. Instabilidade postural é tardia.</li>
+</ul>
+<div class="tbl"><table>
+<thead><tr><th>Diferencial</th><th>Pista</th></tr></thead>
+<tbody>
+<tr><td>Medicamentoso</td><td>Haloperidol, risperidona, metoclopramida, <strong>flunarizina e cinarizina</strong>; simétrico, subagudo → suspender o fármaco</td></tr>
+<tr><td>Vascular</td><td>Predomínio em membros inferiores e marcha, sinais piramidais, AVCs na imagem, pouca resposta à levodopa</td></tr>
+<tr><td>Paralisia supranuclear progressiva</td><td>Quedas precoces e paralisia do olhar vertical</td></tr>
+<tr><td>Atrofia de múltiplos sistemas</td><td>Disautonomia grave precoce (hipotensão postural, disfunção urinária), sinais cerebelares</td></tr>
+<tr><td>Degeneração corticobasal</td><td>Assimetria extrema, apraxia, membro "alienígena"</td></tr>
+<tr><td>Corpos de Lewy</td><td>Demência antes ou até 1 ano após o parkinsonismo, alucinações visuais</td></tr>
+<tr><td>Tremor essencial</td><td>Tremor postural ou de ação, bilateral, história familiar, melhora com álcool, sem bradicinesia → propranolol</td></tr>
+</tbody></table></div>
+<h3>Tratamento</h3>
+<ul>
+<li><strong>Levodopa + carbidopa ou benserazida</strong>: a mais eficaz; primeira escolha em idosos ou com prejuízo funcional. Uso prolongado traz flutuações (fim de dose) e discinesias.</li>
+<li>Agonistas dopaminérgicos (pramipexol): preferidos em jovens; sonolência, alucinação, compulsões.</li>
+<li>Inibidores da MAO-B (rasagilina, selegilina) em sintomas leves; amantadina para discinesia; biperideno só em jovem com tremor (evitar em idoso).</li>
+<li>Náusea: domperidona, não metoclopramida. Psicose: quetiapina ou clozapina, nunca haloperidol.</li>
+</ul>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Icterícia neonatal, incompatibilidade e eritroblastose</span><span class="chip c-ci">Sem. 07</span><span class="src">MARC + palestra</span><span class="ref">caiu 5</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>RN ≥35 semanas com Kramer e bilirrubina no Bhutani → <strong>alta ou fototerapia</strong> <span class="ref">CI 24.2 Q1</span> <span class="ref">CI 24.2 Q6</span> <span class="ref">CI 25.1 Q12</span> <span class="ref">CI 25.2 Q9</span>. Uma de <strong>icterícia fisiológica</strong> no 5º dia em aleitamento exclusivo <span class="ref">CI 25.2 Q15</span>. Eritroblastose ainda não caiu.</p></div>
+
+<div class="grid2">
+<div class="card mini"><h3>Fisiológica</h3><ul>
+<li>Começa após 24 h</li><li>Pico no 3º–5º dia (termo)</li><li>Indireta predominante</li><li>RN ativo, mamando, urina clara, fezes normais</li></ul>
+<p><strong>Conduta:</strong> tranquilizar, manter aleitamento em livre demanda, reavaliar cor, sucção, peso e eliminações.</p></div>
+<div class="card mini"><h3>Sinais de patológica</h3><ul>
+<li>Início antes de 24 h (hemólise até prova em contrário)</li><li>Subida rápida ou acima da linha de tratamento</li><li>Bilirrubina direta acima de 1 mg/dL → investigar colestase</li><li>Mais de 2 semanas no termo; acolia e colúria</li><li>RN doente, sucção fraca, letargia</li></ul></div>
+</div>
+
+<h3>Kramer e Bhutani</h3>
+<div class="tbl"><table>
+<thead><tr><th>Kramer</th><th>Área</th><th>BT aproximada</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Cabeça e pescoço</td><td>~5 mg/dL</td></tr>
+<tr><td>2</td><td>Tronco até o umbigo</td><td>~9 mg/dL</td></tr>
+<tr><td>3</td><td>Umbigo aos joelhos</td><td>~12 mg/dL</td></tr>
+<tr><td>4</td><td>Braços e pernas</td><td>~15 mg/dL</td></tr>
+<tr><td>5</td><td>Palmas e plantas</td><td>acima de 15 mg/dL</td></tr>
+</tbody></table></div>
+<p>Kramer só estima: a conduta sempre passa por <strong>dosar a bilirrubina</strong>. O nomograma de Bhutani (≥35 semanas, BT × horas de vida) separa risco baixo (abaixo de P40), intermediário baixo (P40–75), intermediário alto (P75–95) e alto (acima de P95).</p>
+<div class="tbl"><table>
+<thead><tr><th>Cenário da prova</th><th>Resposta</th></tr></thead>
+<tbody>
+<tr><td>Zona baixa ou intermediária baixa, sem fator de risco, mamando bem</td><td>Alta com reavaliação em 24–48 h</td></tr>
+<tr><td>Acima de P75 na consulta em casa ou na UBS</td><td>Dosar BT; se confirmado, fototerapia</td></tr>
+<tr><td>Acima de P95 (36 h, BT 13) com mãe O e RN A</td><td>Suspender a alta, fototerapia imediata, BT em 4–8 h</td></tr>
+<tr><td>54 h, BT 15,5, mãe com diabetes gestacional</td><td>Adiar a alta e fototerapia no alojamento conjunto</td></tr>
+</tbody></table></div>
+<p class="muted">Formalmente, a indicação de fototerapia vem das curvas por idade gestacional e fatores de risco da SBP; nas provas da Afya a decisão foi cobrada pelo Bhutani, como na tabela.</p>
+<p class="muted">Fatores de risco: menos de 38 semanas, icterícia nas primeiras 24 h, incompatibilidade ABO/Rh ou Coombs direto positivo, irmão que fez fototerapia, céfalo-hematoma, aleitamento ineficaz com perda de peso excessiva, deficiência de G6PD, filho de mãe diabética.</p>
+
+<h3>Incompatibilidade ABO × Rh</h3>
+<div class="tbl"><table>
+<thead><tr><th></th><th>ABO</th><th>Rh (eritroblastose fetal)</th></tr></thead>
+<tbody>
+<tr><td>Combinação</td><td>Mãe O, RN A ou B</td><td>Mãe Rh negativo sensibilizada, feto Rh positivo</td></tr>
+<tr><td>1º filho</td><td>Pode acometer (anticorpos naturais)</td><td>Geralmente poupado; a sensibilização ocorre no parto ou evento anterior</td></tr>
+<tr><td>Gravidade</td><td>Leve a moderada; Coombs direto fraco ou negativo</td><td>Pode ser grave: anemia fetal, hepatoesplenomegalia, hidropsia, óbito</td></tr>
+</tbody></table></div>
+<ul>
+<li>Eventos sensibilizantes: parto, abortamento, ectópica, mola, amniocentese, trauma, sangramento na gestação.</li>
+<li>Pré-natal da Rh negativo: <strong>Coombs indireto</strong>. Negativo → repetir durante a gestação e fazer <strong>imunoglobulina anti-D com 28 semanas</strong>, após eventos sensibilizantes e <strong>até 72 h após o parto</strong> se o RN for Rh positivo.</li>
+<li>Coombs indireto positivo (já sensibilizada) → não adianta anti-D. Titular; título ≥1:16 → <strong>Doppler da artéria cerebral média</strong> (pico sistólico acima de 1,5 MoM indica anemia) → cordocentese e transfusão intrauterina.</li>
+<li>RN: Coombs direto positivo, anemia, icterícia precoce → fototerapia intensiva, imunoglobulina IV se a bilirrubina sobe apesar da fototerapia, exsanguineotransfusão se atingir o limite ou houver sinais de encefalopatia (hipotonia, sucção débil, choro agudo, opistótono).</li>
+</ul>
+<div class="callout warn"><h3>Pegadinhas</h3><ul>
+<li>Banho de sol não é tratamento.</li>
+<li>Não oferecer fórmula a RN saudável com aleitamento eficaz.</li>
+<li>Não "esperar o pico do 5º dia" quando o valor já está alto.</li>
+</ul></div>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Neoplasias pulmonares</span><span class="chip c-ci">Sem. 07</span><span class="src">palestra CC</span><span class="ref">caiu 2</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Tabagista com tosse, perda de peso, hemoptise ou rouquidão e <strong>massa espiculada</strong> ou <strong>lesão peri-hilar obstruindo o brônquio</strong> → câncer de pulmão <span class="ref">CI 25.1 Q9</span> <span class="ref">CI 25.2 Q2</span>. Distratores: tuberculose, abscesso, DPOC, TEP.</p></div>
+<div class="tbl"><table>
+<thead><tr><th>Tipo</th><th>Local</th><th>Marca</th></tr></thead>
+<tbody>
+<tr><td>Adenocarcinoma</td><td>Periférico</td><td>O mais comum; ocorre em não fumantes e mulheres; mutações EGFR e ALK; baqueteamento</td></tr>
+<tr><td>Escamoso</td><td>Central</td><td>Forte ligação com tabaco; cavitação; hipercalcemia por PTHrP</td></tr>
+<tr><td>Pequenas células</td><td>Central</td><td>Quase só tabagistas, agressivo; SIADH (hiponatremia), Cushing ectópico, Lambert-Eaton; tratado com quimio ± radio, não com cirurgia</td></tr>
+<tr><td>Grandes células</td><td>Periférico</td><td>Indiferenciado</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>Pancoast</strong> (ápice): dor no ombro e braço + síndrome de Horner (ptose, miose, anidrose).</li>
+<li>Veia cava superior: edema de face e membros superiores, circulação colateral. Rouquidão: nervo laríngeo recorrente esquerdo. Frênico: paralisia diafragmática.</li>
+<li>Nódulo suspeito: acima de 8 mm, espiculado, lobo superior, crescendo, tabagista. Calcificação em "pipoca" ou central difusa e estabilidade por 2 anos sugerem benignidade.</li>
+<li>Diagnóstico: TC, PET-CT, biópsia (broncoscopia para central, transtorácica guiada por TC para periférico).</li>
+<li>Rastreio com TC de baixa dose anual: 50–80 anos, ≥20 maços-ano, fumante ou ex há menos de 15 anos (USPSTF). Não é programa populacional do SUS.</li>
+<li>Não pequenas células: I–II cirurgia (lobectomia); III quimiorradioterapia; IV terapia-alvo se houver mutação ou imunoterapia. Cessação do tabagismo sempre.</li>
+</ul>
+<div class="callout warn"><h3>Pegadinhas</h3><ul>
+<li>Tuberculose não costuma obstruir o brônquio fonte.</li>
+<li>Abscesso tem febre, escarro purulento e cavidade com nível hidroaéreo.</li>
+</ul></div>
+</div>
+</details>
+</section>
+
+<section class="ham" id="ham">
+<h2>HAM <small>6 questões</small></h2>
+<p class="muted">Referência atual: ATLS 11ª edição (2025) e PHTLS. A prova de 2025.2 já cobrou o ATLS 11.</p>
+
+<details class="topic card">
+<summary><span class="t">Física do trauma (cinemática)</span><span class="chip c-ham">Sem. 02</span><span class="ref">nunca caiu isolada</span></summary>
+<div class="body">
+<div class="callout"><h3>Como deve cair</h3><p>Nunca teve questão própria, mas o mecanismo aparece em quase todo caso de HAM. Espere: "qual lesão suspeitar neste mecanismo" ou "qual dado da cena indica alto risco".</p></div>
+<ul>
+<li><strong>Energia cinética = ½ × massa × velocidade²</strong>: a velocidade pesa mais. Dobrar a velocidade quadruplica a energia.</li>
+<li>Primeira lei de Newton (inércia): o corpo continua em movimento quando o veículo para. Numa colisão há três impactos: veículo, corpo e órgãos internos (desaceleração).</li>
+<li>Cavitação: permanente (trajeto) e temporária (estiramento dos tecidos); projéteis de alta energia causam lesão muito além do trajeto.</li>
+</ul>
+<div class="tbl"><table>
+<thead><tr><th>Mecanismo</th><th>Lesões a suspeitar</th></tr></thead>
+<tbody>
+<tr><td>Colisão frontal, trajetória "por baixo"</td><td>Joelho no painel: patela, fêmur, <strong>luxação posterior do quadril</strong>, acetábulo</td></tr>
+<tr><td>Colisão frontal, trajetória "por cima"</td><td>Volante e para-brisa: TCE, coluna cervical, fraturas de costelas, tórax instável, contusão cardíaca, <strong>lesão de aorta por desaceleração</strong>, fígado e baço</td></tr>
+<tr><td>Colisão lateral</td><td>Do lado do impacto: clavícula, costelas, pelve por compressão lateral, baço (esquerda) ou fígado (direita), flexão lateral cervical</td></tr>
+<tr><td>Colisão traseira</td><td>Hiperextensão cervical ("chicote") quando o encosto de cabeça está mal ajustado</td></tr>
+<tr><td>Ejeção e capotamento</td><td>Lesões múltiplas e imprevisíveis; ejeção aumenta muito o risco de morte e de lesão de coluna</td></tr>
+<tr><td>Cinto abdominal mal posicionado</td><td>Sinal do cinto (equimose): víscera oca, pâncreas, duodeno e <strong>fratura de Chance</strong> lombar</td></tr>
+<tr><td>Motocicleta</td><td>Ejeção sobre o guidão com fraturas bilaterais de fêmur; TCE sem capacete</td></tr>
+<tr><td>Atropelamento de adulto</td><td>Para-choque nas pernas (tíbia, joelho), tronco no capô ou para-brisa, cabeça e coluna na queda</td></tr>
+<tr><td>Atropelamento de criança</td><td><strong>Tríade de Waddell</strong>: fêmur, tórax ou abdome e cabeça</td></tr>
+<tr><td>Queda em pé de altura</td><td>Calcâneos, tornozelos, tíbias, quadril e compressão da coluna toracolombar</td></tr>
+<tr><td>Explosão</td><td>Primária: onda de pressão em órgãos com ar (tímpano, pulmão, intestino). Secundária: fragmentos. Terciária: arremesso contra objetos. Quaternária: queimaduras, esmagamento, inalação</td></tr>
+<tr><td>Arma branca</td><td>Baixa energia, lesão restrita ao trajeto; objeto empalado não se retira no pré-hospitalar, apenas se estabiliza</td></tr>
+</tbody></table></div>
+<p class="muted">Sinais de alto risco na cena: morte de ocupante no mesmo veículo, ejeção, intrusão importante no habitáculo, atropelamento ou moto em alta velocidade, queda de grande altura (mais de 3 vezes a altura da vítima em referência clássica do PHTLS).</p>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Atendimento inicial ao politraumatizado</span><span class="chip c-ham">Sem. 03</span><span class="ref">caiu 5</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Ordem do xABCDE na criança atropelada em choque <span class="ref">HAM 24.2 Q1</span>, prioridades na chegada à cena e sangramento em jato <span class="ref">HAM 25.1 Q3</span>, quando fazer a avaliação secundária com SAMPLA <span class="ref">HAM 24.2 Q3</span> <span class="ref">HAM 25.1 Q6</span> e particularidades de idoso e criança <span class="ref">HAM 24.2 Q8</span>.</p></div>
+<div class="flow"><span>Segurança da cena e EPI</span><i>→</i><span>Recursos adicionais e nº de vítimas</span><i>→</i><span>Impressão geral</span><i>→</i><span>xABCDE</span><i>→</i><span>Transporte ao centro de trauma</span><i>→</i><span>Avaliação secundária</span></div>
+<div class="tbl"><table>
+<thead><tr><th>Etapa</th><th>O que avaliar</th><th>O que fazer</th></tr></thead>
+<tbody>
+<tr><td>x — hemorragia exsanguinante</td><td>Sangramento externo em jato, amputação</td><td>Compressão direta, tamponamento de junções, <strong>torniquete 5–8 cm acima da lesão</strong> (fora de articulação, anotar horário). Vem antes da via aérea</td></tr>
+<tr><td>A — via aérea + coluna cervical</td><td>Fala normal = via aérea pérvia; ruídos, secreção, trauma de face</td><td>Tração da mandíbula, aspiração, cânula; via aérea definitiva se necessário; restrição de movimento cervical</td></tr>
+<tr><td>B — ventilação</td><td>Expor tórax: frequência, expansão, ausculta, percussão, SpO₂</td><td>O₂; tratar pneumotórax hipertensivo, pneumotórax aberto, hemotórax maciço, tórax instável</td></tr>
+<tr><td>C — circulação</td><td>Consciência, pele, pulso, enchimento capilar; fontes ocultas: tórax, abdome, pelve, ossos longos</td><td>2 acessos calibrosos ou intraósseo, cinta pélvica, imobilizar fraturas, sangue precoce, ácido tranexâmico</td></tr>
+<tr><td>D — neurológico</td><td>Glasgow, pupilas, sinais focais, glicemia</td><td>Glasgow 8 ou menos → via aérea definitiva; evitar hipóxia e hipotensão</td></tr>
+<tr><td>E — exposição e ambiente</td><td>Despir, rolar em bloco, lesões ocultas</td><td><strong>Prevenir hipotermia</strong>: mantas, fluidos aquecidos</td></tr>
+</tbody></table></div>
+<ul>
+<li>Reavaliar o xABCDE sempre que o paciente piorar. Transportar para o <strong>centro de trauma adequado</strong>, não o mais próximo; no pré-hospitalar grave, minimizar tempo de cena.</li>
+<li><strong>Avaliação secundária</strong>: só depois da primária completa e com funções vitais em normalização. Exame da cabeça aos pés + <strong>SAMPLA</strong> (sintomas, alergias, medicamentos, passado médico e gestação, líquidos e última refeição, ambiente e eventos do trauma).</li>
+<li>Adjuntos da primária: monitorização, ECG, oximetria, capnografia, gasometria e lactato, FAST ou eFAST, radiografia de tórax e pelve.</li>
+<li>Sonda vesical contraindicada com sangue no meato, equimose perineal ou próstata alta. Sonda nasogástrica contraindicada com sinais de fratura de base de crânio (olhos de guaxinim, sinal de Battle, rinorreia ou otorreia) → usar via oral.</li>
+<li>Tríade letal: <strong>hipotermia, acidose e coagulopatia</strong>.</li>
+</ul>
+<div class="grid2">
+<div class="card mini"><h3>Idoso</h3><ul>
+<li>Maior risco de lesão cervical com pouca energia (osteoporose, artrose)</li>
+<li>Betabloqueador mascara taquicardia; PA "normal" pode ser hipotensão para ele</li>
+<li>Anticoagulantes, menor reserva, hipotermia fácil</li></ul></div>
+<div class="card mini"><h3>Criança</h3><ul>
+<li>Occipício grande: coxim sob os ombros para alinhar a via aérea</li>
+<li><strong>Taquicardia é o sinal precoce</strong>; hipotensão é tardia</li>
+<li>Maior superfície corporal: hipotermia rápida</li>
+<li>Costelas flexíveis: contusão pulmonar sem fratura</li></ul></div>
+</div>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Via aérea e ventilação</span><span class="chip c-ham">Sem. 04</span><span class="ref">caiu 3</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Inconsciente com respiração ruidosa após colisão → <strong>tração da mandíbula com proteção cervical + aspiração</strong> <span class="ref">HAM 24.2 Q4</span> <span class="ref">HAM 25.1 Q1</span>; TCE com Glasgow 6 e estridor → <strong>intubação orotraqueal em sequência rápida</strong>, nunca nasotraqueal <span class="ref">HAM 25.1 Q5</span>.</p></div>
+<ul>
+<li>Sinais de ameaça: agitação (hipóxia), rebaixamento (hipercapnia), cianose (tardia), uso de musculatura acessória, <strong>ronco</strong> (língua), <strong>gorgolejo</strong> (líquido → aspirar), <strong>estridor</strong> (laringe), rouquidão.</li>
+<li>Causa mais comum de obstrução no inconsciente: queda da língua.</li>
+<li>No trauma: elevação do mento ou <strong>tração da mandíbula</strong>; não hiperestender o pescoço.</li>
+</ul>
+<div class="tbl"><table>
+<thead><tr><th>Dispositivo</th><th>Uso</th><th>Contraindicação ou limite</th></tr></thead>
+<tbody>
+<tr><td>Cânula orofaríngea</td><td>Medida da comissura labial ao ângulo da mandíbula</td><td>Só no inconsciente sem reflexo de vômito</td></tr>
+<tr><td>Cânula nasofaríngea</td><td>Tolerada no paciente semiconsciente</td><td>Suspeita de fratura de base de crânio ou de face</td></tr>
+<tr><td>Supraglótico (máscara laríngea, tubo laríngeo)</td><td>Resgate quando a intubação falha</td><td>Não é via aérea definitiva</td></tr>
+<tr><td>Tubo orotraqueal</td><td><strong>Via aérea definitiva</strong>: tubo na traqueia, balonete insuflado, fixado e ligado a O₂</td><td>Estabilizar a coluna manualmente durante a intubação</td></tr>
+<tr><td>Cricotireoidostomia cirúrgica</td><td>"Não intubo, não oxigeno"</td><td>Por punção em menores de 12 anos; o ATLS 11 retirou a traqueostomia das opções de emergência</td></tr>
+</tbody></table></div>
+<div class="callout ok"><h3>Indicações de via aérea definitiva</h3><ul>
+<li>Não protege a via aérea: <strong>Glasgow 8 ou menos</strong>, obstrução, trauma maxilofacial grave, risco de aspiração</li>
+<li>Não oxigena ou ventila: apneia, hipóxia refratária</li>
+<li>Obstrução prevista: lesão inalatória, hematoma cervical em expansão, estridor, edema progressivo</li>
+</ul></div>
+<h3>Sequência rápida de intubação</h3>
+<div class="flow"><span>Preparar material e plano B</span><i>→</i><span>Pré-oxigenar O₂ 100% por 3–5 min</span><i>→</i><span>Posicionar com estabilização cervical</span><i>→</i><span>Indução (etomidato ou cetamina)</span><i>→</i><span>Bloqueador (succinilcolina ou rocurônio)</span><i>→</i><span>Intubar</span><i>→</i><span>Confirmar com capnografia</span></div>
+<ul>
+<li><strong>Sedar antes de paralisar</strong> (evita paralisia consciente). Cetamina é boa opção no paciente hipotenso.</li>
+<li>Succinilcolina: evitar em hiperpotassemia, queimado ou esmagamento após 48–72 h, doença neuromuscular e hipertermia maligna.</li>
+<li>Confirmação: <strong>capnografia com curva</strong> é o padrão; ausculta de epigástrio e tórax; radiografia só confirma a altura do tubo.</li>
+<li>Preditores de via aérea difícil (LEMON): aspecto externo, regra 3-3-2, Mallampati, obstrução, mobilidade do pescoço.</li>
+</ul>
+<h3>Ventilação e lesões do B</h3>
+<ul>
+<li>Máscara com reservatório 10–15 L/min para alta FiO₂. Bolsa-válvula-máscara funciona melhor com duas pessoas. Evitar hiperventilar.</li>
+<li><strong>Pneumotórax hipertensivo</strong> é diagnóstico clínico (dispneia, murmúrio abolido, hipertimpanismo, turgência jugular, hipotensão; desvio de traqueia é tardio) → descompressão imediata sem esperar radiografia. ATLS 11: punção no <strong>2º espaço na linha hemiclavicular ou 4º–5º espaço entre as linhas axilares anterior e média</strong>; depois dreno no 5º espaço, no triângulo de segurança (drenos finos, ~14 Fr, são aceitos).</li>
+<li><strong>Pneumotórax aberto</strong>: curativo oclusivo fixado em 3 lados ou valvulado, depois dreno em outro local.</li>
+<li><strong>Tórax instável</strong>: 2 ou mais costelas fraturadas em 2 ou mais pontos com movimento paradoxal; o problema é a contusão pulmonar → O₂, analgesia, ventilação se hipóxia.</li>
+<li><strong>Hemotórax maciço</strong>: classicamente mais de 1.500 mL na drenagem ou mais de 200 mL/h por 2–4 h; o ATLS 11 enfatiza choque com hemotórax sem outra fonte de sangramento → toracotomia.</li>
+<li><strong>Tamponamento</strong>: tríade de Beck (hipotensão, bulhas abafadas, turgência jugular) → FAST e descompressão.</li>
+</ul>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Choque</span><span class="chip c-ham">Sem. 05</span><span class="ref">caiu 4</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Politraumatizado taquicárdico, hipotenso e confuso → <strong>choque hipovolêmico</strong>: controlar sangramento e repor volume, não vasopressor nem inotrópico <span class="ref">HAM 25.1 Q2</span> <span class="ref">HAM 25.1 Q4</span>. Fisiologia: <strong>catecolaminas causam taquicardia e vasoconstrição</strong> <span class="ref">HAM 25.1 Q8</span>; hipoperfusão leva a <strong>metabolismo anaeróbico e acidose metabólica</strong> <span class="ref">HAM 25.1 Q9</span>.</p></div>
+<ul>
+<li>Choque = perfusão e oxigenação tecidual inadequadas. <strong>Hipotensão não é obrigatória</strong>: existe choque compensado.</li>
+<li>No trauma, todo choque é <strong>hemorrágico até prova em contrário</strong>.</li>
+<li>Compensação: simpático e catecolaminas (taquicardia, vasoconstrição, pele fria, pálida e úmida, enchimento lento), renina-angiotensina e ADH (oligúria), taquipneia (compensa acidose). Descompensação: hipotensão e rebaixamento.</li>
+</ul>
+<div class="tbl"><table>
+<thead><tr><th>Tipo no trauma</th><th>Pista</th><th>Tratamento</th></tr></thead>
+<tbody>
+<tr><td>Hemorrágico</td><td>Taquicardia, pele fria, jugulares vazias, fonte de sangramento</td><td>Controle da hemorragia + sangue</td></tr>
+<tr><td>Obstrutivo</td><td><strong>Jugulares túrgidas</strong>: pneumotórax hipertensivo ou tamponamento</td><td>Descompressão</td></tr>
+<tr><td>Neurogênico</td><td>Lesão medular alta: <strong>hipotensão com bradicardia</strong> e pele quente</td><td>Volume, depois vasopressor</td></tr>
+<tr><td>Cardiogênico</td><td>Contusão cardíaca, arritmia, IAM</td><td>Suporte, tratar a causa</td></tr>
+</tbody></table></div>
+<h3>Gravidade da hemorragia</h3>
+<p>O ATLS 11 trocou as classes I a IV por <strong>leve, moderada e grave</strong>. As questões antigas usam as classes; saiba as duas.</p>
+<div class="tbl"><table>
+<thead><tr><th></th><th>Leve</th><th>Moderada</th><th>Grave</th></tr></thead>
+<tbody>
+<tr><td>FC</td><td>Normal</td><td>Acima de 100</td><td><strong>Acima de 120</strong></td></tr>
+<tr><td>PA sistólica</td><td>Normal</td><td>Normal ou pouco reduzida</td><td><strong>Abaixo de 90</strong></td></tr>
+<tr><td>Consciência e diurese</td><td>Normais</td><td>Ansioso, diurese reduzida</td><td>Confuso ou letárgico, diurese mínima</td></tr>
+<tr><td>Déficit de base</td><td>0 a −6</td><td>−6 a −10</td><td><strong>Menor que −10</strong></td></tr>
+<tr><td>Conduta</td><td>Observar, cristaloide limitado</td><td>Provável sangue</td><td>Protocolo de transfusão maciça e controle cirúrgico</td></tr>
+</tbody></table></div>
+<p class="muted">Classes clássicas: I até 15% de perda; II 15–30% (taquicardia, pressão de pulso reduzida); III 31–40% (FC 120–140, hipotensão, confusão); IV acima de 40% (FC acima de 140, hipotensão grave, letargia). Os casos da HAM 25.1 (FC 135–138, PA 85–90 de sistólica, confusão) são classe III, hemorragia grave no ATLS 11.</p>
+<h3>Tratamento</h3>
+<ul>
+<li><strong>Controlar a fonte</strong>: compressão, torniquete, cinta pélvica, imobilização de fraturas, cirurgia ou angioembolização.</li>
+<li>Dois acessos periféricos calibrosos e curtos, ou intraósseo. Cristaloide aquecido <strong>limitado</strong> (até 1 L no adulto), avaliando resposta: rápida, transitória ou ausente.</li>
+<li><strong>Sangue precoce</strong> e transfusão balanceada (plasma, plaquetas e hemácias em 1:1:1). <strong>Ácido tranexâmico em até 3 h</strong> do trauma.</li>
+<li><strong>Hipotensão permissiva</strong> no trauma penetrante sem TCE; no TCE, evitar hipotensão.</li>
+<li>Vasopressor não trata choque hemorrágico. Metas: diurese 0,5 mL/kg/h no adulto e 1 mL/kg/h na criança; aquecer o paciente.</li>
+<li>Índice de choque (FC ÷ PA sistólica) acima de 1 sugere choque relevante.</li>
+<li>Armadilhas: idoso com betabloqueador, atleta com bradicardia basal, gestante (hipervolemia esconde perda; o feto sofre antes), criança (hipotensão só aparece com perda grande).</li>
+</ul>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Queimaduras e trauma ambiental I (calor e frio)</span><span class="chip c-ham">Sem. 06</span><span class="ref">caiu 4</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Dois cenários de <strong>incêndio com múltiplas vítimas</strong> em que a prioridade é via aérea e inalação <span class="ref">HAM 24.2 Q7</span> <span class="ref">HAM 25.1 Q7</span>, uma sobre profundidade, risco de via aérea e insuficiência respiratória pelo PHTLS <span class="ref">HAM 24.2 Q5</span> e uma de <strong>exaustão pelo calor</strong> em maratona <span class="ref">HAM 24.2 Q10</span>. Frio nunca caiu. O cálculo de %SCQ e Parkland está no bloco CI.</p></div>
+
+<div class="flow"><span>Cena segura</span><i>→</i><span>Parar a queimadura</span><i>→</i><span>xABCDE</span><i>→</i><span>Evitar hipotermia</span><i>→</i><span>%SCQ e volume</span></div>
+
+<h3>Lesão inalatória e via aérea</h3>
+<ul>
+<li>Sinais: ambiente fechado, queimadura de face e pescoço, sobrancelhas ou vibrissas chamuscadas, fuligem na boca, escarro carbonáceo, <strong>rouquidão</strong>, <strong>estridor</strong>, alteração de consciência.</li>
+<li><strong>Intubação precoce</strong> se rouquidão ou estridor, queimadura circunferencial do pescoço, queimadura facial extensa ou profunda, edema de orofaringe, dificuldade de deglutir secreção, Glasgow ≤8 ou queimadura muito extensa. O edema piora nas horas seguintes; esperar fecha a janela. Tubo de pelo menos 7,5 mm no adulto.</li>
+<li><strong>Monóxido de carbono</strong>: o oxímetro não distingue carboxi-hemoglobina, então SpO₂ 99% não tranquiliza. Confusão e agitação após fumaça → <strong>O₂ a 100% em máscara com reservatório</strong> (meia-vida cai de ~4 h para ~40 min); câmara hiperbárica em casos graves.</li>
+<li>Cianeto (plástico queimado): acidose lática persistente e rebaixamento → hidroxocobalamina.</li>
+<li>Corticoide para lesão inalatória, antibiótico profilático e pomada não são prioridade no atendimento inicial.</li>
+</ul>
+<div class="callout ok"><h3>Lógica das questões de boate</h3>
+<p>A vítima agitada com pelos da face queimados e SpO₂ 99% deve sair da cena, receber O₂ na maior FiO₂ possível e ser exposta com proteção contra hipotermia; a cena é perigosa para a equipe <span class="ref">HAM 24.2 Q7</span>. Entre três vítimas: intubar cedo quem tem rouquidão e dispneia, O₂ de alto fluxo para quem está confuso com SpO₂ 88%; a vítima com mais de 40% de 3º grau em choque tem prognóstico reservado <span class="ref">HAM 25.1 Q7</span>.</p></div>
+
+<ul>
+<li><strong>Elétrica</strong>: a lesão da pele subestima a interna. Monitorar ECG (arritmia), procurar rabdomiólise (urina escura) e síndrome compartimental.</li>
+<li><strong>Química</strong>: irrigação abundante e prolongada; escovar pó seco antes; não tentar neutralizar. Álcali lesa mais fundo que ácido.</li>
+</ul>
+
+<h3>Calor</h3>
+<div class="tbl"><table>
+<thead><tr><th>Quadro</th><th>Pista</th><th>Conduta</th></tr></thead>
+<tbody>
+<tr><td>Cãibras de calor</td><td>Dor muscular com temperatura normal</td><td>Repouso na sombra, eletrólitos por via oral</td></tr>
+<tr><td>Exaustão pelo calor</td><td>Abaixo de 40 °C, <strong>consciência preservada</strong>, sudorese profusa, tontura, náusea, taquicardia</td><td>Tirar do calor, deitar, resfriar, solução eletrolítica isotônica em pequenas quantidades e intervalos regulares</td></tr>
+<tr><td>Intermação (insolação)</td><td><strong>40 °C ou mais + disfunção do SNC</strong> (confusão, convulsão, coma); pele seca ou suada</td><td>Emergência: resfriar no local antes de transportar (imersão em água gelada é o mais eficaz no esforço) até ~39 °C; antitérmico não funciona</td></tr>
+<tr><td>Hiponatremia do exercício</td><td>Bebeu muita água pura; confusão ou convulsão com temperatura normal</td><td>Restringir água; salina hipertônica se grave</td></tr>
+</tbody></table></div>
+<p class="muted">Gabarito da maratona: grandes volumes de água pura causam hiponatremia; água gelada rápida e suplemento de sódio imediato são distratores.</p>
+
+<h3>Frio <span class="chip c-gap">ainda não caiu</span></h3>
+<div class="tbl"><table>
+<thead><tr><th>Hipotermia</th><th>Clínica</th><th>Reaquecimento</th></tr></thead>
+<tbody>
+<tr><td>Leve 32–35 °C</td><td>Tremor, taquicardia, confusão leve</td><td>Tirar roupa molhada, isolar, passivo externo</td></tr>
+<tr><td>Moderada 28–32 °C</td><td>Tremor cessa, bradicardia, sonolência, onda J de Osborn, FA</td><td>Ativo externo (mantas térmicas) + fluidos aquecidos</td></tr>
+<tr><td>Grave abaixo de 28 °C</td><td>Coma, hipotensão, risco de fibrilação ventricular ao manipular</td><td>Ativo interno (lavagem de cavidades, circulação extracorpórea)</td></tr>
+</tbody></table></div>
+<ul>
+<li>Manipular com cuidado e na horizontal. PCR hipotérmica: RCP prolongada, "ninguém está morto até estar quente e morto". Abaixo de 30 °C, limitar choques e adiar adrenalina; entre 30 e 35 °C, espaçar as doses.</li>
+<li><strong>Congelamento</strong>: reaquecer rápido em água morna (~37–40 °C) até a pele amolecer e ficar rosada; não esfregar nem usar calor seco; não reaquecer se houver risco de recongelar; analgesia forte e antitetânica; amputação só após demarcação (semanas).</li>
+</ul>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Trauma ambiental II (submersão, raio, mergulho, altitude)</span><span class="chip c-ham">Sem. 07</span><span class="ref">caiu 3</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Duas de <strong>classificação de Szpilman</strong> <span class="ref">HAM 24.2 Q2</span> <span class="ref">HAM 25.1 Q10</span> (a segunda com gabarito errado) e uma de <strong>raio: mecanismos e triagem reversa</strong> <span class="ref">HAM 24.2 Q9</span>. Mergulho e altitude nunca caíram.</p></div>
+
+<h3>Afogamento (Szpilman)</h3>
+<div class="tbl"><table>
+<thead><tr><th>Grau</th><th>Achado</th><th>Conduta</th></tr></thead>
+<tbody>
+<tr><td>Resgate</td><td>Sem tosse e sem espuma</td><td>Avaliar e liberar no local</td></tr>
+<tr><td>1</td><td>Tosse sem espuma, ausculta normal</td><td>Repouso, aquecimento, liberar</td></tr>
+<tr><td>2</td><td>Pouca espuma, estertores em alguns campos</td><td>O₂ por cateter nasal; observação hospitalar 6–24 h</td></tr>
+<tr><td>3</td><td>Muita espuma (edema pulmonar), <strong>pulso radial presente</strong></td><td>O₂ 15 L/min por máscara; hospital, considerar ventilação</td></tr>
+<tr><td>4</td><td>Muita espuma + <strong>hipotensão ou pulso radial ausente</strong></td><td>O₂ 15 L/min, vigiar parada respiratória, intubação, cristaloide, UTI</td></tr>
+<tr><td>5</td><td><strong>Apneia com pulso carotídeo</strong></td><td>Ventilação imediata com bolsa-válvula-máscara e O₂; ao voltar a respirar, conduzir como grau 4</td></tr>
+<tr><td>6</td><td>PCR</td><td>RCP começando pelas ventilações</td></tr>
+</tbody></table></div>
+<ul>
+<li>O problema é hipóxia: <strong>ventilar é a prioridade</strong>. Não fazer manobra para "tirar água do pulmão".</li>
+<li>Colar cervical só se houver suspeita de trauma (mergulho em água rasa). Vômito é comum: lateralizar. Tratar hipotermia associada.</li>
+<li>Água doce ou salgada não muda a conduta.</li>
+</ul>
+
+<h3>Raio</h3>
+<ul>
+<li>Mecanismos: impacto direto, <strong>flash lateral</strong> (salta de árvore ou pessoa próxima), contato com objeto atingido, <strong>corrente de solo</strong>, descarga ascendente e onda de choque (trauma contuso, ruptura timpânica).</li>
+<li>PCR: despolarização maciça causa assistolia; o coração costuma voltar sozinho, mas a <strong>apneia persiste</strong> e leva a nova parada por hipóxia. Por isso a ventilação precoce e prolongada salva.</li>
+<li>Outras lesões: figuras de Lichtenberg (padrão arborescente, somem em horas, não são queimadura), queimaduras geralmente superficiais (corrente passa pela superfície), queraunoparalisia (membros paralisados, frios e sem pulso, transitória), catarata tardia, quedas e lesão de coluna.</li>
+<li>Diferente da elétrica de alta voltagem: exposição de milissegundos, menos lesão profunda e menos rabdomiólise.</li>
+</ul>
+<div class="callout ok"><h3>Triagem reversa</h3>
+<p>No START, a vítima sem respiração após abrir a via aérea é classificada como óbito. Em múltiplas vítimas de raio a lógica se inverte: <strong>atende-se primeiro quem está aparentemente morto</strong> (em PCR ou apneia), porque quem está consciente quase sempre sobrevive e a parada por raio tem alta chance de reverter com RCP e ventilação imediatas.</p></div>
+
+<h3>Mergulho <span class="chip c-gap">ainda não caiu</span></h3>
+<div class="tbl"><table>
+<thead><tr><th>Quadro</th><th>Base física</th><th>Pista</th></tr></thead>
+<tbody>
+<tr><td>Barotrauma de ouvido e seios</td><td>Lei de Boyle, na descida</td><td>Otalgia, hipoacusia; o mais comum</td></tr>
+<tr><td>Barotrauma pulmonar e embolia gasosa arterial</td><td>Lei de Boyle, subida prendendo a respiração</td><td>Sintomas tipo AVC ou perda de consciência em minutos após emergir; pneumotórax, pneumomediastino</td></tr>
+<tr><td>Doença descompressiva</td><td>Lei de Henry (nitrogênio sai da solução), subida rápida</td><td>Tipo I: dor articular, pele, prurido. Tipo II: medula (parestesia, paraplegia), pulmão, labirinto. Minutos a horas</td></tr>
+<tr><td>Narcose por nitrogênio</td><td>Profundidade</td><td>"Embriaguez" que resolve ao subir</td></tr>
+</tbody></table></div>
+<p><strong>Conduta</strong> na embolia e na doença descompressiva: O₂ a 100%, paciente deitado na horizontal (não Trendelenburg), hidratação e transporte para <strong>câmara hiperbárica</strong>. Transporte aéreo só em baixa altitude ou cabine pressurizada; drenar pneumotórax antes da câmara. Não voar por 12–24 h após mergulhar.</p>
+
+<h3>Altitude <span class="chip c-gap">ainda não caiu</span></h3>
+<div class="tbl"><table>
+<thead><tr><th>Quadro</th><th>Pista</th><th>Conduta</th></tr></thead>
+<tbody>
+<tr><td>Mal agudo da montanha</td><td>Acima de ~2.500 m: cefaleia + náusea, fadiga, tontura ou insônia, 6–12 h após subir</td><td>Parar de subir, repouso, analgésico, acetazolamida; descer se não melhorar</td></tr>
+<tr><td>Edema cerebral de altitude</td><td>Ataxia (marcha em tandem alterada), confusão, rebaixamento</td><td><strong>Descida imediata</strong>, O₂, dexametasona, câmara hiperbárica portátil</td></tr>
+<tr><td>Edema pulmonar de altitude</td><td>Dispneia em repouso, tosse com espuma rosada, crepitações, 2º–4º dia; principal causa de morte</td><td><strong>Descida imediata</strong>, O₂, nifedipino, câmara portátil</td></tr>
+</tbody></table></div>
+<p>Prevenção: subida gradual (acima de 3.000 m, aumentar a altitude onde dorme em até ~500 m por dia, com descanso a cada 3–4 dias), evitar álcool e sedativos, acetazolamida profilática em quem tem risco. A descida é o tratamento definitivo.</p>
+</div>
+</details>
+</section>
+
+<section class="iesc" id="iesc">
+<h2>IESC <small>6 questões</small></h2>
+<details class="topic card">
+<summary><span class="t">Origens e estruturação do SUS</span><span class="chip c-iesc">Sem. 02</span><span class="ref">caiu 2</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Afirmativas e asserções sobre <strong>Constituição de 1988, Lei 8.080 e Lei 8.142</strong>, com todas verdadeiras <span class="ref">IESC 24.2 Q5</span> <span class="ref">IESC 25.1 Q3</span>.</p></div>
+<div class="tbl"><table>
+<thead><tr><th>Ano</th><th>Marco</th></tr></thead>
+<tbody>
+<tr><td>1923</td><td>Lei Eloy Chaves: Caixas de Aposentadorias e Pensões por empresa</td></tr>
+<tr><td>1930s</td><td>Institutos de Aposentadorias e Pensões por categoria</td></tr>
+<tr><td>1966</td><td>INPS unifica os institutos</td></tr>
+<tr><td>1977</td><td>INAMPS: assistência só a quem contribuía; o resto dependia de filantropia</td></tr>
+<tr><td>1970s–80s</td><td>Movimento da Reforma Sanitária</td></tr>
+<tr><td>1986</td><td><strong>8ª Conferência Nacional de Saúde</strong>: saúde como direito e conceito ampliado; base do SUS</td></tr>
+<tr><td>1987</td><td>SUDS, transição descentralizada</td></tr>
+<tr><td>1988</td><td><strong>Constituição</strong>, arts. 196–200: saúde direito de todos e dever do Estado; cria o SUS</td></tr>
+<tr><td>1990</td><td><strong>Lei 8.080</strong> e <strong>Lei 8.142</strong></td></tr>
+<tr><td>1991–96</td><td>NOBs: municipalização; 1994 Programa Saúde da Família</td></tr>
+<tr><td>2001–02</td><td>NOAS: regionalização</td></tr>
+<tr><td>2006</td><td>Pacto pela Saúde (pela Vida, em Defesa do SUS, de Gestão)</td></tr>
+<tr><td>2011</td><td>Decreto 7.508: Regiões de Saúde, contrato organizativo, RENASES, RENAME, portas de entrada</td></tr>
+<tr><td>2012</td><td>Lei Complementar 141: mínimos em saúde (municípios 15%, estados 12% da receita de impostos)</td></tr>
+</tbody></table></div>
+<div class="grid2">
+<div class="card mini"><h3>Lei 8.080/1990</h3><ul>
+<li>Promoção, proteção e recuperação da saúde; organização e funcionamento dos serviços</li>
+<li>Princípios e diretrizes, competências de cada esfera</li>
+<li>Vigilância sanitária, epidemiológica, saúde do trabalhador, assistência farmacêutica</li>
+<li>Participação complementar do privado</li></ul></div>
+<div class="card mini"><h3>Lei 8.142/1990</h3><ul>
+<li><strong>Participação da comunidade</strong>: conselhos (permanentes, deliberativos, paritários) e conferências (a cada 4 anos)</li>
+<li>Paridade: 50% usuários, 25% trabalhadores, 25% gestores e prestadores</li>
+<li>Transferências fundo a fundo; para receber: fundo, conselho, plano, relatório de gestão, contrapartida, comissão de carreira</li></ul></div>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>Princípios doutrinários</th><th>Princípios organizativos</th></tr></thead>
+<tbody><tr><td>Universalidade, integralidade, equidade</td><td>Descentralização com direção única em cada esfera, regionalização e hierarquização, participação da comunidade</td></tr></tbody>
+</table></div>
+<ul>
+<li>Lei 8.080, art. 3: a saúde tem como <strong>determinantes e condicionantes</strong> alimentação, moradia, saneamento, meio ambiente, trabalho, renda, educação, atividade física, transporte, lazer e acesso a bens e serviços.</li>
+<li>Constituição, art. 199: assistência é livre à iniciativa privada; participação complementar no SUS com preferência a filantrópicas e sem fins lucrativos; <strong>vedados recursos públicos para auxílio ou subvenção</strong> a instituições privadas com fins lucrativos.</li>
+<li>Pactuação entre gestores: Comissão Intergestores Tripartite (nacional), Bipartite (estadual) e Regional.</li>
+<li>A 8.142 existe porque os trechos de participação social e financiamento foram vetados na 8.080.</li>
+</ul>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Gestão em saúde e administração pública no SUS</span><span class="chip c-iesc">Sem. 03</span><span class="ref">caiu 7</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>O tema que mais caiu no IESC. <strong>Instrumentos de planejamento</strong> <span class="ref">IESC 24.2 Q6</span> <span class="ref">IESC 25.1 Q2</span>, <strong>etapas do planejamento</strong> <span class="ref">IESC 24.2 Q2</span>, <strong>participação complementar do privado</strong> <span class="ref">IESC 24.2 Q1</span> <span class="ref">IESC 25.1 Q4</span> e <strong>auditoria</strong> <span class="ref">IESC 24.2 Q3</span> <span class="ref">IESC 25.1 Q7</span>.</p></div>
+
+<h3>Instrumentos de planejamento do SUS</h3>
+<div class="tbl"><table>
+<thead><tr><th>Instrumento</th><th>Período</th><th>O que é</th></tr></thead>
+<tbody>
+<tr><td>Plano de Saúde</td><td>4 anos</td><td>Diretrizes, objetivos, metas e indicadores a partir da análise situacional; compromissos do governo para a saúde; aprovado pelo conselho; conversa com o PPA</td></tr>
+<tr><td>Programação Anual de Saúde</td><td>Anual</td><td>Operacionaliza o plano: anualiza metas e prevê recursos do orçamento</td></tr>
+<tr><td>Relatório Detalhado do Quadrimestre Anterior</td><td>Quadrimestral</td><td>Apresentado ao conselho e em audiência pública na Casa Legislativa</td></tr>
+<tr><td>Relatório Anual de Gestão</td><td>Anual</td><td>Resultados da programação anual; orienta redirecionamentos do plano; enviado ao conselho até 30 de março</td></tr>
+</tbody></table></div>
+<p class="muted">Pegadinha já cobrada: inverter prazos, dizendo que a programação anual é o planejamento de longo prazo e o plano é de curto prazo.</p>
+
+<div class="callout ok"><h3>Etapas do planejamento, na ordem</h3>
+<div class="flow"><span>Diagnóstico situacional</span><i>→</i><span>Priorização de problemas</span><i>→</i><span>Plano de ação (objetivos, metas, responsáveis, prazos, recursos)</span><i>→</i><span>Execução</span><i>→</i><span>Monitoramento e avaliação por indicadores</span><i>→</i><span>Replanejamento</span></div>
+<p>Na objetiva, espere a ordem certa ou a função de cada etapa: conhecer a realidade, focar no que mais pesa, organizar a resposta, envolver equipe e comunidade, corrigir o rumo. Referência teórica: Planejamento Estratégico Situacional de Carlos Matus (momentos explicativo, normativo, estratégico e tático-operacional).</p></div>
+
+<ul>
+<li>Princípios da administração pública (art. 37 da Constituição): <strong>legalidade, impessoalidade, moralidade, publicidade e eficiência</strong>.</li>
+<li>Funções administrativas: planejar, organizar, dirigir e controlar.</li>
+</ul>
+
+<h3>Participação complementar do setor privado</h3>
+<div class="tbl"><table>
+<thead><tr><th></th><th>Convênio</th><th>Contrato administrativo</th></tr></thead>
+<tbody>
+<tr><td>Com quem</td><td>Filantrópica ou sem fins lucrativos</td><td>Qualquer prestador</td></tr>
+<tr><td>Natureza</td><td>Parceria por interesse comum</td><td>Compra de serviços</td></tr>
+</tbody></table></div>
+<ul>
+<li>Só quando a rede pública é insuficiente; preferência para filantrópicas e sem fins lucrativos (Constituição art. 199; Lei 8.080 arts. 24–26).</li>
+<li>Antes de contratar: <strong>avaliar capacidade técnica e qualidade</strong>, com critérios transparentes e metas. Depois: <strong>monitorar indicadores e auditar</strong>. Segue tabela e regulação do SUS; o usuário nunca paga.</li>
+<li>Alternativas erradas já cobradas: contratar o mais próximo sem avaliar, manter contrato antigo sem reavaliar, priorizar acesso pela capacidade de pagamento.</li>
+</ul>
+
+<h3>Auditoria</h3>
+<ul>
+<li>Sistema Nacional de Auditoria nas três esferas. Verifica conformidade legal, qualidade da assistência e uso dos recursos.</li>
+<li>Essencial nas provas: <strong>revisar registros médicos e administrativos</strong> e <strong>analisar dados financeiros e orçamentários</strong>. Entrevista com paciente complementa, mas não é componente essencial.</li>
+<li>Tipos: analítica (documentos e sistemas) e operativa (in loco); regular (programada) e especial (denúncia ou suspeita).</li>
+<li>Controle acompanha a execução; avaliação julga resultados; auditoria verifica conformidade e aponta irregularidades.</li>
+</ul>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Gerenciamento da unidade de saúde</span><span class="chip c-iesc">Sem. 04</span><span class="ref">caiu 4</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Duas objetivas de <strong>conflito na equipe</strong> <span class="ref">IESC 24.2 Q4</span> <span class="ref">IESC 25.1 Q5</span> e duas sobre <strong>princípios, habilidades e ferramentas do gerente</strong> de UBS <span class="ref">IESC 24.2 Q9</span> <span class="ref">IESC 25.1 Q1</span>.</p></div>
+<div class="callout ok"><h3>Princípios e habilidades que aparecem na alternativa certa</h3><ul>
+<li><strong>Planejamento</strong> com diagnóstico situacional e territorialização.</li>
+<li><strong>Liderança e comunicação</strong>: saber ouvir, empatia, feedback, conhecer as expectativas de funcionários e usuários, monitorar o clima.</li>
+<li><strong>Trabalho em equipe</strong> multiprofissional com reuniões periódicas e pactuação de fluxos.</li>
+<li><strong>Organização do acesso</strong>: acolhimento com classificação de risco, agenda que combine demanda espontânea e programada, acesso avançado, informação ao usuário.</li>
+<li><strong>Integração clínica e administrativa</strong>: protocolos, coordenação do cuidado, referência e contrarreferência.</li>
+<li><strong>Gestão de recursos</strong>: insumos, medicamentos e estoque (curva ABC), uso racional.</li>
+<li><strong>Indicadores e monitoramento</strong> (estrutura, processo e resultado, de Donabedian).</li>
+<li><strong>Educação permanente</strong> e compartilhamento de conhecimento.</li>
+<li><strong>Humanização e satisfação do usuário</strong>: ouvidoria, pesquisa de satisfação, conselho local de saúde.</li>
+</ul></div>
+<div class="tbl"><table>
+<thead><tr><th>Ferramenta</th><th>Para quê</th></tr></thead>
+<tbody>
+<tr><td>PDCA</td><td>Ciclo de melhoria: planejar, executar, checar, agir</td></tr>
+<tr><td>5W2H</td><td>Plano de ação: o quê, por quê, onde, quando, quem, como, quanto custa</td></tr>
+<tr><td>Ishikawa</td><td>Mapear causas de um problema (espinha de peixe)</td></tr>
+<tr><td>Pareto</td><td>Poucas causas explicam a maior parte dos problemas (80/20)</td></tr>
+<tr><td>Matriz GUT</td><td>Priorizar por gravidade, urgência e tendência</td></tr>
+<tr><td>Fluxograma</td><td>Desenhar e enxugar processos (ex.: fluxo do acolhimento)</td></tr>
+<tr><td>Indicadores e prontuário eletrônico</td><td>Monitorar metas e resultados (e-SUS APS)</td></tr>
+</tbody></table></div>
+<h3>Conflito na equipe</h3>
+<ul>
+<li>Certo: <strong>reuniões regulares ou estruturadas com mediação da gestão</strong>, comunicação aberta, escuta ativa, empatia, soluções colaborativas, olhar para a causa (sobrecarga, papéis indefinidos).</li>
+<li>Errado (já cobrado): sanção imediata, deixar resolver sozinho, só recompensar desempenho individual, dividir tarefas para reduzir interação, rodízio para evitar tensão, canal anônimo com decisão exclusiva da coordenação.</li>
+</ul>
+<h3>PNAB 2017</h3>
+<ul>
+<li>Acolhimento à demanda espontânea com classificação de risco e vulnerabilidade; a UBS é porta de entrada preferencial e coordena o cuidado.</li>
+<li>Prevê o <strong>gerente de Atenção Básica</strong>: nível superior, preferencialmente não integrante das equipes.</li>
+<li>Equipe de Saúde da Família: médico, enfermeiro, técnico ou auxiliar de enfermagem e ACS, 40 h; 2.000 a 3.500 pessoas por equipe; até 750 pessoas por ACS.</li>
+</ul>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Gestão em saúde privada e empreendedorismo</span><span class="chip c-iesc">Sem. 05</span><span class="ref">caiu 4</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Duas de <strong>abertura de consultório</strong>, em que todos os itens estavam certos <span class="ref">IESC 24.2 Q8</span> <span class="ref">IESC 25.1 Q6</span>, e duas de <strong>paciente com plano de saúde usando o SUS</strong> <span class="ref">IESC 24.2 Q7</span> <span class="ref">IESC 25.1 Q10</span>.</p></div>
+<div class="callout ok"><h3>Paciente com plano no SUS</h3><ul>
+<li>Universalidade: ter plano <strong>não tira o direito ao SUS</strong>. Com indicação clínica, interna no hospital público; nunca pedir termo de renúncia.</li>
+<li>Encaminhamento a partir da UBS é <strong>formal para a rede pública</strong>; o paciente decide se usa o encaminhamento ou procura o plano.</li>
+<li>Quando o beneficiário usa o SUS para algo coberto, a operadora <strong>ressarce o SUS</strong> (Lei 9.656/1998, art. 32).</li>
+</ul></div>
+<ul>
+<li>Saúde suplementar: Lei 9.656/1998 regula os planos; Lei 9.961/2000 cria a ANS; rol de procedimentos da ANS como referência básica de cobertura.</li>
+<li>Carências máximas (Lei 9.656): <strong>24 h para urgência e emergência</strong>, <strong>300 dias para parto a termo</strong>, 180 dias para os demais casos; doença preexistente pode ter cobertura parcial temporária de até 24 meses.</li>
+</ul>
+<h3>Abrir consultório</h3>
+<div class="flow"><span>Plano de negócios</span><i>→</i><span>Localização</span><i>→</i><span>Formalização</span><i>→</i><span>Registro no CRM</span><i>→</i><span>Alvarás</span><i>→</i><span>CNES e operação</span><i>→</i><span>Marketing ético</span></div>
+<ul>
+<li><strong>Plano de negócios</strong>: serviços, público-alvo, concorrência, custos fixos e variáveis, ponto de equilíbrio, projeções; análise SWOT (forças, fraquezas, oportunidades, ameaças) ou Canvas.</li>
+<li><strong>Localização</strong>: acessibilidade, demanda local, concorrência, custo.</li>
+<li><strong>Formalização</strong>: autônomo (pessoa física) ou pessoa jurídica com CNPJ, contador e regime tributário (Simples Nacional, lucro presumido). Separar finanças pessoais e da empresa; fluxo de caixa.</li>
+<li><strong>Registro da empresa no CRM</strong> com diretor técnico médico.</li>
+<li><strong>Alvará de funcionamento</strong> (prefeitura) e <strong>licença sanitária</strong> (vigilância sanitária: estrutura física e plano de gerenciamento de resíduos).</li>
+<li>Cadastro no CNES, prontuário (guarda mínima de 20 anos; eletrônico com certificação digital), LGPD para dados sensíveis, credenciamento a operadoras se desejar.</li>
+<li><strong>Marketing</strong>: identidade visual e presença digital dentro da Resolução CFM 2.336/2023; proibido sensacionalismo e garantia de resultado; anunciar especialidade exige RQE.</li>
+</ul>
+<ul>
+<li>Empreendedor: identifica oportunidade, assume risco calculado e inova. Qualidade no setor privado: acreditação ONA (nível 1 segurança, 2 gestão integrada, 3 excelência).</li>
+</ul>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Modelo de financiamento da APS</span><span class="chip c-iesc">Sem. 06</span><span class="ref">caiu 1</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>Uma questão comparando <strong>Previne Brasil</strong> com a <strong>Portaria GM/MS 3.493/2024</strong>, com uma UBS de 10.000 habitantes e 7.000 cadastrados <span class="ref">IESC 25.1 Q9</span>.</p></div>
+<div class="tbl"><table>
+<thead><tr><th>Modelo</th><th>Como distribui</th><th>Crítica</th></tr></thead>
+<tbody>
+<tr><td>PAB fixo e variável (1998–2019)</td><td>Fixo per capita pela população do IBGE + variável por equipes e programas implantados</td><td>Pouco ligado a resultado</td></tr>
+<tr><td>Previne Brasil (Portaria 2.979/2019)</td><td><strong>Capitação ponderada</strong> (pessoas cadastradas, ponderadas por vulnerabilidade socioeconômica, idade e tipologia do município) + <strong>pagamento por desempenho</strong> (indicadores de pré-natal, citopatológico, vacinação, hipertensão, diabetes) + <strong>incentivos a ações estratégicas</strong> (Saúde na Hora, saúde bucal, consultório na rua, PSE, informatização)</td><td>Quem não é cadastrado não gera recurso; município com baixa cobertura cadastral perde</td></tr>
+<tr><td>Cofinanciamento federal (Portaria 3.493/2024)</td><td>Seis componentes: <strong>I</strong> fixo (manutenção de eSF e eAP e implantação de eSF, eAP, eSB e eMulti); <strong>II</strong> vínculo e acompanhamento territorial; <strong>III</strong> qualidade; <strong>IV</strong> implantação e manutenção de programas, serviços e profissionais; <strong>V</strong> atenção à saúde bucal; <strong>VI</strong> per capita de base populacional. Extingue capitação ponderada e pagamento por desempenho. O fixo varia pelo <strong>Índice de Equidade e Dimensionamento</strong> (4 estratos; estrato 1 é o mais vulnerável e recebe mais por equipe); vínculo e qualidade são pagos conforme classificação da equipe</td><td>Base fixa e previsibilidade; reduz a dependência de cadastro e desempenho; reforça equidade e a Estratégia Saúde da Família</td></tr>
+</tbody></table></div>
+<div class="callout ok"><h3>Aplicando ao caso da prova</h3>
+<p>No Previne, a capitação considera só os 7.000 cadastrados, então 3.000 habitantes não geram recurso. No modelo de 2024, o componente per capita usa a população total, o fixo remunera as quatro equipes existentes e vínculo e qualidade continuam estimulando cadastro e acompanhamento.</p></div>
+<ul>
+<li>Base geral: financiamento tripartite; transferência fundo a fundo; recursos federais em dois blocos, manutenção (custeio) e estruturação da rede (investimento), modelo iniciado pela Portaria 3.992/2017.</li>
+<li>A Portaria 3.493/2024 vem sendo implantada em etapas, com ajustes por portarias de 2025 e 2026.</li>
+</ul>
+</div>
+</details>
+
+<details class="topic card">
+<summary><span class="t">Processos de regulação em saúde</span><span class="chip c-iesc">Sem. 07</span><span class="ref">caiu 2</span></summary>
+<div class="body">
+<div class="callout"><h3>Como cai</h3>
+<p>O mesmo caso duas vezes: <strong>IAM com UTI lotada</strong> → estabilizar e acionar a Central de Regulação <span class="ref">IESC 24.2 Q10</span> <span class="ref">IESC 25.1 Q8</span>.</p></div>
+<div class="callout warn"><h3>Erradas em qualquer versão do caso</h3><ul>
+<li>Negar admissão ou mandar o SAMU procurar outro hospital</li>
+<li>Transferir direto sem passar pela regulação</li>
+<li>Segurar em enfermaria ou na emergência esperando vaga no próprio hospital</li>
+<li>Sugerir que a família procure hospital privado</li>
+</ul></div>
+<h3>Política Nacional de Regulação (Portaria 1.559/2008)</h3>
+<div class="tbl"><table>
+<thead><tr><th>Dimensão</th><th>Sobre quem</th><th>Ações</th></tr></thead>
+<tbody>
+<tr><td>Regulação de sistemas de saúde</td><td>Gestores sobre o sistema</td><td>Planejamento, financiamento, fiscalização, políticas</td></tr>
+<tr><td>Regulação da atenção à saúde</td><td>Prestadores</td><td>Contratualização, controle, avaliação, auditoria, cadastro</td></tr>
+<tr><td>Regulação do acesso (assistencial)</td><td>Fluxo do usuário</td><td>Complexos reguladores com centrais de consultas e exames, de internações e de urgência (SAMU 192); protocolos e classificação de risco</td></tr>
+</tbody></table></div>
+<ul>
+<li>Médico regulador é autoridade sanitária sobre a vaga. <strong>Vaga zero</strong>: em urgência com risco de vida, o regulador pode encaminhar mesmo sem leito formal (Portaria 2.048/2002).</li>
+<li>APS coordena o cuidado e ordena a rede: referência e contrarreferência. Teleconsultoria qualifica encaminhamentos e reduz filas.</li>
+<li>Transferência só com paciente estabilizado e contato entre médicos. Sistemas: SISREG; Tratamento Fora de Domicílio para quem precisa sair do município.</li>
+</ul>
+</div>
+</details>
+</section>
+
+<section id="vespera">
+<h2>Véspera: números e marcos que viram alternativa</h2>
+<div class="tbl num"><table>
+<thead><tr><th>Bloco</th><th>Tema</th><th>Guardar</th></tr></thead>
+<tbody>
+<tr><td><span class="chip c-ci">CI</span></td><td>Lombalgia</td><td>Inflamatória: início antes dos 40, melhora com exercício. ASAS: lombalgia há 3 meses ou mais, início antes dos 45. Sem imagem nas primeiras 6 semanas se não houver alarme</td></tr>
+<tr><td><span class="chip c-ci">CI</span></td><td>Ottawa</td><td>6 cm distais do maléolo; incapacidade de dar 4 passos</td></tr>
+<tr><td><span class="chip c-ci">CI</span></td><td>Câncer infantil</td><td>Linfonodo maior que 2 cm ou supraclavicular; LLA pico 2–5 anos; neutropenia febril → antibiótico em até 1 h</td></tr>
+<tr><td><span class="chip c-ci">CI</span></td><td>Ansiedade</td><td>TOC mais de 1 h/dia; TAG 6 meses; pânico 1 mês de preocupação; TEPT mais de 1 mês</td></tr>
+<tr><td><span class="chip c-ci">CI</span></td><td>Queimadura</td><td>Regra dos 9; 2 mL × kg × %SCQ ÷ 16 = mL/h inicial; diurese 0,5 adulto, 1 criança, 1–1,5 elétrica</td></tr>
+<tr><td><span class="chip c-ci">CI</span></td><td>Nutrição</td><td>Meia-vida: albumina ~20 dias, transferrina ~8, pré-albumina ~2; linfócitos abaixo de 1.500 = depleção; NRS-2002 de 3 ou mais = risco</td></tr>
+<tr><td><span class="chip c-ci">CI</span></td><td>Abortamento</td><td>Endométrio 15 mm; retido: embrião de 7 mm sem batimento ou saco de 25 mm vazio; AMIU até 12 semanas</td></tr>
+<tr><td><span class="chip c-ci">CI</span></td><td>Ectópica e mola</td><td>Metotrexato: β-hCG abaixo de 5.000, massa menor que 3,5 cm, queda de 15% entre dia 4 e 7. Mola: β-hCG semanal até 3 negativos</td></tr>
+<tr><td><span class="chip c-ci">CI</span></td><td>Laringe e próstata</td><td>Laringoscopia se rouquidão por mais de 4 semanas. IPSS 0–7, 8–19, 20–35; inibidor da 5-alfa-redutase reduz PSA pela metade</td></tr>
+<tr><td><span class="chip c-ci">CI</span></td><td>Demência</td><td>MEEM por escolaridade: 20, 25, 26,5, 28, 29. Função preservada = CCL. Memantina só moderada a grave</td></tr>
+<tr><td><span class="chip c-ci">CI</span></td><td>Icterícia</td><td>Antes de 24 h = patológica; Bhutani P40, P75, P95; anti-D com 28 semanas e até 72 h pós-parto; Coombs indireto 1:16 → Doppler da cerebral média acima de 1,5 MoM</td></tr>
+<tr><td><span class="chip c-ci">CI</span></td><td>Pulmão</td><td>Rastreio: 50–80 anos, 20 maços-ano ou mais; nódulo acima de 8 mm e espiculado é suspeito</td></tr>
+<tr><td><span class="chip c-ham">HAM</span></td><td>Cinemática</td><td>Energia = ½ × m × v²; tríade de Waddell na criança atropelada</td></tr>
+<tr><td><span class="chip c-ham">HAM</span></td><td>Atendimento</td><td>xABCDE; torniquete 5–8 cm acima; Glasgow 8 ou menos → via aérea definitiva; SAMPLA na secundária</td></tr>
+<tr><td><span class="chip c-ham">HAM</span></td><td>Tórax</td><td>Punção: 2º espaço hemiclavicular ou 4º–5º entre axilares; hemotórax maciço 1.500 mL ou 200 mL/h por 2–4 h</td></tr>
+<tr><td><span class="chip c-ham">HAM</span></td><td>Choque</td><td>Grave: FC acima de 120, PAS abaixo de 90, déficit de base menor que −10; ácido tranexâmico em até 3 h; 1:1:1</td></tr>
+<tr><td><span class="chip c-ham">HAM</span></td><td>Calor e frio</td><td>Intermação: 40 °C + alteração do SNC. Hipotermia: 35, 32 e 28 °C. CO: meia-vida ~4 h no ar, ~40 min com O₂ 100%</td></tr>
+<tr><td><span class="chip c-ham">HAM</span></td><td>Afogamento</td><td>Grau 3 com pulso radial; grau 4 com hipotensão; grau 5 apneia com pulso; grau 6 PCR</td></tr>
+<tr><td><span class="chip c-ham">HAM</span></td><td>Mergulho e altitude</td><td>Boyle: barotrauma e embolia; Henry: doença descompressiva. Altitude acima de ~2.500 m; descer é o tratamento</td></tr>
+<tr><td><span class="chip c-iesc">IESC</span></td><td>Marcos</td><td>8ª Conferência 1986; Constituição 1988 (arts. 196–200); Leis 8.080 e 8.142 em 1990; Decreto 7.508 em 2011</td></tr>
+<tr><td><span class="chip c-iesc">IESC</span></td><td>Controle social e mínimos</td><td>Conselhos 50% usuários, 25% trabalhadores, 25% gestores e prestadores; conferências a cada 4 anos; LC 141: municípios 15%, estados 12%</td></tr>
+<tr><td><span class="chip c-iesc">IESC</span></td><td>Planejamento</td><td>Plano de Saúde 4 anos; programação anual; relatório quadrimestral; Relatório Anual de Gestão até 30 de março</td></tr>
+<tr><td><span class="chip c-iesc">IESC</span></td><td>PNAB 2017</td><td>2.000–3.500 pessoas por equipe; até 750 por ACS; gerente de Atenção Básica</td></tr>
+<tr><td><span class="chip c-iesc">IESC</span></td><td>Suplementar</td><td>Lei 9.656/1998 e ANS (Lei 9.961/2000); carência 24 h urgência, 300 dias parto, 180 dias demais; ressarcimento ao SUS</td></tr>
+<tr><td><span class="chip c-iesc">IESC</span></td><td>Financiamento</td><td>Previne Brasil 2019 (capitação, desempenho, ações estratégicas) × Portaria 3.493/2024 (6 componentes, índice de equidade com 4 estratos)</td></tr>
+<tr><td><span class="chip c-iesc">IESC</span></td><td>Regulação</td><td>Portaria 1.559/2008: sistemas, atenção e acesso; vaga zero; estabilizar e acionar a central</td></tr>
+</tbody></table></div>
+</section>
+
+<section>
+<h2>Casos que se repetem</h2>
+<div class="tbl"><table>
+<thead><tr><th>Caso</th><th>Vezes</th><th>Resposta</th></tr></thead>
+<tbody>
+<tr><td>Idoso esquecido com MEEM alterado</td><td>6</td><td>Função preservada = CCL; perda funcional = demência → inibidor da colinesterase</td></tr>
+<tr><td>Dor articular com rigidez curta em idoso</td><td>5</td><td>Osteoartrite → exercício, perda de peso e analgesia</td></tr>
+<tr><td>Politraumatizado em choque</td><td>4</td><td>Controlar sangramento e repor volume; nada de vasopressor</td></tr>
+<tr><td>RN ictérico na hora da alta</td><td>4</td><td>Dosar BT e colocar no Bhutani</td></tr>
+<tr><td>Adolescente lavando as mãos por medo de germes</td><td>3</td><td>TOC → TCC + ISRS (sertralina)</td></tr>
+<tr><td>Gestante de 10 semanas sangrando</td><td>3</td><td>Colo fechado = ameaça; aberto = em curso</td></tr>
+<tr><td>Inconsciente com respiração ruidosa após colisão</td><td>2</td><td>Tração da mandíbula + aspiração com proteção cervical</td></tr>
+<tr><td>Criança com linfonodo cervical após amigdalite</td><td>2</td><td>Reacional → observar</td></tr>
+<tr><td>Entorse de tornozelo</td><td>2</td><td>Aplicar Ottawa antes de pedir radiografia</td></tr>
+<tr><td>Incêndio em boate</td><td>2</td><td>Via aérea e inalação primeiro; O₂ 100% para suspeita de CO</td></tr>
+<tr><td>Afogado</td><td>2</td><td>Szpilman; ventilar é a prioridade</td></tr>
+<tr><td>IAM com UTI lotada</td><td>2</td><td>Estabilizar + Central de Regulação</td></tr>
+<tr><td>Conflito na equipe da UBS</td><td>2</td><td>Reuniões estruturadas com mediação e escuta ativa</td></tr>
+<tr><td>Serviço privado complementando a UBS</td><td>2</td><td>Avaliar qualidade antes, monitorar e auditar depois</td></tr>
+<tr><td>Médico abrindo consultório</td><td>2</td><td>Todas as etapas listadas estavam certas</td></tr>
+<tr><td>Paciente com plano de saúde no SUS</td><td>2</td><td>Tem direito pleno ao SUS</td></tr>
+<tr><td>Queimado: %SCQ e hidratação</td><td>2</td><td>Regra dos 9 + ATLS 11</td></tr>
+</tbody></table></div>
+</section>
+
+<footer>
+<p>Baseado nos relatórios de devolutiva das provas N1 de CI, CC, HAM e IESC (2024.2, 2025.1 e 2025.2), revisado contra ATLS 11ª edição, ASAS-EULAR 2022, SBP, FEBRASGO, PNAB 2017, Lei Complementar 141/2012 e Portaria GM/MS 3.493/2024. Onde gabarito ou comentário da prova diverge da referência, o guia indica. Em pontos em que manuais divergem, prevalece o que o professor ensinou em aula.</p>
+</footer>
+
+</main>
+</body>
+</html>
