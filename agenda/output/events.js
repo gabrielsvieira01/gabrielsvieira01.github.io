@@ -131,7 +131,7 @@ window.SCHEDULE_DATA = {
       "group": null,
       "preceptor": "Prof. Marcelo",
       "raw_detail": "Prof. Marcelo",
-      "cell": "A29/B29"
+      "cell": "A28/B28"
     },
     {
       "id": "ev007",
@@ -143,9 +143,9 @@ window.SCHEDULE_DATA = {
       "type_label_raw": "CI PRATICA - CLÍNICA ACADÊMICA",
       "start": "07:50",
       "end": "12:00",
-      "group": "3/4",
+      "group": "1/2",
       "preceptor": "Isnaya Araujo",
-      "raw_detail": "Isnaya Araujo - 3/4",
+      "raw_detail": "Isnaya Araujo - 2/1",
       "cell": "C5/D5"
     },
     {
@@ -154,13 +154,13 @@ window.SCHEDULE_DATA = {
       "day_label": "Terça-feira",
       "category": "CI_PRATICA",
       "category_label": "Clínica Integrada – CI Prática",
-      "subtype": "CLÍNICA ACADÊMICA",
-      "type_label_raw": "CI PRATICA - CLÍNICA ACADÊMICA",
+      "subtype": "POLIMEG",
+      "type_label_raw": "CI PRATICA - POLIMEG",
       "start": "07:50",
       "end": "12:00",
-      "group": "5/6",
+      "group": "9/10",
       "preceptor": "Roberta Mota",
-      "raw_detail": "Roberta Mota - 5/6",
+      "raw_detail": "Roberta Mota -9/10",
       "cell": "C7/D7"
     },
     {
@@ -173,9 +173,9 @@ window.SCHEDULE_DATA = {
       "type_label_raw": "CI PRATICA - CLÍNICA ACADÊMICA",
       "start": "07:50",
       "end": "12:00",
-      "group": "1/2",
+      "group": "7/8",
       "preceptor": "Daniela Matiolli",
-      "raw_detail": "Daniela Matiolli - 2/1",
+      "raw_detail": "Daniela Matiolli - 8/7",
       "cell": "C9/D9"
     },
     {
@@ -188,9 +188,9 @@ window.SCHEDULE_DATA = {
       "type_label_raw": "CI PRATICA - POLIMEG",
       "start": "07:50",
       "end": "12:00",
-      "group": "7/8",
+      "group": "3/4",
       "preceptor": "Ivina",
-      "raw_detail": "Ivina - Grupos 7/8",
+      "raw_detail": "Ivina - Grupos 3/4",
       "cell": "C11/D11"
     },
     {
@@ -233,9 +233,9 @@ window.SCHEDULE_DATA = {
       "type_label_raw": "CI PRATICA - CLÍNICA ACADÊMICA",
       "start": "13:50",
       "end": "18:00",
-      "group": "9/10",
+      "group": "7/8",
       "preceptor": "Lenilson Prates",
-      "raw_detail": "Lenilson Prates 9/10",
+      "raw_detail": "Lenilson Prates - 8/7",
       "cell": "C17/D17"
     },
     {
@@ -248,9 +248,9 @@ window.SCHEDULE_DATA = {
       "type_label_raw": "CI PRATICA - POLIMEG",
       "start": "13:50",
       "end": "18:00",
-      "group": "3/4",
+      "group": "1/2",
       "preceptor": "Alexandre Filipov",
-      "raw_detail": "Alexandre Filipov - 4/3",
+      "raw_detail": "Alexandre Filipov - 1/2",
       "cell": "C19/D19"
     },
     {
@@ -259,32 +259,17 @@ window.SCHEDULE_DATA = {
       "day_label": "Terça-feira",
       "category": "CI_PRATICA",
       "category_label": "Clínica Integrada – CI Prática",
-      "subtype": "Casa da Criança",
-      "type_label_raw": "CI PRATICA - Casa da Criança",
-      "start": "13:50",
-      "end": "18:00",
-      "group": "1/2",
-      "preceptor": "Karla Baleeiro",
-      "raw_detail": "Karla Baleeiro - 1/2",
-      "cell": "C22/D22"
-    },
-    {
-      "id": "ev016",
-      "day": "TERCA",
-      "day_label": "Terça-feira",
-      "category": "CI_PRATICA",
-      "category_label": "Clínica Integrada – CI Prática",
       "subtype": "CLÍNICA ACADÊMICA",
       "type_label_raw": "CI PRATICA - CLÍNICA ACADÊMICA",
       "start": "13:50",
       "end": "18:00",
-      "group": "9/10",
+      "group": "3/4",
       "preceptor": "Priscila Monteiro",
-      "raw_detail": "Priscila Monteiro - 10/9",
-      "cell": "C26/D26"
+      "raw_detail": "Priscila Monteiro - 4/3",
+      "cell": "C22/D22"
     },
     {
-      "id": "ev017",
+      "id": "ev016",
       "day": "TERCA",
       "day_label": "Terça-feira",
       "category": "CI_MARC_PALESTRA",
@@ -296,10 +281,10 @@ window.SCHEDULE_DATA = {
       "group": null,
       "preceptor": "Prof. Adriano Monteiro, Profa Naira e Prof. Iomar",
       "raw_detail": "Prof. Adriano Monteiro, Profa Naira e Prof. Iomar",
-      "cell": "C30/D30"
+      "cell": "C26/D26"
     },
     {
-      "id": "ev018",
+      "id": "ev017",
       "day": "TERCA",
       "day_label": "Terça-feira",
       "category": "CI_MARC_PALESTRA",
@@ -311,10 +296,10 @@ window.SCHEDULE_DATA = {
       "group": null,
       "preceptor": "Prof. Adriano Monteiro, Profa Naira e Prof. Iomar",
       "raw_detail": "Prof. Adriano Monteiro, Profa Naira e Prof. Iomar",
-      "cell": "C31/D31"
+      "cell": "C27/D27"
     },
     {
-      "id": "ev019",
+      "id": "ev018",
       "day": "TERCA",
       "day_label": "Terça-feira",
       "category": "CI_MARC_PALESTRA",
@@ -326,7 +311,22 @@ window.SCHEDULE_DATA = {
       "group": null,
       "preceptor": "Prof. Adriano Monteiro, Profa Naira e Prof. Iomar",
       "raw_detail": "Prof. Adriano Monteiro, Profa Naira e Prof. Iomar",
-      "cell": "C33/D33"
+      "cell": "C29/D29"
+    },
+    {
+      "id": "ev019",
+      "day": "QUARTA",
+      "day_label": "Quarta-feira",
+      "category": "CI_PRATICA",
+      "category_label": "Clínica Integrada – CI Prática",
+      "subtype": "CLÍNICA ACADÊMICA",
+      "type_label_raw": "CI PRATICA - CLÍNICA ACADÊMICA",
+      "start": "07:50",
+      "end": "12:00",
+      "group": "5/6",
+      "preceptor": "Priscila Monteiro",
+      "raw_detail": "Priscila Monteiro - 6/5",
+      "cell": "E5/F5"
     },
     {
       "id": "ev020",
@@ -336,30 +336,15 @@ window.SCHEDULE_DATA = {
       "category_label": "Clínica Integrada – CI Prática",
       "subtype": "CLÍNICA ACADÊMICA",
       "type_label_raw": "CI PRATICA - CLÍNICA ACADÊMICA",
-      "start": "07:50",
-      "end": "12:00",
-      "group": "1/2",
-      "preceptor": "Priscila Monteiro",
-      "raw_detail": "Priscila Monteiro - 1/2",
-      "cell": "E5/F5"
-    },
-    {
-      "id": "ev021",
-      "day": "QUARTA",
-      "day_label": "Quarta-feira",
-      "category": "CI_PRATICA",
-      "category_label": "Clínica Integrada – CI Prática",
-      "subtype": "CLÍNICA ACADÊMICA",
-      "type_label_raw": "CI PRATICA - CLÍNICA ACADÊMICA",
       "start": "14:00",
       "end": "18:10",
-      "group": "5/6",
+      "group": "9/10",
       "preceptor": "Isnaya Araujo",
-      "raw_detail": "Isnaya Araujo - 6/5",
+      "raw_detail": "Isnaya Araujo - 10/9",
       "cell": "E22/F22"
     },
     {
-      "id": "ev022",
+      "id": "ev021",
       "day": "QUARTA",
       "day_label": "Quarta-feira",
       "category": "CI_PRATICA",
@@ -368,13 +353,13 @@ window.SCHEDULE_DATA = {
       "type_label_raw": "CI PRATICA - Casa da Criança",
       "start": "13:50",
       "end": "18:00",
-      "group": "7/8",
+      "group": "3/4",
       "preceptor": "Christielle",
-      "raw_detail": "Christielle - 8/7",
+      "raw_detail": "Christielle - 3/4",
       "cell": "E26/F26"
     },
     {
-      "id": "ev023",
+      "id": "ev022",
       "day": "QUARTA",
       "day_label": "Quarta-feira",
       "category": "IESC_COMUNIDADES",
@@ -386,10 +371,10 @@ window.SCHEDULE_DATA = {
       "group": null,
       "preceptor": "Profa. Agnis de Jesus",
       "raw_detail": "Profa. Agnis de Jesus",
-      "cell": "E30/F30"
+      "cell": "E32/F32"
     },
     {
-      "id": "ev024",
+      "id": "ev023",
       "day": "QUINTA",
       "day_label": "Quinta-feira",
       "category": "CI_PRATICA",
@@ -398,13 +383,13 @@ window.SCHEDULE_DATA = {
       "type_label_raw": "CI PRATICA - POLICLÍNICA REGIONAL",
       "start": "07:50",
       "end": "12:00",
-      "group": "7/8",
+      "group": "5/6",
       "preceptor": "Alexandre Filipov",
-      "raw_detail": "Alexandre Filipov - 7/8",
+      "raw_detail": "Alexandre Filipov - 5/6",
       "cell": "G5/H5"
     },
     {
-      "id": "ev025",
+      "id": "ev024",
       "day": "QUINTA",
       "day_label": "Quinta-feira",
       "category": "CI_PRATICA",
@@ -413,13 +398,13 @@ window.SCHEDULE_DATA = {
       "type_label_raw": "CI PRATICA - CLÍNICA ACADÊMICA",
       "start": "07:50",
       "end": "12:00",
-      "group": "7/8",
+      "group": "9/10",
       "preceptor": "Daniela Leão",
-      "raw_detail": "Daniela Leão - 8/7",
+      "raw_detail": "Daniela Leão - 9/10",
       "cell": "G7/H7"
     },
     {
-      "id": "ev026",
+      "id": "ev025",
       "day": "QUINTA",
       "day_label": "Quinta-feira",
       "category": "PIEPE",
@@ -434,7 +419,7 @@ window.SCHEDULE_DATA = {
       "cell": "G9/H9"
     },
     {
-      "id": "ev027",
+      "id": "ev026",
       "day": "QUINTA",
       "day_label": "Quinta-feira",
       "category": "PIEPE",
@@ -449,7 +434,7 @@ window.SCHEDULE_DATA = {
       "cell": "G11/H11"
     },
     {
-      "id": "ev028",
+      "id": "ev027",
       "day": "QUINTA",
       "day_label": "Quinta-feira",
       "category": "CI_PRATICA",
@@ -458,13 +443,13 @@ window.SCHEDULE_DATA = {
       "type_label_raw": "CI PRATICA - POLIMEG",
       "start": "13:50",
       "end": "18:00",
-      "group": "9/10",
-      "preceptor": "Roberta",
-      "raw_detail": "Roberta - 10/9",
+      "group": "7/8",
+      "preceptor": "Roberta Mota",
+      "raw_detail": "Roberta Mota - 7/8",
       "cell": "G17/H17"
     },
     {
-      "id": "ev029",
+      "id": "ev028",
       "day": "QUINTA",
       "day_label": "Quinta-feira",
       "category": "CI_PRATICA",
@@ -473,13 +458,13 @@ window.SCHEDULE_DATA = {
       "type_label_raw": "CI PRATICA - CLÍNICA ACADÊMICA",
       "start": "13:50",
       "end": "18:00",
-      "group": "3/4",
+      "group": "9/10",
       "preceptor": "Luane Costa",
-      "raw_detail": "Luane Costa - 3/4",
+      "raw_detail": "Luane Costa - 10/9",
       "cell": "G19/H19"
     },
     {
-      "id": "ev030",
+      "id": "ev029",
       "day": "QUINTA",
       "day_label": "Quinta-feira",
       "category": "IESC_COMUNIDADES",
@@ -494,7 +479,7 @@ window.SCHEDULE_DATA = {
       "cell": "G22/H22"
     },
     {
-      "id": "ev031",
+      "id": "ev030",
       "day": "QUINTA",
       "day_label": "Quinta-feira",
       "category": "IESC_COMUNIDADES",
@@ -509,7 +494,7 @@ window.SCHEDULE_DATA = {
       "cell": "G26/H26"
     },
     {
-      "id": "ev032",
+      "id": "ev031",
       "day": "QUINTA",
       "day_label": "Quinta-feira",
       "category": "IESC_COMUNIDADES",
@@ -521,10 +506,10 @@ window.SCHEDULE_DATA = {
       "group": "3",
       "preceptor": "Profa. Agnis de Jesus",
       "raw_detail": "Grupo 03 - Profa. Agnis de Jesus",
-      "cell": "G29/H29"
+      "cell": "G28/H28"
     },
     {
-      "id": "ev033",
+      "id": "ev032",
       "day": "QUINTA",
       "day_label": "Quinta-feira",
       "category": "IESC_COMUNIDADES",
@@ -539,7 +524,7 @@ window.SCHEDULE_DATA = {
       "cell": "G30/H30"
     },
     {
-      "id": "ev034",
+      "id": "ev033",
       "day": "SEXTA",
       "day_label": "Sexta-feira",
       "category": "CI_PRATICA",
@@ -548,13 +533,13 @@ window.SCHEDULE_DATA = {
       "type_label_raw": "CI PRATICA - UBS \"Novo Horizonte\"",
       "start": "07:50",
       "end": "12:00",
-      "group": "3/4",
+      "group": "7/8",
       "preceptor": "Tainan Ramos",
-      "raw_detail": "Tainan Ramos - 4/3",
+      "raw_detail": "Tainan Ramos - 7/8",
       "cell": "I5/J5"
     },
     {
-      "id": "ev035",
+      "id": "ev034",
       "day": "SEXTA",
       "day_label": "Sexta-feira",
       "category": "CI_PRATICA",
@@ -563,13 +548,13 @@ window.SCHEDULE_DATA = {
       "type_label_raw": "CI PRATICA - CLÍNICA ACADÊMICA",
       "start": "07:50",
       "end": "12:00",
-      "group": "5/6",
+      "group": "3/4",
       "preceptor": "Adriano Monteiro",
-      "raw_detail": "Adriano Monteiro - 6/5",
+      "raw_detail": "Adriano Monteiro - 4/3",
       "cell": "I7/J7"
     },
     {
-      "id": "ev036",
+      "id": "ev035",
       "day": "SEXTA",
       "day_label": "Sexta-feira",
       "category": "CI_PRATICA",
@@ -578,10 +563,25 @@ window.SCHEDULE_DATA = {
       "type_label_raw": "CI PRATICA - POLIMEG",
       "start": "07:50",
       "end": "12:00",
-      "group": "9/10",
+      "group": "1/2",
       "preceptor": "Ivina",
-      "raw_detail": "Ivina - Grupos 9/10",
+      "raw_detail": "Ivina - Grupos 1/2",
       "cell": "I9/J9"
+    },
+    {
+      "id": "ev036",
+      "day": "SEXTA",
+      "day_label": "Sexta-feira",
+      "category": "CI_PRATICA",
+      "category_label": "Clínica Integrada – CI Prática",
+      "subtype": "Casa da Criança",
+      "type_label_raw": "CI PRATICA - Casa da Criança",
+      "start": "07:50",
+      "end": "12:00",
+      "group": "5/6",
+      "preceptor": "Karla Baleeiro",
+      "raw_detail": "Karla Baleeiro - 6/5",
+      "cell": "I11/J11"
     },
     {
       "id": "ev037",
@@ -593,9 +593,9 @@ window.SCHEDULE_DATA = {
       "type_label_raw": "CI PRATICA - POLIMEG",
       "start": "13:00",
       "end": "17:10",
-      "group": "1/2",
+      "group": "5/6",
       "preceptor": "Thiara Prates",
-      "raw_detail": "Thiara Prates - 2/1",
+      "raw_detail": "Thiara Prates - 5/6",
       "cell": "I17/J17"
     },
     {
@@ -608,9 +608,9 @@ window.SCHEDULE_DATA = {
       "type_label_raw": "CI PRATICA - CLÍNICA ACADÊMICA",
       "start": "13:00",
       "end": "17:10",
-      "group": "5/6",
+      "group": "1/2",
       "preceptor": "Daniela Leão",
-      "raw_detail": "Daniela Leão - 5/6",
+      "raw_detail": "Daniela Leão - 2/1",
       "cell": "I19/J19"
     },
     {
@@ -692,14 +692,11 @@ window.SCHEDULE_DATA = {
   "warnings": {
     "conflitos_criticos": [],
     "notas_informativas": [
-      "Terça-feira - \"Clínica Integrada – CI Prática\" (CI PRATICA - CLÍNICA ACADÊMICA): 07:50-12:00 [grupo 3/4, Isnaya Araujo] == 07:50-12:00 [grupo 5/6, Roberta Mota]  (mesmo local/horario, preceptores diferentes - provavel grupos paralelos)",
-      "Terça-feira - \"Clínica Integrada – CI Prática\" (CI PRATICA - CLÍNICA ACADÊMICA): 07:50-12:00 [grupo 3/4, Isnaya Araujo] == 07:50-12:00 [grupo 1/2, Daniela Matiolli]  (mesmo local/horario, preceptores diferentes - provavel grupos paralelos)",
-      "Terça-feira - \"Clínica Integrada – CI Prática\" (CI PRATICA - CLÍNICA ACADÊMICA): 07:50-12:00 [grupo 5/6, Roberta Mota] == 07:50-12:00 [grupo 1/2, Daniela Matiolli]  (mesmo local/horario, preceptores diferentes - provavel grupos paralelos)",
-      "Terça-feira - \"Clínica Integrada – CI Prática\" (CI PRATICA - CLÍNICA ACADÊMICA): 13:50-18:00 [grupo 9/10, Lenilson Prates] == 13:50-18:00 [grupo 9/10, Priscila Monteiro]  (mesmo local/horario, preceptores diferentes - provavel grupos paralelos)",
+      "Terça-feira - \"Clínica Integrada – CI Prática\" (CI PRATICA - CLÍNICA ACADÊMICA): 07:50-12:00 [grupo 1/2, Isnaya Araujo] == 07:50-12:00 [grupo 7/8, Daniela Matiolli]  (mesmo local/horario, preceptores diferentes - provavel grupos paralelos)",
+      "Terça-feira - \"Clínica Integrada – CI Prática\" (CI PRATICA - POLIMEG): 07:50-12:00 [grupo 9/10, Roberta Mota] == 07:50-12:00 [grupo 3/4, Ivina]  (mesmo local/horario, preceptores diferentes - provavel grupos paralelos)",
+      "Terça-feira - \"Clínica Integrada – CI Prática\" (CI PRATICA - CLÍNICA ACADÊMICA): 13:50-18:00 [grupo 7/8, Lenilson Prates] == 13:50-18:00 [grupo 3/4, Priscila Monteiro]  (mesmo local/horario, preceptores diferentes - provavel grupos paralelos)",
       "Quinta-feira - \"PIEPE\" (PIEPE): 08:00-08:50 [grupo 3, Profa. Kênia] == 08:00-08:50 [grupo 4, Prof. Lucas Amaral]  (mesmo local/horario, preceptores diferentes - provavel grupos paralelos)"
     ],
-    "horarios_fora_do_padrao": [
-      "Segunda-feira - HAM - PALESTRA (cél. A23): planilha tem \"18:0 - 18:50\", interpretado como \"18:00 - 18:50\" — confirme se está certo"
-    ]
+    "horarios_fora_do_padrao": []
   }
 };
