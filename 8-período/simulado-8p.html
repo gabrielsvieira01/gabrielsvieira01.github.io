@@ -229,7 +229,7 @@ details .body p:last-child{margin-bottom:0}
 .meter i.low{background:var(--err)} .meter i.mid{background:var(--warn)}
 @media (max-width:520px){ .dtab .hide-s{display:none} }
 body.painel .nav{display:none}
-#filtros,#desemp{max-height:calc(100vh - 120px);max-height:calc(100dvh - 120px)}
+#filtros,#desemp{max-height:calc(100vh - 160px);max-height:calc(100dvh - 160px)}
 #filtros .fcount{position:sticky;bottom:-14px;background:var(--bg2);margin:12px -14px -14px;padding:10px 14px;z-index:2}
 #fass .chip,#fprov .chip{white-space:normal;text-align:left;max-width:100%}
 .enun,.ofic,.refs,.alt,.sec p,.altcom,.nota,.takehome,details .body{overflow-wrap:anywhere}
@@ -486,6 +486,7 @@ function aplica(manterPos) {
   const bi = $('bir'); if (bi) bi.onclick = () => { $('filtros').classList.remove('open'); painel(); window.scrollTo({ top: 0 }); };
   salva();
   render();
+  ajustaPainel();
 }
 
 function limpa() {
@@ -548,7 +549,7 @@ function desempenho() {
 /* ---------------- render ---------------- */
 const paras = arr => (Array.isArray(arr) ? arr : [arr]).filter(Boolean).map(t => `<p>${esc(t)}</p>`).join('');
 
-function render() {
+function render(topo = true) {
   const app = $('app');
   if (!lista.length) {
     app.innerHTML = `<div class="empty">Nenhuma questão com esses filtros.<br><button class="linkbtn" id="bl3">Limpar filtros</button></div>`;
@@ -630,20 +631,35 @@ function render() {
   </div>`;
 
   app.querySelectorAll('.alt:not(:disabled)').forEach(b => {
-    b.onclick = () => { resp[q.id] = b.dataset.l; salva(); render(); };
+    b.onclick = () => { resp[q.id] = b.dataset.l; salva(); render(false); };
   });
   const rv = $('breveal');
-  if (rv) rv.onclick = () => { revelada.add(q.id); salva(); render(); };
+  if (rv) rv.onclick = () => { revelada.add(q.id); salva(); render(false); };
 
   $('pos').textContent = (idx + 1) + ' / ' + lista.length;
   $('bprev').disabled = idx === 0;
   $('bnext').textContent = idx === lista.length - 1 ? 'Recomeçar' : 'Próxima ›';
   placar();
-  window.scrollTo({ top: 0, behavior: 'instant' });
+  if (topo) window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 /* ---------------- eventos ---------------- */
-const painel = () => document.body.classList.toggle('painel', $('filtros').classList.contains('open') || $('desemp').classList.contains('open'));
+/* painel aberto: ocupa só a altura que sobra na tela, para o rodapé (contador + Começar) ficar sempre visível */
+function ajustaPainel() {
+  const alturaTela = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+  ['filtros', 'desemp'].forEach(id => {
+    const el = $(id);
+    if (!el.classList.contains('open')) { el.style.maxHeight = ''; return; }
+    const topo = el.getBoundingClientRect().top;
+    el.style.maxHeight = Math.max(180, alturaTela - topo - 12) + 'px';
+  });
+}
+const painel = () => {
+  document.body.classList.toggle('painel', $('filtros').classList.contains('open') || $('desemp').classList.contains('open'));
+  ajustaPainel();
+};
+window.addEventListener('resize', ajustaPainel);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', ajustaPainel);
 $('bfil').onclick = () => { $('desemp').classList.remove('open'); $('filtros').classList.toggle('open'); painel(); };
 $('bdes').onclick = () => { $('filtros').classList.remove('open'); const d = $('desemp'); d.classList.toggle('open'); if (d.classList.contains('open')) desempenho(); painel(); };
 $('bshuf').onclick = () => { F.ordem = 'aleatoria'; aplica(); };
@@ -704,7 +720,7 @@ document.addEventListener('keydown', e => {
   const q = lista[idx];
   if (q && q.tipo === 'objetiva' && resp[q.id] === undefined) {
     const L = e.key.toUpperCase();
-    if (q.alternativas[L] !== undefined) { resp[q.id] = L; salva(); render(); }
+    if (q.alternativas[L] !== undefined) { resp[q.id] = L; salva(); render(false); }
   }
 });
 
