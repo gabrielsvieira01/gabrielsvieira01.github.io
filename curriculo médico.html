@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Atividades Complementares</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f1f4f7;--card:#fff;--ink:#14191f;--mut:#667180;--line:#e1e6ec;--brand:#2468b8;--bad:#cf3f3f;--ok:#18865a;--warn:#b26a00;--r:14px;--hero:#0f2740;
+--ensino:#2f7dd1;--pesquisa:#0e9a8a;--extensao:#d4811f;--res:#cf4a3a}
+@media(prefers-color-scheme:dark){:root{--bg:#0d1116;--card:#161b22;--ink:#eef2f6;--mut:#8f9aa8;--line:#252c36;--brand:#5aa7f2;--bad:#f06a6a;--ok:#4cc98f;--warn:#e0a040;--hero:#12263b;--ensino:#5aa7f2;--pesquisa:#34c9b6;--extensao:#f0a24a;--res:#f07d6c}}
+*{box-sizing:border-box}
+[data-e=ensino]{--e:var(--ensino)}[data-e=pesquisa]{--e:var(--pesquisa)}[data-e=extensao]{--e:var(--extensao)}[data-e=res]{--e:var(--res)}
+html{padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Figtree,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:720px;margin:0 auto;padding:18px 16px 40px}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
+h1{font-size:19px;margin:0;font-weight:800;letter-spacing:-.01em}
+.chip{display:inline-flex;align-items:center;font:inherit;font-size:12px;padding:5px 11px;border-radius:99px;background:var(--card);border:1px solid var(--line);color:var(--mut);cursor:pointer}
+.chip::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--mut);margin-right:7px}
+.chip.ok::before{background:var(--ok)}.chip.err{color:var(--bad)}.chip.err::before{background:var(--bad)}
+.tabs{display:flex;gap:2px;background:var(--line);padding:3px;border-radius:12px;margin-bottom:14px}
+.tabs button{flex:1;font:inherit;font-size:14px;font-weight:700;border:0;background:none;color:var(--mut);padding:9px 6px;border-radius:9px;cursor:pointer;transition:background .2s,color .2s}
+.tabs button[aria-selected=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px #0002}
+.hero{background:var(--hero);color:#fff;border-radius:22px;padding:20px;margin-bottom:6px}
+.hero-in{display:flex;gap:20px;align-items:center}
+.ring{--p:0;--rc:#5ab0ff;width:116px;height:116px;flex:none;border-radius:50%;display:grid;place-content:center;text-align:center;
+background:radial-gradient(closest-side,var(--hero) 79%,transparent 81%),conic-gradient(var(--rc) calc(var(--p)*1%),#ffffff24 0)}
+.ring.done{--rc:#4cc98f}
+.ring b{font-size:32px;font-weight:800;line-height:1;letter-spacing:-.02em}.ring span{font-size:11px;opacity:.7;margin-top:3px}
+.hs{flex:1;min-width:0}.hs p{margin:0 0 12px;font-size:13px;line-height:1.45;opacity:.88}
+.eixos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.eixos div{font-size:12px;color:#ffffffa6}.eixos b{display:block;font-size:16px;color:#fff;font-weight:800}.eixos b span{font-weight:500;font-size:11px;color:#ffffffa6}
+.hero .bar{background:#ffffff22;height:5px;margin-top:6px}.hero .bar i{background:var(--e,#5ab0ff)}.hero .bar.done i{background:#4cc98f}
+.bar{height:5px;border-radius:9px;background:var(--line);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--e,var(--brand));border-radius:9px;transition:width .4s}
+.bar.done i{background:var(--ok)}
+h2{font-size:14px;margin:26px 2px 10px;display:flex;align-items:center;gap:8px;font-weight:800}
+h2::before{content:'';width:10px;height:10px;border-radius:3px;background:var(--e,var(--mut))}
+h2 span{margin-left:auto;font-size:12px;font-weight:600;color:var(--mut)}
+details{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--e,var(--brand));border-radius:var(--r);margin-bottom:8px;overflow:hidden;transition:box-shadow .2s}
+details[open]{box-shadow:0 10px 24px -16px #0007}
+summary{list-style:none;cursor:pointer;padding:13px 14px;display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center}
+summary::-webkit-details-marker{display:none}
+.nm{font-weight:700;line-height:1.3}
+.nm::before{content:'›';display:inline-block;width:14px;color:var(--mut);transition:transform .2s}
+details[open] .nm::before{transform:rotate(90deg)}
+.rl{grid-column:1;font-size:12px;color:var(--mut);padding-left:14px}
+.hh{grid-row:1/3;grid-column:2;text-align:right;font-weight:800;font-size:17px;line-height:1.1}
+.hh small{display:block;font-weight:500;color:var(--mut);font-size:11px;margin-top:2px}
+details.full .hh{color:var(--ok)}
+summary .bar{grid-column:1/3}
+.body{padding:2px 14px 14px;border-top:1px solid var(--line)}
+.ent{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.ent .d{flex:1;min-width:0;overflow-wrap:anywhere}.ent small{color:var(--mut);display:block;font-size:12px}
+.ent b{white-space:nowrap}
+.ent button{background:none;border:0;color:var(--mut);font-size:20px;line-height:1;cursor:pointer;padding:4px 8px;border-radius:8px}
+.ent button:hover{background:var(--line)}
+.ent.over b{color:var(--warn);text-decoration:line-through}
+form{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+input{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;min-width:0}
+input:focus,button:focus-visible,summary:focus-visible{outline:2px solid var(--e,var(--brand));outline-offset:2px}
+form .t{flex:1 1 160px}form .n{width:104px}form .dt{width:148px}
+.add{background:var(--e,var(--brand));color:#fff;border:0;border-radius:10px;padding:9px 18px;font:inherit;font-weight:700;cursor:pointer}
+.add:active{transform:scale(.97)}
+.note{font-size:12px;color:var(--warn);margin-top:8px}
+.empty{color:var(--mut);font-size:13px;padding:12px 0}
+.blk{font-size:12px;color:var(--mut);margin:14px 0 2px;font-weight:700}
+.opt{display:flex;gap:11px;align-items:flex-start;padding:10px 8px;margin:0 -8px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:10px}
+.opt:has(input:checked){background:color-mix(in srgb,var(--e) 9%,transparent)}
+.opt input{width:19px;height:19px;margin-top:2px;padding:0;flex:none;accent-color:var(--e,var(--brand))}
+.opt .tx{flex:1;font-size:14px}.opt b{white-space:nowrap}
+.src{font-size:12px;color:var(--mut);margin:20px 2px 6px}
+dialog{border:1px solid var(--line);border-radius:18px;background:var(--card);color:var(--ink);width:min(440px,92vw);padding:20px}
+dialog::backdrop{background:#000a;backdrop-filter:blur(3px)}
+dialog label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}dialog input{width:100%}
+.row{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.row button{font:inherit;border-radius:10px;padding:9px 15px;border:1px solid var(--line);background:none;color:var(--ink);cursor:pointer}
+.row .add{border:0;color:#fff}
+[hidden]{display:none!important}
+.tip{font-size:13px;line-height:1.5;background:color-mix(in srgb,var(--e) 9%,transparent);border-radius:10px;padding:10px 12px;margin:12px 0 4px}
+.fx{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.fx .tx{flex:1;font-size:14px}.fx small{display:block;color:var(--mut);font-size:12px;margin-top:2px;line-height:1.4}
+.pill{white-space:nowrap;font-weight:800;font-size:13px;color:var(--e)}
+.fx.done .pill{color:var(--ok)}.fx.done .tx b{opacity:.55}
+.ei{margin:12px 0 0;padding-left:18px;font-size:14px}.ei li{margin:7px 0}
+.sep{margin:26px 2px 10px;font-size:14px;font-weight:800}
+@media(max-width:420px){.hero-in{flex-direction:column;align-items:stretch;text-align:center}.ring{margin:0 auto}.eixos{text-align:left}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header><h1>Atividades Complementares</h1><button class="chip" id="sync" type="button">Configurar sincronização</button></header>
+<nav class="tabs" role="tablist">
+<button type="button" role="tab" data-tab="ac" aria-selected="true">Complementares</button>
+<button type="button" role="tab" data-tab="res" aria-selected="false">Currículo de residência</button>
+</nav>
+<div id="v-ac">
+<section class="hero" id="hero"></section>
+<div id="list"></div>
+</div>
+<div id="v-res" data-e="res" hidden>
+<section class="hero" id="rhero"></section>
+<div id="rlist"></div>
+<p class="src">Base: PSU-MG 2027, Anexo 1 (Avaliação Curricular Padronizada). Confira o edital vigente antes de se inscrever: os critérios podem mudar até o seu ano de ingresso.</p>
+</div>
+</main>
+
+<dialog id="dlg">
+<form method="dialog" id="cfg" style="display:block;margin:0">
+<strong>Sincronização com a planilha</strong>
+<label for="url">URL do app da web (Apps Script)</label>
+<input id="url" placeholder="https://script.google.com/macros/s/.../exec">
+<label for="tok">Token (o mesmo do script)</label>
+<input id="tok" type="password" autocomplete="off">
+<div class="row"><button value="cancel">Cancelar</button><button class="add" value="ok">Salvar e carregar</button></div>
+</form>
+</dialog>
+
+<script>
+// ---------- Barema (Ficha de Atividades Complementares – Afya Guanambi) ----------
+// mode: fixed = horas fixas por registro | free = digita as horas | tier = digita a duração e a faixa define as horas
+const EIXOS={ensino:{nome:'Ensino',min:50},pesquisa:{nome:'Pesquisa',min:50},extensao:{nome:'Extensão',min:50}};
+const TOTAL=210;
+const ACTS=[
+{id:'en1',e:'ensino',nome:'Monitoria',rule:'Horas realizadas',cap:60,mode:'free'},
+{id:'en3',e:'ensino',nome:'Curso, palestra, seminário, fórum, congresso e reuniões',rule:'Até 10h por evento',cap:50,mode:'free',perMax:10},
+{id:'en4',e:'ensino',nome:'Estágio extracurricular',rule:'Digite a carga do estágio: 50–99h = 10h · 100–199h = 20h · 200h+ = 40h',cap:40,mode:'tier',tiers:[[50,10],[100,20],[200,40]]},
+{id:'en5',e:'ensino',nome:'Organização de eventos',rule:'10h por evento',cap:20,mode:'fixed',fixed:10},
+{id:'en6',e:'ensino',nome:'Intercâmbio',rule:'Digite a duração: até 100h = 15h · 101–200h = 30h · 200h+ = 60h',cap:60,mode:'tier',tiers:[[1,15],[101,30],[201,60]]},
+{id:'en7',e:'ensino',nome:'Cursos livres',rule:'1h por h/a do histórico ou comprovante',cap:50,mode:'free'},
+{id:'en8',e:'ensino',nome:'Representação estudantil',rule:'20h por representação',cap:60,mode:'fixed',fixed:20},
+{id:'pe1',e:'pesquisa',nome:'Iniciação científica',rule:'30h por programa de pesquisa com orientação',cap:60,mode:'fixed',fixed:30},
+{id:'pe2',e:'pesquisa',nome:'Apresentação de trabalho em pôster',rule:'5h por trabalho inscrito',cap:20,mode:'fixed',fixed:5},
+{id:'pe3',e:'pesquisa',nome:'Apresentação oral de trabalho científico',rule:'10h por trabalho',cap:40,mode:'fixed',fixed:10},
+{id:'pe4',e:'pesquisa',nome:'Publicação de artigo (autor ou coautor)',rule:'20h por trabalho publicado',cap:40,mode:'fixed',fixed:20},
+{id:'pe5',e:'pesquisa',nome:'Ouvinte em banca de TCC ou pós-graduação',rule:'2h por banca',cap:10,mode:'fixed',fixed:2},
+{id:'ex1',e:'extensao',nome:'Prestação de serviço à comunidade (ações)',rule:'1h por hora de participação',cap:30,mode:'free'},
+{id:'ex2',e:'extensao',nome:'Prestação de serviço à comunidade (capacitações)',rule:'Até 10h por participação',cap:40,mode:'free',perMax:10},
+{id:'ex3',e:'extensao',nome:'Cooperação em campanhas comunitárias',rule:'4h por participação',cap:20,mode:'fixed',fixed:4},
+{id:'ex4',e:'extensao',nome:'Organização de evento cultural',rule:'1h por hora realizada',cap:20,mode:'free'},
+{id:'ex5',e:'extensao',nome:'Ligas acadêmicas',rule:'Digite a carga da liga: até 100h = 20h · 101–200h = 40h · 200h+ = 60h',cap:60,mode:'tier',tiers:[[1,20],[101,40],[201,60]]}
+];
+const A=Object.fromEntries(ACTS.map(a=>[a.id,a]));
+
+// ---------- Estado (a planilha é a fonte da verdade) ----------
+let entries=[];          // {id,a,desc,date,val}
+let loaded=false;        // só salva depois de carregar com sucesso (evita apagar a planilha)
+let cfg={url:'',tok:''};
+try{cfg=JSON.parse(localStorage.getItem('ac_cfg'))||cfg}catch(e){}   // só guarda URL/token deste dispositivo
+const open=new Set();
+
+// ---------- Currículo de residência (PSU-MG 2027, Anexo 1) ----------
+// radio = escolhe no máximo uma opção do bloco | check = cada opção é marcada separadamente
+const RES_MAX=10;
+const RES=[
+{id:'r1',nome:'Aproveitamento curricular',cap:3,blocks:[
+ {t:'radio',nome:'Notas dos 4 primeiros anos',opts:[['Mín. 50% das notas ≥ 85,00',1.5],['Mín. 50% das notas ≥ 80,00',1],['Mín. 50% das notas ≥ 75,00',.5],['Notas abaixo de 75,00',.25]]},
+ {t:'radio',nome:'Internato (últimos 2 anos)',opts:[['Mín. 70% das notas ≥ 85 ou conceito A',1.5],['Mín. 70% das notas ≥ 80 ou conceito B',1],['Notas abaixo de 80',.5],['Notas apenas conceituais, sem enquadramento',.25],['Sem histórico (só cópia de diploma ou CRM válido)',.1]]}]},
+{id:'r2',nome:'Língua estrangeira',rule:'Sem somatório de línguas',cap:1,blocks:[
+ {t:'radio',opts:[['Título avançado em inglês (titulação internacional)',1],['Título intermediário em inglês',.5],['Título avançado em outra língua',.5],['4 semestres aprovados de outra língua em Faculdade de Letras ou no histórico',.5],['Título intermediário em outra língua',.25]]}]},
+{id:'r3',nome:'Estágios extracurriculares e monitoria',cap:2,blocks:[
+ {t:'check',opts:[['Estágio extracurricular prático: 1 estágio de mín. 6 meses (180h), ou 2 de mín. 3 meses (90h cada) sem concomitância, ou PET-Saúde de mín. 6 meses',1],['Monitoria/PID: monitoria oficial de disciplina do histórico, 1 semestre letivo (16 semanas), mín. 80h e 5h/semana',1]]}]},
+{id:'r4',nome:'Iniciação científica e projeto de pesquisa',rule:'Não concomitantes',cap:1.3,blocks:[
+ {t:'check',opts:[['Bolsa de IC (CNPq, CAPES, IES…): mín. 6 meses consecutivos e 80h',.5],['IC voluntária: mín. 6 meses consecutivos e 80h',.3],['Projeto de pesquisa: grupo do CNPq por mín. 1 ano consecutivo (80h), com resultado publicado em revista indexada ou apresentado em evento',.5]]}]},
+{id:'r5',nome:'Organizador ou palestrante',rule:'Não vale para ligas',cap:.5,blocks:[
+ {t:'check',opts:[['Organizador de evento científico de sociedade de especialidade ou entidade de classe (mín. 8h ou 2 dias consecutivos)',.25],['Palestrante: palestra especificada no certificado, em evento de sociedade de especialidade ou entidade de classe',.25]]}]},
+{id:'r6',nome:'Ligas acadêmicas e representação estudantil',cap:1.1,blocks:[
+ {t:'check',opts:[['Ligas: até 2 ligas por 2 semestres letivos não coincidentes (somam), CH total mín. 80h',.8],['Representação discente: titular como presidente, diretor, secretário ou tesoureiro de DA, representante em órgão oficial ou diretoria estudantil nacional/estadual',.3]]}]},
+{id:'r7',nome:'Cursos de suporte avançado à vida',cap:.7,blocks:[
+ {t:'check',opts:[['Aprovação em 1 curso teórico-prático (ACLS, ATLS, PALS…), vigente, mín. 16h',.7]]}]},
+{id:'r8',nome:'Cursos de temas médicos',rule:'Filiados à AMB, mín. 8h, com aprovação, não vale BLS',cap:.6,blocks:[
+ {t:'radio',opts:[['2 cursos diferentes, de entidades diferentes, com intervalo mín. de 30 dias',.6],['1 curso nas mesmas regras',.3]]}]},
+{id:'r9',nome:'Projetos de extensão e voluntariado',cap:1,blocks:[
+ {t:'check',opts:[['Projeto de extensão da IES, não ligado a ligas, mín. 1 semestre letivo (16 semanas) e 80h',.7],['Voluntariado: mín. 2 projetos comunitários de prevenção/educação em doenças, em instituições diferentes e semestres não coincidentes (mín. 16h e 2 dias)',.3]]}]},
+{id:'r10',nome:'Apresentação de trabalho científico',cap:.8,blocks:[
+ {t:'radio',opts:[['Apresentação oral/pôster em evento médico (máx. 1 autor, 4 coautores e 1 orientador médico com RQE)',.5],['Apresentação com resumo/trabalho publicado em anais de revista indexada (PubMed, Scopus, SciELO, LILACS…, Qualis B2)',.8]]}]},
+{id:'r11',nome:'Publicação de artigo científico',cap:1,blocks:[
+ {t:'radio',opts:[['Artigo completo (máx. 1 autor, 4 coautores e 1 orientador com RQE) indexado no MEDLINE/PubMed, Embase, Scopus ou Web of Science',1],['Artigo completo indexado só no SciELO ou LILACS (mín. Qualis B2)',.5]]}]}
+];
+const OPT={},BLK={};
+RES.forEach(it=>it.blocks.forEach((b,bi)=>{b.id=it.id+'.'+bi;b.opts=b.opts.map(([l,p],oi)=>{const o={id:b.id+'.'+oi,l,p,item:it.nome};OPT[o.id]=o;BLK[o.id]=b;return o})}));
+const sel=new Set();
+const pt=n=>(Math.round(n*100)/100).toFixed(2).replace('.',',');
+const openR=new Set(['focus']);
+const TIPS={
+r1:'Marque as notas dos 4 primeiros anos conforme o seu histórico atual. No internato, mire nota ≥ 85 (ou conceito A) em pelo menos 70% das notas, com no mínimo 8 notas/rodízios no histórico.',
+r2:'Faça um teste de proficiência internacional (TOEFL, IELTS…). Nível B2 vale 0,50 e C1/C2 vale 1,00. Línguas diferentes não somam.',
+r3:'Estágio prático fora das disciplinas da faculdade: 6 meses consecutivos (180h) ou 2 de 3 meses (90h cada) sem sobreposição. Monitoria: concorra a uma vaga oficial de 1 semestre (16 semanas, 80h).',
+r4:'IC e projeto de pesquisa não podem ser concomitantes. Confirme no certificado 6 meses consecutivos e 80h. A bolsa vale mais que a IC voluntária.',
+r5:'Atue como organizador ou palestrante em evento de sociedade de especialidade ou entidade de classe. Evento de liga não vale, e o certificado deve especificar a palestra.',
+r6:'Participe de até 2 ligas, em 2 semestres não coincidentes, somando 80h. Para a representação, vale cargo titular de DA ou representação em órgão oficial.',
+r7:'Faça um curso de suporte avançado (ACLS, ATLS, PALS…) de pelo menos 16h e confira se o certificado estará vigente na data da prova.',
+r8:'Faça 2 cursos de 8h, de entidades diferentes filiadas à AMB, com 30 dias entre eles e aprovação. BLS não vale.',
+r9:'Entre em 1 projeto de extensão da faculdade (1 semestre, 80h) e participe de 2 ações comunitárias de prevenção, em instituições diferentes e semestres distintos.',
+r10:'Apresente em congresso médico oficial. Para os 0,80, o resumo precisa ser publicado em anais de revista indexada (Qualis B2 ou melhor). Máx. 1 autor, 4 coautores e 1 orientador médico com RQE.',
+r11:'Escreva um artigo completo com orientador médico com RQE e publique: PubMed, Embase, Scopus ou Web of Science valem 1,00; SciELO ou LILACS valem 0,50.'};
+RES.forEach(it=>it.tip=TIPS[it.id]);
+const optRem=id=>sel.has(id)?0:OPT[id].p;
+const blkGot=b=>b.opts.reduce((s,o)=>s+(sel.has(o.id)?o.p:0),0);
+function focusHtml(per){
+ const left=id=>Math.max(0,RES.find(r=>r.id===id).cap-per[id].got);
+ const F=[
+  {n:'Notas do internato',how:'Mire nota ≥ 85 (ou conceito A) em pelo menos 70% das disciplinas, com no mínimo 8 notas/rodízios no histórico.',r:1.5-blkGot(RES[0].blocks[1])},
+  {n:'Certificação de inglês',how:'Agende TOEFL, IELTS ou similar: B2 = 0,50 e C1/C2 = 1,00.',r:left('r2')},
+  {n:'Monitoria oficial',how:'Concorra a uma vaga de 1 semestre letivo (16 semanas, 80h).',r:optRem('r3.0.1')},
+  {n:'Estágio extracurricular prático',how:'6 meses consecutivos (180h) ou 2 estágios de 3 meses (90h cada), sem concomitância.',r:optRem('r3.0.0')},
+  {n:'ACLS/ATLS e cursos de sociedade médica',how:'1 curso de suporte avançado de 16h (0,70) e 2 cursos de 8h filiados à AMB, com 30 dias entre eles (0,60).',r:optRem('r7.0.0')+left('r8')},
+  {n:'Extensão e voluntariado',how:'1 projeto de extensão da faculdade (0,70) e 2 ações comunitárias de prevenção em semestres diferentes (0,30).',r:left('r9')},
+  {n:'Produção científica',how:'Apresentar em congresso com resumo em anais indexados (0,80) e escrever 1 artigo com orientador com RQE (1,00).',r:left('r10')+left('r11')}
+ ];
+ const tot=F.reduce((a,f)=>a+f.r,0);
+ return `<details data-id="focus" data-e="res" ${openR.has('focus')?'open':''}><summary><span class="nm">Foco nos 2 anos de internato</span><span class="rl">O que ainda dá para conquistar do 9º ao 12º período</span><span class="hh">+${pt(tot)}<small>em aberto</small></span></summary><div class="body">`+
+  F.map(f=>`<div class="fx ${f.r<=0?'done':''}"><div class="tx"><b>${esc(f.n)}</b><small>${esc(f.how)}</small></div><span class="pill">${f.r<=0?'feito':'+'+pt(f.r)}</span></div>`).join('')+
+  `<div class="note" style="color:var(--mut)">As notas dos 4 primeiros anos já estão definidas pelo seu histórico atual. O que ainda se constrói é o internato e o restante da lista.</div></div></details>`;
+}
+function einsteinHtml(){
+ return `<div class="sep">Outro processo: Albert Einstein 2027</div>
+ <details data-id="einstein" data-e="pesquisa" ${openR.has('einstein')?'open':''}><summary><span class="nm">Currículo no Einstein</span><span class="rl">O edital não publica pontos por item</span><span class="hh">10%<small>da nota final</small></span></summary><div class="body">
+ <div class="tip">O edital (item 4.5.8.3) diz que os quesitos e os pesos do currículo sairão em aditivo próprio. Não encontrei esse aditivo, então não há pontos por item para marcar aqui.</div>
+ <ul class="ei">
+ <li><b>Peso na nota final:</b> prova teórica ×0,5, prova prática ×0,4 e análise de currículo ×0,1.</li>
+ <li><b>Iniciação científica documentada:</b> conta o tempo de dedicação na graduação (horas, semanas e meses). Vários produtos de IC se somam.</li>
+ <li><b>Publicações no PubMed:</b> avaliadas por posição de autoria (primeiro ou último autor, ou coautor), presença de DOI e fator de impacto do periódico (JCR) na data da publicação.</li>
+ <li><b>Pós-graduação stricto sensu:</b> mestrado ou doutorado, concluído ou em curso.</li>
+ <li><b>Exigências:</b> todo item precisa de certificado que comprove a autenticidade. O currículo vai em um único PDF de até 10 MB, e sem envio a nota é zero.</li>
+ </ul>
+ <div class="note" style="color:var(--mut)">Isso vem do edital do ciclo 2027. Em ciclos futuros os critérios podem mudar, então confira o aditivo antes de se planejar.</div></div></details>`;
+}
+
+function resCalc(){
+ const per={};let total=0;
+ for(const it of RES){let raw=0;it.blocks.forEach(b=>b.opts.forEach(o=>{if(sel.has(o.id))raw+=o.p}));
+  raw=Math.round(raw*100)/100;per[it.id]={raw,got:Math.min(raw,it.cap)};total+=per[it.id].got}
+ total=Math.round(total*100)/100;
+ return{per,total,final:Math.min(total,RES_MAX)};
+}
+function renderRes(){
+ const{per,total,final}=resCalc();
+ document.getElementById('rhero').innerHTML=
+  `<div class="hero-in"><div class="ring ${final>=RES_MAX?'done':''}" style="--p:${final/RES_MAX*100}"><b>${pt(final)}</b><span>de ${pt(RES_MAX)}</span></div>
+   <div class="hs"><p>Soma dos itens: ${pt(total)} de 13,00 possíveis. A nota da etapa é limitada a 10,00, então pontos de um item podem compensar a falta em outro.${total>RES_MAX?' O excedente acima de 10,00 não conta.':''}</p></div></div>`;
+ let h=focusHtml(per);
+ for(const it of RES){
+  const p=per[it.id],full=p.got>=it.cap;
+  h+=`<details data-id="${it.id}" data-e="res" class="${full?'full':''}" ${openR.has(it.id)?'open':''}>
+   <summary><span class="nm">${esc(it.nome)}</span><span class="rl">${esc(it.rule?it.rule+' · ':'')}teto ${pt(it.cap)}</span>
+   <span class="hh">${pt(p.got)}<small>de ${pt(it.cap)}</small></span>
+   <div class="bar ${full?'done':''}"><i style="width:${p.got/it.cap*100}%"></i></div></summary>
+   <div class="body">${it.tip?`<div class="tip">${esc(it.tip)}</div>`:''}`;
+  for(const b of it.blocks){
+   if(b.nome)h+=`<div class="blk">${esc(b.nome)}</div>`;
+   for(const o of b.opts)h+=`<label class="opt"><input type="${b.t==='radio'?'radio':'checkbox'}" name="${b.id}" data-o="${o.id}" ${sel.has(o.id)?'checked':''}><span class="tx">${esc(o.l)}</span><b>+${pt(o.p)}</b></label>`;
+  }
+  if(p.raw>it.cap)h+=`<div class="note">Passou do teto: só ${pt(it.cap)} contam neste item.</div>`;
+  h+=`</div></details>`;
+ }
+ h+=einsteinHtml();
+ document.getElementById('rlist').innerHTML=h;
+}
+
+const hrs=(a,e)=>{
+ const v=parseFloat(e.val)||0;
+ if(a.mode==='fixed')return a.fixed;
+ if(a.mode==='free')return Math.min(v,a.perMax||Infinity);
+ let h=0;for(const[m,x]of a.tiers)if(v>=m)h=x;return h;
+};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>Number.isInteger(n)?n:n.toFixed(1);
+const fdate=d=>d?d.split('-').reverse().join('/'):'';
+
+function calc(){
+ const per={},eix={ensino:0,pesquisa:0,extensao:0};
+ for(const a of ACTS){
+  const raw=entries.filter(e=>e.a===a.id).reduce((s,e)=>s+hrs(a,e),0);
+  per[a.id]={raw,got:Math.min(raw,a.cap)};
+  eix[a.e]+=per[a.id].got;
+ }
+ return{per,eix,total:Object.values(eix).reduce((a,b)=>a+b,0)};
+}
+
+function render(){
+ const{per,eix,total}=calc();
+ const pct=(v,m)=>Math.min(100,v/m*100);
+ const falta=Object.entries(EIXOS).filter(([k,x])=>eix[k]<x.min).map(([k,x])=>`${x.nome} (${fmt(x.min-eix[k])}h)`);
+ document.getElementById('hero').innerHTML=
+  `<div class="hero-in"><div class="ring ${total>=TOTAL?'done':''}" style="--p:${pct(total,TOTAL)}"><b>${fmt(total)}</b><span>de ${TOTAL}h</span></div>
+   <div class="hs"><p>${total>=TOTAL&&!falta.length?'Meta cumprida.':`Faltam ${fmt(Math.max(0,TOTAL-total))}h no total`+(falta.length?`. Mínimo por eixo pendente: ${falta.join(', ')}.`:'.')}</p>
+   <div class="eixos">${Object.entries(EIXOS).map(([k,x])=>`<div data-e="${k}">${x.nome}<b>${fmt(eix[k])}h <span>/ ${x.min}h</span></b><div class="bar ${eix[k]>=x.min?'done':''}"><i style="width:${pct(eix[k],x.min)}%"></i></div></div>`).join('')}</div></div></div>`;
+
+ let h='';
+ for(const[k,x]of Object.entries(EIXOS)){
+  h+=`<h2 data-e="${k}">${x.nome}<span>${fmt(eix[k])}h contadas</span></h2>`;
+  for(const a of ACTS.filter(a=>a.e===k)){
+   const p=per[a.id],full=p.raw>=a.cap,list=entries.filter(e=>e.a===a.id);
+   let acc=0;
+   const rows=list.map(e=>{const v=hrs(a,e);const over=acc>=a.cap;acc+=v;
+    return`<div class="ent ${over?'over':''}"><div class="d">${esc(e.desc||'(sem descrição)')}<small>${fdate(e.date)}${a.mode!=='fixed'&&a.mode==='tier'?` · ${esc(e.val)}h de duração`:''}</small></div><b>${fmt(v)}h</b><button type="button" data-del="${e.id}" aria-label="Remover">×</button></div>`}).join('');
+   h+=`<details data-id="${a.id}" data-e="${a.e}" class="${full?'full':''}" ${open.has(a.id)?'open':''}>
+    <summary><span class="nm">${esc(a.nome)}</span><span class="rl">${esc(a.rule)}</span>
+    <span class="hh">${fmt(p.got)}h<small>máx. ${a.cap}h</small></span>
+    <div class="bar ${full?'done':''}"><i style="width:${pct(p.got,a.cap)}%"></i></div></summary>
+    <div class="body">${rows||'<div class="empty">Nenhum registro ainda.</div>'}
+    ${p.raw>a.cap?`<div class="note">Você passou do limite: só ${a.cap}h contam nesta atividade.</div>`:''}
+    <form data-add="${a.id}"><input class="t" name="desc" placeholder="Descrição (evento, local…)" aria-label="Descrição">
+    <input class="dt" name="date" type="date" aria-label="Data">
+    ${a.mode==='fixed'?'':`<input class="n" name="val" type="number" min="0" step="0.5" required placeholder="${a.mode==='tier'?'Duração (h)':'Horas'}" aria-label="Horas">`}
+    <button class="add">Adicionar${a.mode==='fixed'?` (+${a.fixed}h)`:''}</button></form></div></details>`;
+  }
+ }
+ document.getElementById('list').innerHTML=h;
+}
+
+// ---------- Sincronização (Google Apps Script) ----------
+const chip=document.getElementById('sync');
+function status(t,c){chip.textContent=t;chip.className='chip '+(c||'')}
+async function load(){
+ if(!cfg.url){status('Configurar sincronização');return}
+ status('Carregando…');
+ try{
+  const r=await fetch(cfg.url+'?token='+encodeURIComponent(cfg.tok));
+  const j=await r.json();
+  if(!j.ok)throw new Error(j.error);
+  const old=j.entries.some(e=>e.a==='ex7');entries=j.entries.map(e=>e.a==='ex7'?{...e,a:'en7'}:e).filter(e=>A[e.a]);sel.clear();(j.res||[]).forEach(id=>{if(OPT[id])sel.add(id)});
+  loaded=true;render();renderRes();status('Sincronizado','ok');if(old)queueSave();
+ }catch(e){loaded=false;status('Erro ao carregar — tocar para configurar','err')}
+}
+let timer,saving=false,again=false;
+function queueSave(){
+ if(!cfg.url){return}
+ if(!loaded){status('Não salvo: carregue a planilha primeiro','err');return}
+ status('Salvando…');clearTimeout(timer);timer=setTimeout(save,600);
+}
+async function save(){
+ if(saving){again=true;return}
+ saving=true;
+ try{
+  const payload=entries.map(e=>{const a=A[e.a];return{...e,eixo:EIXOS[a.e].nome,atividade:a.nome,horas:hrs(a,e)}});
+  const res=[...sel].map(id=>({id,item:OPT[id].item,desc:OPT[id].l,pts:OPT[id].p}));
+  const r=await fetch(cfg.url,{method:'POST',body:JSON.stringify({token:cfg.tok,entries:payload,res})}); // sem header = sem preflight CORS
+  const j=await r.json();if(!j.ok)throw new Error(j.error);
+  status('Sincronizado','ok');
+ }catch(e){status('Erro ao salvar — tocar para tentar de novo','err')}
+ saving=false;if(again){again=false;save()}
+}
+
+// ---------- Eventos ----------
+const L=document.getElementById('list');
+L.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.id){d.open?open.add(d.dataset.id):open.delete(d.dataset.id)}},true);
+L.addEventListener('submit',e=>{
+ e.preventDefault();const f=e.target,id=f.dataset.add;if(!id)return;
+ const fd=new FormData(f);
+ entries.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),a:id,desc:(fd.get('desc')||'').trim(),date:fd.get('date')||'',val:fd.get('val')||''});
+ open.add(id);render();queueSave();
+});
+L.addEventListener('click',e=>{
+ const b=e.target.closest('[data-del]');if(!b)return;
+ if(!confirm('Remover este registro?'))return;
+ entries=entries.filter(x=>x.id!==b.dataset.del);render();queueSave();
+});
+const R=document.getElementById('rlist');
+R.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.id){d.open?openR.add(d.dataset.id):openR.delete(d.dataset.id)}},true);
+R.addEventListener('click',e=>{
+ const i=e.target.closest('input[data-o]');if(!i)return;
+ const id=i.dataset.o,b=BLK[id];
+ if(sel.has(id))sel.delete(id);
+ else{if(b.t==='radio')b.opts.forEach(o=>sel.delete(o.id));sel.add(id)}
+ renderRes();queueSave();
+});
+document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click',()=>{
+ document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',x===btn));
+ document.getElementById('v-ac').hidden=btn.dataset.tab!=='ac';
+ document.getElementById('v-res').hidden=btn.dataset.tab!=='res';
+}));
+const dlg=document.getElementById('dlg');
+chip.onclick=()=>{url.value=cfg.url;tok.value=cfg.tok;dlg.showModal()};
+document.getElementById('cfg').addEventListener('submit',e=>{
+ if(e.submitter&&e.submitter.value==='ok'){cfg={url:url.value.trim(),tok:tok.value};
+  try{localStorage.setItem('ac_cfg',JSON.stringify(cfg))}catch(_){}load()}
+});
+
+render();renderRes();load();
+</script>
+</body>
+</html>
